@@ -2,7 +2,7 @@
     class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg px-6 py-2 flex justify-between items-center z-50 max-w-md mx-auto">
     <a href="{{ url('/') }}" wire:navigate
         class="flex flex-col items-center {{ request()->is('/') ? 'text-[#38CAC8]' : 'text-slate-400' }}">
-        <i class="fa-regular fa-house"></i>
+        <i class="fa-solid fa-house"></i>
         <span class="text-[10px] {{ request()->is('/') ? 'font-bold' : 'font-medium' }} mt-1">Home</span>
     </a>
 
