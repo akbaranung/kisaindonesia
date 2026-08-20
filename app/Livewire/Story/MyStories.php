@@ -115,7 +115,7 @@ class MyStories extends Component
 
         $this->selectedStoryId = $story->id;
         $this->selectedStoryTitle = $story->title;
-        return $this->redirect(route('stories.manage', $story->slug), navigate: true);
+        return $this->redirect(route('stories.chapters', $story->id), navigate: true);
     }
 
     public function updatingSearch()

@@ -79,9 +79,6 @@ class ManageStoryChapters extends Component
                     throw new \Exception("Sistem gagal menulis file json bab ke storage.");
                 }
 
-                $isPremium = ($this->story->monetization_type === 'premium' && $nextOrder > 5);
-
-
                 return Chapter::create([
                     'story_id' => $this->story->id,
                     'title' => $this->title,
@@ -92,10 +89,10 @@ class ManageStoryChapters extends Component
                     'is_premium' => ($this->story->monetization_type === 'premium' && $nextOrder > 5),
                     'bean_price' => 0,
                     'status' => $this->status,
+                    'type' => $this->type
                 ]);
             });
 
-            $this->closeCreateModal();
 
             return redirect()->route(
                 'chapters.editor',
@@ -104,6 +101,7 @@ class ManageStoryChapters extends Component
                     'chapter' => $chapter->id
                 ]
             );
+            $this->closeCreateModal();
         } catch (\Throwable $th) {
             if ($filePath && Storage::disk('local')->exists($filePath)) {
                 Storage::disk('local')->delete($filePath);
@@ -114,7 +112,7 @@ class ManageStoryChapters extends Component
                 ['story_id' => $this->story->id ?? null, 'user_id' => auth()->id(), 'trace' => $th->getTraceAsString()]
             );
 
-            session()->flash('warning', 'Terjadi kesalahan saat membuat bab baru: ' . $th->getMessage());
+            $this->dispatch('show-toast', type: 'error', message: $th->getMessage());
             $this->closeCreateModal();
         }
     }

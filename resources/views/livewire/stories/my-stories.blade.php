@@ -63,10 +63,10 @@
 
                         <div class="flex-2 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
-                                {{-- <span
-                                class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md {{ $story->status === 'Published' ? 'bg-emerald-50 text-brand-600 border border-emerald-100' : 'bg-slate-100 text-slate-500' }}">
-                                {{ $story->status }}
-                            </span> --}}
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md {{ $story->status === 'Published' ? 'bg-emerald-50 text-brand-600 border border-emerald-100' : 'bg-slate-100 text-slate-500' }}">
+                                    {{ $story->status }}
+                                </span>
                                 @if ($story->monetization_type === 'premium')
                                     <span
                                         class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-800 text-[10px] font-extrabold uppercase">

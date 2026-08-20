@@ -1,7 +1,7 @@
 <div class="min-h-screen text-slate-100 pb-20">
     <div class="sticky top-0 z-3 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <a href="{{ route('stories.manage', $story->slug) }}" class="text-slate-800 hover:text-slate-600">
+            <a href="{{ route('my-stories') }}" class="text-slate-800 hover:text-slate-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
@@ -99,9 +99,12 @@
                     <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
                         <button type="button" wire:click="closeCreateModal"
                             class="px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-xl">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-brand-500 text-slate-950 font-bold text-xs rounded-xl">🚀 Masuk
+                        <button type="submit" wire:loading.remove wire:target="createAndRedirect"
+                            class="px-4 py-2 bg-brand-500 text-slate-950 font-bold text-xs rounded-xl">Masuk
                             Editor</button>
+                        <button type="button" wire:loading wire:target="createAndRedirect"
+                            class="px-4 py-2 bg-brand-500 text-slate-950 font-bold text-xs rounded-xl" disabled>Loading
+                            ...</button>
                     </div>
                 </form>
             </div>
