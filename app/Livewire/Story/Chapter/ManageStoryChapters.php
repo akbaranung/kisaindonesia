@@ -66,6 +66,10 @@ class ManageStoryChapters extends Component
                 $folder = "chapters/story_{$this->story->id}";
                 $filePath = "{$folder}/chap_{$nextOrder}_" . time() . ".json";
 
+                if (!Storage::disk('local')->exists($folder)) {
+                    Storage::disk('local')->makeDirectory($folder);
+                }
+
                 $initialContent = [
                     'type' => strtolower($this->type),
                     'bubbles' => [],
