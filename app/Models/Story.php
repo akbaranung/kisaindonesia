@@ -16,7 +16,8 @@ class Story extends Model
         'status',
         'slug',
         'cover_path',
-        'monetization_type'
+        'monetization_type',
+        'type'
     ];
     use HasFactory;
 
@@ -78,5 +79,10 @@ class Story extends Model
     public function hasPendingPremiumRequest(): bool
     {
         return $this->premiumRequests()->where('status', 'pending')->exists();
+    }
+
+    public function penName()
+    {
+        return $this->belongsTo(PenName::class);
     }
 }

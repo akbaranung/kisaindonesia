@@ -212,7 +212,7 @@ class ChapterEditor extends Component
         $this->editingCharacterId = $char->id;
         $this->char_name = $char->name;
         $this->char_position = $char->default_position ?? 'left';
-        $this->char_existing_avatar = $char->avatar;
+        $this->char_existing_avatar = $char->avatar_path;
 
         $this->isCharacterModalOpen = true;
     }
@@ -290,12 +290,13 @@ class ChapterEditor extends Component
         $rules = [
             'title' => 'required|string|max:255',
             'status' => 'required|in:draft,published',
-            'type' => 'required|in:regular,puisi,chat'
+            'type' => 'required|in:regular,chat'
         ];
 
         $messages = [
             'title.required' => 'Judul bab wajib diisi!',
             'status.required' => 'Status bab wajib dipilih!',
+            'type.required' => 'Type harus dipilih!',
             'regularContent.required' => 'Isi content chapter tidak boleh kosong!',
             'regualrContent.min' => 'Konten chapter minimal 5 karakter!',
             'bubbles.required' => 'Tambahkan minimal 1 pesan chat!',
@@ -416,7 +417,7 @@ class ChapterEditor extends Component
                 return "Batas maksimal gelembung percakapan untuk bab premium adalah {$maxBubbles} bubble! (Saat ini: {$currentBubbles} bubble)";
             }
         } else {
-            $minWords = ($this->type === 'puisi') ? 700 : 1000;
+            $minWords = ($this->story->type === 'puisi') ? 700 : 1000;
             $maxWords = 1500;
             $currentWords = $this->calculateWordCount();
 
@@ -482,11 +483,40 @@ class ChapterEditor extends Component
 
     private function calculateWordCount(): int
     {
+        // 1. JIKA TIPE CHAT
         if ($this->type === 'chat') {
-            return count($this->bubbles);
+            if (empty($this->bubbles) || !is_iterable($this->bubbles)) {
+                return 0;
+            }
+
+            $totalWords = 0;
+
+            foreach ($this->bubbles as $bubble) {
+                $text = '';
+
+                // Ambil teks dari property/key 'message'
+                if (!empty($bubble['message'])) {
+                    $text .= ' ' . $bubble['message'];
+                }
+
+                // Ambil teks dari property/key 'caption' (jika ada pada gambar)
+                if (!empty($bubble['caption'])) {
+                    $text .= ' ' . $bubble['caption'];
+                }
+
+                // Bersihkan tag HTML dan spasi ganda, lalu hitung kata
+                $cleanText = trim(preg_replace('/\s+/', ' ', strip_tags($text)));
+
+                if (!empty($cleanText)) {
+                    $totalWords += str_word_count($cleanText);
+                }
+            }
+
+            return $totalWords;
         }
 
-        return str_word_count(strip_tags($this->regularContent));
+        // 2. JIKA TIPE REGULAR (NOVEL / PUISI)
+        return str_word_count(strip_tags((string) $this->regularContent));
     }
 
     public function render()

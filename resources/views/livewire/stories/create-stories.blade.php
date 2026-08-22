@@ -9,7 +9,7 @@
 
  <main class="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-2xl shadow-slate-200/40">
      <form wire:submit.prevent="saveStory" class="flex flex-col gap-5">
-         <div class="flex gap-4 items-center p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+         <div class="flex gap-4 items-center rounded-2xl">
              <div>
                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Cover
                      Cerita (Opsional)</label>
@@ -51,6 +51,20 @@
          <div>
              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Genre
                  / Kategori</label>
+             <select wire:model="type"
+                 class="select2 w-full px-4 py-3.5 bg-slate-50 border @error('genreId') border-rose-500 @else border-slate-100 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-500 focus:bg-white transition-all shadow-2xs text-slate-700">
+                 <option value="">-- Pilih Type --</option>
+                 <option value="novel" {{ $type === 'novel' ? 'selected' : '' }}>Novel</option>
+                 <option value="puisi" {{ $type === 'puisi' ? 'selected' : '' }}>Puisi</option>
+             </select>
+             @error('genreId')
+                 <span class="text-[10px] text-rose-500 mt-1 block font-bold px-1">{{ $message }}</span>
+             @enderror
+         </div>
+
+         <div>
+             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Genre
+                 / Kategori</label>
              <select wire:model="genreId"
                  class="select2 w-full px-4 py-3.5 bg-slate-50 border @error('genreId') border-rose-500 @else border-slate-100 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-500 focus:bg-white transition-all shadow-2xs text-slate-700">
                  <option value="">-- Pilih Genre --</option>
@@ -63,7 +77,6 @@
                  <span class="text-[10px] text-rose-500 mt-1 block font-bold px-1">{{ $message }}</span>
              @enderror
          </div>
-
          <div>
              <label
                  class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Sinopsis</label>

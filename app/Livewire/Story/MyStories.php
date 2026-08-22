@@ -26,6 +26,7 @@ class MyStories extends Component
     public $title = '';
     public $genreId = '';
     public $synopsis = '';
+    public $type = 'novel';
     public string $status = 'draft';
     public $cover;
     public $existingCover = null; //Menampilkan cover lama ketika edit data
@@ -33,11 +34,27 @@ class MyStories extends Component
     public $selectedStoryId;
     public $selectedStoryTitle;
 
+    public ?int $pen_name_id = null;
+    public bool $showPenNameMOdel = false;
+    public string $new_pane_name = '';
+    public string $new_pen_bio = '';
+
+
     public function switchAction($target)
     {
         $this->action = $target;
         if ($target === 'create') {
             $this->resetForm();
+
+            $user = auth()->user();
+
+            // Otomatis pilih nama pena default atau yang pertama
+            $defaultPenName = $user->penNames()->where('is_default', true)->first()
+                ?? $user->penNames()->first();
+
+            if ($defaultPenName) {
+                $this->pen_name_id = $defaultPenName->id;
+            }
         }
     }
 
@@ -48,6 +65,7 @@ class MyStories extends Component
         $this->genreId = '';
         $this->synopsis = '';
         $this->status = 'draft';
+        $this->type = 'novel';
         $this->cover = null;
         $this->existingCover = null;
     }
@@ -58,6 +76,7 @@ class MyStories extends Component
         $this->storyId = $story->id;
         $this->title = $story->title;
         $this->genreId = $story->category;
+        $this->type = $story->type;
         $this->synopsis = $story->synopsis;
         $this->status = $story->status;
         $this->existingCover = $story->cover_path;
@@ -69,10 +88,12 @@ class MyStories extends Component
         $this->validate([
             'title' => 'required|string|max:255',
             'genreId' => 'required|exists:genres,id',
+            'type' => 'required|in:novel,puisi',
             'synopsis' => 'required|string|max:1000',
             'cover' => 'nullable|image|max:2048',
         ], [
             'title.required' => 'Judul novelnya jangan lupa diisi, Bro.',
+            'type.required' => 'Tipe novelnya jangan lupa dipilih, Bro.',
             'genreId.required' => 'Pilih dulu genre ceritamu.',
             'genreId.exists' => 'Genre yang kamu pilih tidak terdaftar.',
             'synopsis.required' => 'Sinopsis singkat wajib ada biar pembaca penasaran.',
@@ -105,6 +126,7 @@ class MyStories extends Component
                 'status' => strtolower($this->status),
                 'synopsis' => $this->synopsis,
                 'cover_path' => $coverPath,
+                'type' => $this->type
             ]
         );
 

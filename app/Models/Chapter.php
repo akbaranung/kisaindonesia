@@ -80,39 +80,81 @@ class Chapter extends Model
         return [];
     }
 
+    // public function calculateWordCount(): int
+    // {
+    //     $data = $this->parseJsonData();
+    //     $type = strtolower($data['type'] ?? $this->type ?? 'regular');
+
+    //     if ($type === 'chat') {
+    //         return 0;
+    //     }
+
+    //     $htmlContent = $data['content'] ?? '';
+    //     $pureText = strip_tags($htmlContent);
+
+    //     $pureText = html_entity_decode($pureText);
+    //     $pureText = trim(preg_match('/\s+/', ' ', $pureText));
+
+    //     if (empty($pureText)) {
+    //         return 0;
+    //     }
+
+    //     return count(explode(' ', $pureText));
+    // }
+
     public function calculateWordCount(): int
     {
         $data = $this->parseJsonData();
         $type = strtolower($data['type'] ?? $this->type ?? 'regular');
 
+        // 1. JIKA TIPE BAB ADALAH CHAT
         if ($type === 'chat') {
-            return 0;
+            $bubbles = $data['bubbles'] ?? [];
+            if (!is_array($bubbles) || empty($bubbles)) {
+                return 0;
+            }
+
+            $totalWords = 0;
+
+            foreach ($bubbles as $bubble) {
+                $textParts = [];
+
+                // Ambil teks dari pesan utama (misal: text atau center_text)
+                if (!empty($bubble['message'])) {
+                    $textParts[] = $bubble['message'];
+                }
+
+                // Ambil teks dari caption (misal: gambar dengan caption)
+                if (!empty($bubble['caption'])) {
+                    $textParts[] = $bubble['caption'];
+                }
+
+                // Jika ada teks yang perlu dihitung
+                if (!empty($textParts)) {
+                    $combinedText = implode(' ', $textParts);
+                    $cleanText = trim(preg_replace('/\s+/', ' ', strip_tags($combinedText)));
+
+                    if (!empty($cleanText)) {
+                        // Gunakan str_word_count untuk menghitung kata secara presisi
+                        $totalWords += str_word_count($cleanText);
+                    }
+                }
+            }
+
+            return $totalWords;
         }
 
-        $htmlContent = $data['content'] ?? '';
-        $pureText = strip_tags($htmlContent);
+        // 2. JIKA TIPE BAB ADALAH REGULAR (NOVEL / PUISI)
+        $htmlContent = $data['content'] ?? (is_string($this->content ?? null) ? $this->content : '');
 
+        $pureText = strip_tags($htmlContent);
         $pureText = html_entity_decode($pureText);
-        $pureText = trim(preg_match('/\s+/', ' ', $pureText));
+        $pureText = trim(preg_replace('/\s+/', ' ', $pureText)); // Perbaikan: mengganti preg_match ke preg_replace
 
         if (empty($pureText)) {
             return 0;
         }
 
-        return count(explode(' ', $pureText));
-    }
-
-    public function calculateBubbleCount()
-    {
-        $data = $this->parseJsonData();
-        $type = strtolower($data['type'] ?? $this->type ?? 'regular');
-
-        if ($type !== 'chat') {
-            return 0;
-        }
-
-        $bubbles = $data['bubbles'] ?? [];
-
-        return is_array($bubbles) ? count($bubbles) : 0;
+        return str_word_count($pureText);
     }
 }

@@ -88,12 +88,21 @@
 
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-300 mb-1">Jenis Content</label>
-                        <select wire:model="type"
-                            class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500 capitalize">
-                            <option value="reguler">Novel / Reguler (Paragraf)</option>
-                            <option value="chat">Chat Fic (Percakapan Chat)</option>
-                            <option value="puisi">Puisi (Bait)</option>
-                        </select>
+                        @if ($story->type === 'puisi')
+                            {{-- Jika Cerita = Puisi --}}
+                            <select wire:model="type"
+                                class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500 capitalize">
+                                <option value="regular">Regular</option>
+                            </select>
+                            <span class="text-[11px] text-slate-400 mt-1 block">Tipe bab untuk cerita puisi otomatis
+                                berformat Regular.</span>
+                        @else
+                            <select wire:model="type"
+                                class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500 capitalize">
+                                <option value="regular">Regular</option>
+                                <option value="chat">Chat Fic (Percakapan Chat)</option>
+                            </select>
+                        @endif
                     </div>
 
                     <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">

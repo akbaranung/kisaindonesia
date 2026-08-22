@@ -34,7 +34,7 @@ class ManageStoryChapters extends Component
         $this->resetErrorBag();
         $this->title = '';
         $this->status = 'draft';
-        $this->type = strtolower($this->story->type ?? 'regular');
+        $this->type = strtolower($this->story->type === 'puisi' ? 'regular' : $this->type);
         $this->isCreateModalOpen = true;
     }
 
@@ -48,7 +48,7 @@ class ManageStoryChapters extends Component
         $this->validate(
             [
                 'title' => 'required|string|max:255',
-                'type' => 'required|in:regular,chat,puisi',
+                'type' => 'required|in:regular,chat',
                 'status' => 'required|in:draft,published',
             ],
             [
@@ -97,7 +97,6 @@ class ManageStoryChapters extends Component
                 ]);
             });
 
-
             return redirect()->route(
                 'chapters.editor',
                 [
@@ -105,7 +104,6 @@ class ManageStoryChapters extends Component
                     'chapter' => $chapter->id
                 ]
             );
-            $this->closeCreateModal();
         } catch (\Throwable $th) {
             if ($filePath && Storage::disk('local')->exists($filePath)) {
                 Storage::disk('local')->delete($filePath);

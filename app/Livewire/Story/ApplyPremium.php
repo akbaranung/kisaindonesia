@@ -75,6 +75,7 @@ class ApplyPremium extends Component
         $validPremiumChapters = 0;
         $invalidChaptersCount = 0;
 
+
         foreach ($this->selectedStory->chapters as $index => $chapter) {
             $words = $chapter->word_count;
             $beans = $chapter->calculateKisaBean();
@@ -82,7 +83,7 @@ class ApplyPremium extends Component
             $this->totalWords += $words;
 
             // Bab 1-5 sampel gratis, perhitungan estimasi koin dimulai dari bab 6
-            if ($index >= 0) {
+            if ($index >= 5) {
                 $type = strtolower($chapter->type ?? $this->selectedStory->type ?? 'regular');
                 $isValidWordCount = false;
 
@@ -103,7 +104,7 @@ class ApplyPremium extends Component
             }
         }
 
-        $this->isEligible = ($this->totalChapters >= 0) && ($validPremiumChapters > 0) && ($invalidChaptersCount === 0);
+        $this->isEligible = ($this->totalChapters >= 20) && ($validPremiumChapters > 0) && ($invalidChaptersCount === 0);
     }
 
     public function submitApplication()

@@ -16,7 +16,6 @@ class NewChapterPublishedNotification extends Notification implements ShouldQueu
 
     public function __construct(Chapter $chapter)
     {
-        // Memastikan relasi story & penulis dimuat secara aman
         $this->chapter = $chapter->loadMissing(['story', 'story.user']);
     }
 

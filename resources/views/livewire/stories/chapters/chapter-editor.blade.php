@@ -66,72 +66,94 @@
         <!-- TAMPILAN CANVAS CHAT FIC -->
         @if ($type === 'chat')
             <div class="max-w-xl mx-auto space-y-4 pb-36">
-                <!-- Screen Frame Chat -->
-                {{-- <div
-                    class="p-4 bg-slate-900 border border-slate-800/80 rounded-3xl space-y-3.5 min-h-[400px] shadow-2xl relative">
-                    <div class="text-center pb-2 border-b border-slate-800/60 flex items-center justify-between px-2">
-                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">💬 Tampilan Chat
-                            Fic</span>
-                        <span class="text-[10px] text-slate-500 font-mono">{{ count($bubbles) }} Pesan</span>
-                    </div> --}}
 
                 @forelse($bubbles as $index => $b)
                     @php
                         $char = $characters->firstWhere('id', $b['character_id'] ?? null);
                         $isRight = ($char->default_position ?? 'left') === 'right';
+                        $isLeft = ($char->default_position ?? 'right') === 'left';
+                        $isCenter = $b['message_type'] === 'center_text';
+                        $charName = $char ? $char->name : 'Unknown';
+                        $avatar =
+                            $char && $char->avatar_path
+                                ? asset('storage/' . $char->avatar_path)
+                                : 'https://ui-avatars.com/api/?name=' . urlencode($charName) . '&background=random';
                     @endphp
 
-                    <div class="flex items-start gap-2.5 my-2.5 {{ $isRight ? 'flex-row-reverse' : '' }} group">
+                    <!-- A. Tipe Pesan TEKS -->
+                    @if (($b['message_type'] ?? 'text') === 'text')
+                        <div class="space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
+                            <div class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                {{-- Avatar --}}
+                                <img src="{{ $avatar }}"
+                                    class="w-6 h-6 rounded-full object-cover border border-slate-800 shrink-0">
 
-                        <!-- Avatar Karakter -->
-                        <div
-                            class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 overflow-hidden shrink-0 mt-0.5 shadow-sm">
-                            @if (!empty($char->avatar))
-                                <img src="{{ Storage::url($char->avatar) }}" class="w-full h-full object-cover">
-                            @else
-                                <div
-                                    class="w-full h-full flex items-center justify-center font-bold text-xs text-slate-300 bg-slate-800">
-                                    {{ strtoupper(substr($char->name ?? 'U', 0, 1)) }}
+                                {{-- Gelembung Pesan --}}
+                                <div class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
+                                    <span
+                                        class="text-[10px] font-black text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
+                                    @if (!$isRight && !empty($row['character_name']))
+                                        <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
+                                            {{ $row['character_name'] }}
+                                        </span>
+                                    @endif
+
+                                    <div
+                                        class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-white text-slate-800 rounded-bl-xs border border-slate-200/80' }}">
+                                        <p class="whitespace-pre-line">{{ $b['message'] ?? '' }}</p>
+                                    </div>
                                 </div>
-                            @endif
+                            </div>
                         </div>
+                        <!-- B. Tipe Pesan GAMBAR -->
+                    @elseif(($b['message_type'] ?? '') === 'image')
+                        <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
+                            <div class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                {{-- Avatar --}}
+                                <img src="{{ $avatar }}"
+                                    class="w-6 h-6 rounded-full object-cover border border-slate-800 shrink-0">
 
-                        <!-- Content Gelembung Chat -->
-                        <div class="max-w-[78%] space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
-                            <span
-                                class="text-[10px] font-bold text-slate-400 px-1 block">{{ $char->name ?? 'Karakter Terhapus' }}</span>
-
-                            <!-- A. Tipe Pesan TEKS -->
-                            @if (($b['message_type'] ?? 'text') === 'text')
-                                <div
-                                    class="inline-block px-3.5 py-2 rounded-2xl text-xs leading-relaxed shadow-sm {{ $isRight ? 'bg-brand-500/20 border border-brand-500/30 text-teal-100 rounded-tr-none' : 'bg-slate-800 border border-slate-700 text-slate-200 rounded-tl-none' }}">
-                                    {{ $b['message'] ?? '' }}
-                                </div>
-
-                                <!-- B. Tipe Pesan GAMBAR -->
-                            @elseif(($b['message_type'] ?? '') === 'image')
-                                <div
-                                    class="inline-block p-1.5 rounded-2xl bg-slate-800 border border-slate-700 overflow-hidden shadow-sm">
-                                    @if (isset($b['image_upload']) && $b['image_upload'])
-                                        <img src="{{ $b['image_upload']->temporaryUrl() }}"
-                                            class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
-                                    @elseif(!empty($b['image_url'] ?? ($b['existing_image_url'] ?? null)))
-                                        <img src="{{ Storage::url($b['image_url'] ?? $b['existing_image_url']) }}"
-                                            class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
+                                {{-- Gelembung Pesan --}}
+                                <div class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
+                                    <span
+                                        class="text-[10px] font-black text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
+                                    @if (!$isRight && !empty($row['character_name']))
+                                        <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
+                                            {{ $row['character_name'] }}
+                                        </span>
                                     @endif
 
-                                    @if (!empty($b['caption'] ?? $b['message']))
-                                        <p class="p-2 text-xs text-slate-300 leading-normal">
-                                            {{ $b['caption'] ?? $b['message'] }}</p>
-                                    @endif
+                                    <div
+                                        class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'border border-brand-500 text-slate-950 rounded-br-xs' : 'bg-white text-slate-800 rounded-bl-xs border border-slate-200/80' }}">
+                                        @if (isset($b['image_upload']) && $b['image_upload'])
+                                            <img src="{{ $b['image_upload']->temporaryUrl() }}"
+                                                class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
+                                        @elseif(!empty($b['image_url'] ?? ($b['existing_image_url'] ?? null)))
+                                            <img src="{{ Storage::url($b['image_url'] ?? $b['existing_image_url']) }}"
+                                                class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
+                                        @endif
+                                        <p class="whitespace-pre-line">
+                                            @if (!empty($b['caption'] ?? $b['message']))
+                                                <p class="p-2 text-xs text-slate-300 leading-normal">
+                                                    {{ $b['caption'] ?? $b['message'] }}</p>
+                                            @endif
+                                        </p>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <!-- C. Tipe Pesan LOG PANGGILAN -->
-                            @elseif(($b['message_type'] ?? '') === 'call')
+                        </div>
+                        <!-- C. Tipe Pesan LOG PANGGILAN -->
+                    @elseif(($b['message_type'] ?? '') === 'call')
+                        <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
+                            <div class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                <img src="{{ $avatar }}"
+                                    class="w-6 h-6 rounded-full object-cover border border-slate-800 shrink-0">
                                 <div
                                     class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-950 border border-slate-800 text-xs shadow-sm">
                                     @if (($b['call_type'] ?? '') === 'missed')
-                                        <span class="text-rose-400 font-bold flex items-center gap-1">📵 Panggilan
+                                        <span class="text-rose-400 font-bold flex items-center gap-1">📵
+                                            Panggilan
                                             Tak Terjawab</span>
                                     @elseif(($b['call_type'] ?? '') === 'incoming')
                                         <span class="text-emerald-400 font-bold flex items-center gap-1">📲
@@ -144,34 +166,39 @@
                                     <span
                                         class="text-[10px] text-slate-500 font-mono">({{ $b['call_duration'] ?? '00:00' }})</span>
                                 </div>
-                            @elseif (($b['message_type'] ?? '') === 'center_text')
-                                <div class="flex flex-col items-center justify-center my-4 group">
-                                    <div
-                                        class="px-3 py-1 bg-slate-950/80 border border-slate-800 rounded-full text-[11px] text-slate-400 font-medium italic text-center max-w-[85%] shadow-sm">
-                                        {{ $b['message'] ?? '' }}
-                                    </div>
-                                    <div class="flex items-center gap-2 text-[10px] text-slate-600 mt-1">
-                                        <button type="button" wire:click="editBubble({{ $index }})"
-                                            class="hover:text-brand-400">Edit</button>
-                                        <span>•</span>
-                                        <button type="button" wire:click="deleteBubble({{ $index }})"
-                                            class="hover:text-rose-400">Hapus</button>
-                                    </div>
-                                </div>
-                            @endif
-
-                            <!-- Aksi Quick Edit & Hapus Row -->
-                            <div
-                                class="flex items-center gap-2 text-[10px] text-slate-500 pt-0.5 {{ $isRight ? 'justify-end' : '' }}">
-                                <span>{{ $b['timestamp'] ?? '' }}</span>
-                                <button type="button" wire:click="editBubble({{ $index }})"
-                                    class="hover:text-brand-400 font-semibold transition">Edit</button>
-                                <span>•</span>
-                                <button type="button" wire:click="deleteBubble({{ $index }})"
-                                    class="hover:text-rose-400 font-semibold transition">Hapus</button>
                             </div>
                         </div>
+                    @elseif (($b['message_type'] ?? '') === 'center_text')
+                        <div class="flex flex-col items-center justify-center my-4 group">
+                            <div
+                                class="px-3 py-1 bg-slate-950/80 border border-slate-800 rounded-full text-[11px] text-slate-400 font-medium italic text-center max-w-[85%] shadow-sm">
+                                {{ $b['message'] ?? '' }}
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Aksi Quick Edit & Hapus Row -->
+                    @php
+                        if ($isRight) {
+                            $position = 'justify-end';
+                        } elseif ($isLeft) {
+                            $position = 'justify-start';
+                        } elseif ($isCenter) {
+                            $position = 'justify-center';
+                        }
+                    @endphp
+
+
+                    <div class="flex items-center gap-2 text-[10px] text-slate-500 pt-0.5 {{ $position }}">
+                        <button type="button" wire:click="editBubble({{ $index }})"
+                            class="hover:text-brand-400 font-semibold transition">Edit</button>
+                        <span>•</span>
+                        <button type="button" wire:click="deleteBubble({{ $index }})"
+                            class="hover:text-rose-400 font-semibold transition">Hapus</button>
                     </div>
+
+
+
                 @empty
                     <div class="py-20 text-center space-y-2">
                         <span class="text-3xl">💬</span>
@@ -254,8 +281,8 @@
                                 <button type="button" wire:click="$set('character_id', {{ $c->id }})"
                                     class="flex items-center gap-1.5">
                                     <div class="w-4 h-4 rounded-full bg-slate-700 overflow-hidden shrink-0">
-                                        @if ($c->avatar)
-                                            <img src="{{ Storage::url($c->avatar) }}"
+                                        @if ($c->avatar_path)
+                                            <img src="{{ Storage::url($c->avatar_path) }}"
                                                 class="w-full h-full object-cover">
                                         @else
                                             <span
@@ -372,7 +399,7 @@
                                 class="px-2 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-brand-500 truncate">
                                 <option value="incoming">📲 Masuk</option>
                                 <option value="outgoing">📞 Keluar</option>
-                                <option value="missed">Option 📵 Tak Terjawab</option>
+                                <option value="missed">📵 Tak Terjawab</option>
                             </select>
                             <input type="text" wire:model="call_duration" placeholder="Durasi (02:45)"
                                 class="px-2.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-brand-500">
@@ -669,11 +696,5 @@
                 title: data.message
             });
         });
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        if (typeof ImageResize !== 'undefined' && typeof Quill !== 'undefined') {
-            Quill.register('modules/imageResize', ImageResize.default || ImageResize);
-        }
     });
 </script>

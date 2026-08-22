@@ -7,7 +7,7 @@
             </h1>
         </div>
 
-        @if ($user)
+        {{-- @if ($user)
             <a href="{{ url('/profile') }}" wire:navigate
                 class="w-10 h-10 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center flex-shrink-0 shadow-2xs hover:scale-105 transition-transform">
                 @if ($user->profile_photo_path)
@@ -24,7 +24,16 @@
                 class="text-xs font-bold bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-brand-600 transition">
                 Login
             </a>
+        @endif --}}
+        @if (!$user)
+            <a href="{{ route('login') }}" wire:navigate
+                class="text-xs font-bold bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-brand-600 transition">
+                Login
+            </a>
         @endif
+        @auth
+            <livewire:notification-bell />
+        @endauth
     </section>
 
     <section class="py-4 w-full">

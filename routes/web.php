@@ -11,6 +11,7 @@ use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Auth\VerifyEmail;
 use App\Livewire\FollowingFeed;
+use App\Livewire\FullNotificationList;
 use App\Livewire\Home;
 use App\Livewire\KisaBean\Topup;
 use App\Livewire\KisaBean\TransactionHistory;
@@ -101,6 +102,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/monetization/apply', ApplyPremium::class)->name('monetization.apply');
 
     Route::get('/kisa-bean/history', TransactionHistory::class)->name('kisa-bean.history');
+    Route::get('/notifications', FullNotificationList::class)->name('notifications.index');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

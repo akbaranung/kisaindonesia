@@ -75,7 +75,7 @@
                 <div class="pt-3 border-t border-slate-100 space-y-2.5">
 
                     <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-bold text-slate-700">Aturan Bab Premium (Bab 6+):</span>
+                        <span class="text-[11px] font-bold text-slate-700">Aturan Bab Premium:</span>
                         <span
                             class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full {{ $storyType === 'puisi' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
                             {{ $storyType }}
@@ -90,8 +90,8 @@
                         </div>
                         <div class="flex items-center justify-between text-[11px]">
                             <span class="text-slate-500">Total Bab Cerita:</span>
-                            <span class="font-bold {{ $totalChapters >= 5 ? 'text-emerald-600' : 'text-rose-500' }}">
-                                {{ $totalChapters }} / 5 Bab (Min)
+                            <span class="font-bold {{ $totalChapters >= 20 ? 'text-emerald-600' : 'text-rose-500' }}">
+                                {{ $totalChapters }} / 20 Bab (Min)
                             </span>
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                                         {{ $chap->title }}</span>
                                     <span class="font-bold shrink-0">
                                         {{ number_format($cWords) }} Kata
-                                        {!! $cValid ? '✓' : '✗' !!}
+                                        {!! $cValid ? '| ✓' : '| ✗' !!}
                                     </span>
                                 </div>
                             @endif
@@ -131,7 +131,7 @@
                         </div>
                         <div class="text-right">
                             <span
-                                class="text-base font-black text-amber-600">~{{ number_format($estimatedBeans) }}</span>
+                                class="text-base font-black text-amber-600">{{ number_format($estimatedBeans) }}</span>
                             <span class="text-[10px] font-bold text-amber-700 block">Kisa Bean</span>
                         </div>
                     </div>
@@ -235,7 +235,7 @@
             <div class="p-4 bg-slate-100 rounded-2xl border border-slate-200 text-center space-y-1.5">
                 <p class="text-xs font-bold text-slate-700">Belum Memenuhi Syarat Minimal</p>
                 <p class="text-[10px] text-slate-500 leading-relaxed">
-                    Syarat minimal pengajuan cerita premium adalah <strong>5 Bab</strong> dan total untuk tipe
+                    Syarat minimal pengajuan cerita premium adalah <strong>20 Bab</strong> dan total untuk tipe
                     <strong>{{ strtoupper($storyType) }}</strong> adalah
                     <strong>{{ $minWords . ' - ' . $maxWords }}</strong>
                     Kata. Silakan tambah bab atau isi cerita terlebih dahulu.

@@ -173,9 +173,28 @@
             // Jika elemen tidak ada atau Quill sudah terinisialisasi, stop.
             if (!editorContainer || editorContainer.classList.contains('ql-container')) return;
 
+            const AllowedFormats = [
+                'bold',
+                'italic',
+                'underline',
+                'strike',
+                'blockquote',
+                'code-block',
+                'header',
+                'list',
+                'script',
+                'indent',
+                'direction',
+                'size',
+                'link',
+                'image',
+                'video'
+            ];
+
             // 1. Inisialisasi Quill
             const quill = new Quill('#quill-editor', {
                 theme: 'snow',
+                formats: AllowedFormats,
                 placeholder: 'Tumpahkan ide cerita hebatmu di sini, Bro...',
                 modules: {
                     toolbar: [
@@ -189,6 +208,8 @@
                     ]
                 }
             });
+
+
 
             // 2. Ambil data awal dari Livewire
             let initialContent = @this.get('content') || '';
