@@ -2,32 +2,31 @@
 
 namespace App\Livewire;
 
+use App\Models\PenName;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class FollowButton extends Component
 {
-    public int $authorId;
-    public bool $isFollowing = false;
+    public PenName $penName;
     public string $variant = 'deafult'; // default,compact atau icon
-    public int $followersCount = 0;
+    public bool $isFollowing = false;
+    public ?int $authorId = null;
 
-    public function mount(int $authorId, string $variant = 'default')
+    public function mount(PenName $penName, string $variant = 'default')
     {
-        $this->authorId = $authorId;
+        $this->penName = $penName;
         $this->variant = $variant;
+        $this->authorId = $penName->user_id;
 
         $this->checkStatus();
     }
 
     public function checkStatus(): void
     {
-        $author = User::find($this->authorId);
-        $this->followersCount = $author ? $author->followers()->count() : 0;
-
-        if (Auth::check()) {
-            $this->isFollowing = Auth::user()->isFollowing($this->authorId);
+        if (auth()->check()) {
+            $this->isFollowing = $this->penName->isFollowedBy(auth()->user());
         }
     }
 
@@ -39,24 +38,25 @@ class FollowButton extends Component
 
         $user = Auth::user();
 
-        if ($user->id === $this->authorId) {
+        if ($this->penName->user_id === $user->id) {
             $this->dispatch('show-toast', type: 'warning', message: 'Anda tidak dapat mengikuti diri sendiri.');
             return;
         }
 
-        $result = $user->toggleFollow($this->authorId);
 
-        if ($result['status'] === 'followed') {
-            $this->isFollowing = true;
-            $this->followersCount++;
-            $this->dispatch('show-toast', type: 'success', message: 'Berhasil mengikuti penulis!');
-        } else {
+        if ($this->isFollowing) {
+            $user->followedPenNames()->detach($this->penName->id);
             $this->isFollowing = false;
-            $this->followersCount = max(0, $this->followersCount - 1);
             $this->dispatch('show-toast', type: 'info', message: 'Batal megikuti penulis.');
+        } else {
+            $user->followedPenNames()->attach($this->penName->id);
+            $this->isFollowing = true;
+            $this->dispatch('show-toast', type: 'success', message: 'Berhasil mengikuti penulis!');
         }
 
-        $this->dispatch('author-follow-updated', authorId: $this->authorId, isFollowing: $this->isFollowing);
+
+
+        $this->dispatch('follow-updated');
     }
 
     public function render()

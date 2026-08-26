@@ -15,6 +15,8 @@ use App\Livewire\FullNotificationList;
 use App\Livewire\Home;
 use App\Livewire\KisaBean\Topup;
 use App\Livewire\KisaBean\TransactionHistory;
+use App\Livewire\ManagePenNames;
+use App\Livewire\PenNameProfile;
 use App\Livewire\Profile;
 use App\Livewire\Story\ApplyPremium;
 use App\Livewire\Story\Chapter\ChapterEditor;
@@ -98,6 +100,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/stories/{story}/characters', ManageStoryChapters::class)->name('stories.characters');
     Route::get('/stories/{story:slug}/chapters/{chapter:slug}', StoryReader::class)->name('stories.chapter.read');
     Route::get('/stories/{story}/chapters/{chapter}/editor', ChapterEditor::class)->name('chapters.editor');
+    Route::get('/my-pen-names', ManagePenNames::class)->name('pen-names.index');
+    Route::get('/author/{slug}', PenNameProfile::class)->name('pen-name.show');
 
     Route::get('/monetization/apply', ApplyPremium::class)->name('monetization.apply');
 

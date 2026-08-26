@@ -17,7 +17,8 @@ class Story extends Model
         'slug',
         'cover_path',
         'monetization_type',
-        'type'
+        'type',
+        'pen_name_id'
     ];
     use HasFactory;
 

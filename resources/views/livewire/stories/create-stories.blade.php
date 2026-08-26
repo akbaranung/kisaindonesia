@@ -49,6 +49,51 @@
          </div>
 
          <div>
+             <div class="flex items-center justify-between mb-1">
+                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Nama
+                     Pena / Penulis *</label>
+                 <div class="flex items-center">
+                     @if ($pen_name_id)
+                         <button type="button" wire:click="openEditPenNameModal"
+                             class="p-2 bg-white/80 backdrop-blur-md rounded-xl shadow-sm text-amber-600 transition me-3">
+                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                             </svg>
+                         </button>
+                     @endif
+                     <button type="button" wire:click="openPenNameModal"
+                         class="p-2 bg-white/80 backdrop-blur-md rounded-xl shadow-sm text-brand-600 transition">
+                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                         </svg>
+
+                     </button>
+                 </div>
+
+             </div>
+
+             @if (session()->has('pen_name_success'))
+                 <div class="mb-2 text-[11px] text-emerald-600 font-medium">
+                     ✓ {{ session('pen_name_success') }}
+                 </div>
+             @endif
+
+             <select wire:model="pen_name_id"
+                 class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium text-slate-700">
+                 <option value="">-- Pilih Nama Pena --</option>
+                 @foreach ($penNames as $penName)
+                     <option value="{{ $penName->id }}">
+                         {{ $penName->name }} {{ $penName->is_default ? '(Utama)' : '' }}
+                     </option>
+                 @endforeach
+             </select>
+             @error('pen_name_id')
+                 <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span>
+             @enderror
+         </div>
+
+         <div>
              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Genre
                  / Kategori</label>
              <select wire:model="type"
@@ -94,4 +139,58 @@
              <span wire:loading wire:target="saveStory">Sedang Menyimpan...</span>
          </button>
      </form>
+
+     @if ($showPenNameModal)
+         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+             <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+                 <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                     <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                         <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                         </svg>
+                         Tambah Nama Pena Cepat
+                     </h3>
+                     <button type="button" wire:click="$set('showPenNameModal', false)"
+                         class="text-slate-400 hover:text-slate-600">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                 d="M6 18L18 6M6 6l12 12" />
+                         </svg>
+                     </button>
+                 </div>
+
+                 <form wire:submit="saveQuickPenName" class="p-5 space-y-3.5">
+                     <div>
+                         <label class="block text-xs font-bold text-slate-700 mb-1">Nama Pena *</label>
+                         <input type="text" wire:model="new_pen_name" placeholder="Contoh: Kirana Senja"
+                             class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                         @error('new_pen_name')
+                             <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span>
+                         @enderror
+                     </div>
+
+                     <div>
+                         <label class="block text-xs font-bold text-slate-700 mb-1">Bio Singkat (Opsional)</label>
+                         <textarea wire:model="new_pen_bio" rows="2" placeholder="Spesialis genre romance & angst..."
+                             class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+                         @error('new_pen_bio')
+                             <span class="text-[11px] text-rose-500 mt-1 block">{{ $message }}</span>
+                         @enderror
+                     </div>
+
+                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                         <button type="button" wire:click="$set('showPenNameModal', false)"
+                             class="px-3.5 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-700">
+                             Batal
+                         </button>
+                         <button type="submit"
+                             class="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-sm transition">
+                             Simpan & Gunakan
+                         </button>
+                     </div>
+                 </form>
+             </div>
+         </div>
+     @endif
  </main>

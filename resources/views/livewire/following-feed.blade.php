@@ -7,7 +7,7 @@
         </div>
     </div>
 
-    @if (empty($followingIds))
+    @if (empty($followedPenNameIds))
         <!-- State 1: Belum Follow Siapapun -->
         <div class="text-center py-12 px-6 bg-slate-50/60 rounded-2xl border-2 border-dashed border-slate-200">
             <div class="w-14 h-14 bg-brand-50 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -36,70 +36,70 @@
         <div class="space-y-4">
             @foreach ($chapters as $chapter)
                 <div
-                    class="bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200 overflow-hidden">
-                    <div class="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                    class="bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm hover:border-slate-200 transition">
+                    {{-- Header: Info Nama Pena --}}
+                    <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-50">
+                        <a href="{{ route('pen-name.show', $chapter->story->penName->slug) }}"
+                            class="flex items-center gap-3 group">
+                            <div
+                                class="w-10 h-10 rounded-full bg-brand-100 overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center font-bold text-brand-600 text-sm">
+                                @if ($chapter->story->penName->avatar)
+                                    <img src="{{ asset('storage/' . $chapter->story->penName->avatar) }}"
+                                        alt="{{ $chapter->story->penName->name }}" class="w-full h-full object-cover">
+                                @else
+                                    {{ strtoupper(substr($chapter->story->penName->name, 0, 1)) }}
+                                @endif
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-800 group-hover:text-brand-600 transition">
+                                    {{ $chapter->story->penName->name }}
+                                </h4>
+                                <span class="text-[10px] text-slate-400">
+                                    Menerbitkan bab baru • {{ $chapter->created_at->diffForHumans() }}
+                                </span>
+                            </div>
+                        </a>
 
-                        <!-- Info Cerita & Bab -->
-                        <div class="flex gap-4 items-start">
-                            <!-- Cover Cerita -->
-                            <a href="{{ route('stories.chapters', $chapter->story->slug) }}" class="shrink-0 group">
-                                <img src="{{ $chapter->story->cover_path ? asset('storage/' . $chapter->story->cover_path) : asset('images/default-cover.jpg') }}"
-                                    alt="{{ $chapter->story->title }}"
-                                    class="w-16 h-24 object-cover rounded-lg shadow-sm border border-slate-100 group-hover:opacity-90 transition">
-                            </a>
 
-                            <!-- Detail Konten -->
-                            <div class="space-y-1.5">
-                                <div class="flex items-center gap-2 text-xs text-slate-500">
-                                    <span class="font-medium text-slate-800">{{ $chapter->story->user->name }}</span>
-                                    <span>•</span>
-                                    <span>{{ $chapter->created_at->diffForHumans() }}</span>
+                    </div>
+
+                    {{-- Content: Detail Bab & Cerita --}}
+                    <div class="flex gap-4">
+                        <a href="{{ route('stories.chapters', $chapter->story->slug ?? $chapter->story->id) }}"
+                            class="w-16 h-24 md:w-20 md:h-28 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
+                            @if ($chapter->story->cover_path)
+                                <img src="{{ asset('storage/' . $chapter->story->cover_path) }}"
+                                    alt="{{ $chapter->story->title }}" class="w-full h-full object-cover">
+                            @else
+                                <div
+                                    class="w-full h-full flex items-center justify-center p-2 bg-brand-50 text-brand-300 font-bold text-[10px] text-center">
+                                    {{ $chapter->story->title }}
                                 </div>
+                            @endif
+                        </a>
 
-                                <h2
-                                    class="font-semibold text-base text-slate-900 hover:text-brand-600 transition line-clamp-1">
-                                    <a
-                                        href="{{ route('stories.chapter.read', [$chapter->story->slug, $chapter->slug]) }}">
-                                        {{ $chapter->title }}
-                                    </a>
-                                </h2>
+                        <div class="flex-1 flex flex-col justify-between py-0.5">
+                            <div>
+                                <span class="text-[10px] font-semibold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
+                                    {{ $chapter->story->title }}
+                                </span>
 
-                                <p class="text-xs text-slate-600 line-clamp-1">
-                                    {{ $chapter->story->title }} — <span class="font-semibold text-slate-700">Bab
-                                        {{ $chapter->order_number }}</span>
-                                </p>
+                                <a href="{{ route('stories.chapter.read', [$chapter->story->slug, $chapter->slug]) }}"
+                                    class="block text-sm font-bold text-slate-800 hover:text-brand-600 transition mt-1">
+                                    Bab {{ $chapter->order }}: {{ $chapter->title }}
+                                </a>
 
-                                <!-- Tag Status & Tipe -->
-                                <div class="pt-1 flex items-center gap-2">
-                                    @if ($chapter->is_premium)
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                            <span>⚡</span> {{ $chapter->coins }} Kisa Beans
-                                        </span>
-                                    @else
-                                        <span
-                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            Gratis
-                                        </span>
-                                    @endif
+                                @if ($chapter->synopsis)
+                                    <p class="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                                        {{ $chapter->synopsis }}
+                                    </p>
+                                @endif
+                            </div>
 
-                                    <span
-                                        class="text-[10px] font-medium text-slate-400 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded">
-                                        {{ $chapter->type }}
-                                    </span>
-                                </div>
+                            <div class="text-[11px] text-slate-400 font-medium mt-2">
+                                Dibaca {{ number_format($chapter->views_count ?? 0) }} kali
                             </div>
                         </div>
-
-                        <!-- Tombol Action -->
-                        <div
-                            class="w-full sm:w-auto flex justify-end shrink-0 pt-2 sm:pt-0 border-t border-slate-100 sm:border-0">
-                            <a href="{{ route('stories.chapter.read', [$chapter->story->slug, $chapter->slug]) }}"
-                                class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-lg border border-brand-600 text-brand-600 hover:bg-brand-50 active:bg-brand-100 transition-all duration-150">
-                                Baca Bab
-                            </a>
-                        </div>
-
                     </div>
                 </div>
             @endforeach

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -94,16 +95,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 
-    public function followings(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id')->withTimestamps();
-    }
-
-    public function followers(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id')->withTimestamps();
-    }
-
     public function isFollowing(int|string $authorId): bool
     {
         if (!$authorId) {
@@ -128,23 +119,28 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    protected function followersCount(): Attribute
+    public function getFollowingCountAttribute(): int
     {
-        return Attribute::make(
-            get: fn() => $this->followers()->count()
-        );
+        return $this->followedPenNames()->count();
     }
 
-    protected function followingsCount(): Attribute
+    public function getTotalFollowersCountAttribute(): int
     {
-        return Attribute::make(
-            get: fn() => $this->followings()->count()
-        );
+        return DB::table('follows')
+            ->whereIn('following_id', $this->penNames()->pluck('id'))
+            ->distinct('follower_id')
+            ->count('follower_id');
     }
 
     public function penNames()
     {
         return $this->hasMany(PenName::class);
+    }
+
+    public function followedPenNames()
+    {
+        return $this->belongsToMany(PenName::class, 'follows', 'follower_id', 'following_id')
+            ->withTimestamps();
     }
 
     public function defaultPenName()

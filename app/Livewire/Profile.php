@@ -27,10 +27,6 @@ class Profile extends Component
     public $new_password;
     public $new_password_confirmation;
 
-    public $followersCount = 0;
-    public $followingCount = 0;
-    public $booksCount = 0;
-
     public $recentTransactions = [];
 
     public function mount()
@@ -141,17 +137,20 @@ class Profile extends Component
         $this->bio = $user->bio;
         $this->bio = $user->bio ?? '';
 
-        $this->followersCount = 1420; // Contoh: 1.4k Followers
-        $this->followingCount = 318;  // Contoh: 318 Following
-        $this->booksCount = 24;       // Contoh: 24 Buku di Rak
-
         $this->recentTransactions = UserTransaction::where('user_id', $user->id)->latest()->take(3)->get();
     }
 
     public function render()
     {
+        $user = auth()->user();
+
+        $penNames = $user->penNames()->withCount('stories', 'followers')->get();
+
         return view('livewire.profile.profile', [
-            'user' => Auth::user()
+            'user' => Auth::user(),
+            'followersCount' => $user->total_followers_count,
+            'followingCount' => $user->following_count,
+            'penNames' => $penNames,
         ]);
     }
 }

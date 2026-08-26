@@ -2,7 +2,7 @@
     @if ($action === 'view')
         <nav class="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-6">
             <a href="{{ url('/') }}" wire:navigate
-                class="p-2 bg-white/80 backdrop-blur-md rounded-xl shadow-sm text-slate-600 hover:text-emerald-600 transition">
+                class="p-2 bg-white/80 backdrop-blur-md rounded-xl shadow-sm text-slate-600 hover:text-brand-600 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
@@ -12,7 +12,7 @@
         </nav>
 
         <header class="relative pt-24 pb-8 bg-white border-b border-slate-100">
-            <div class="absolute top-0 left-0 right-0 h-40 bg-linear-to-br from-emerald-500 to-teal-600 opacity-10">
+            <div class="absolute top-0 left-0 right-0 h-40 bg-linear-to-br from-brand-500 to-teal-600 opacity-10">
             </div>
 
             <div class="relative flex flex-col items-center">
@@ -26,7 +26,7 @@
 
                         <div wire:loading wire:target="avatar_temp"
                             class="absolute inset-0 bg-slate-950/80 rounded-full flex items-center justify-center">
-                            <svg class="animate-spin h-6 w-6 text-emerald-400" xmlns="http://www.w3.org/2000/svg"
+                            <svg class="animate-spin h-6 w-6 text-brand-400" xmlns="http://www.w3.org/2000/svg"
                                 fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                     stroke-width="4"></circle>
@@ -53,20 +53,20 @@
                 <div
                     class="flex flex-col items-center p-3 rounded-2xl bg-slate-50/80 border border-slate-100 transition hover:bg-white hover:shadow-2xs">
                     <span
-                        class="text-lg font-black text-slate-800">{{ number_format($user->followers->count(), 0, ',', '.') }}</span>
+                        class="text-lg font-black text-slate-800">{{ number_format($followersCount, 0, ',', '.') }}</span>
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Followers</span>
                 </div>
                 <div
                     class="flex flex-col items-center p-3 rounded-2xl bg-slate-50/80 border border-slate-100 transition hover:bg-white hover:shadow-2xs">
                     <span
-                        class="text-lg font-black text-slate-800">{{ number_format($user->followings->count(), 0, ',', '.') }}</span>
+                        class="text-lg font-black text-slate-800">{{ number_format($followingCount, 0, ',', '.') }}</span>
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Following</span>
                 </div>
                 <a href="{{ route('library') }}"
-                    class="flex flex-col items-center p-3 rounded-2xl bg-emerald-50 border border-emerald-100 transition hover:bg-white hover:shadow-2xs">
+                    class="flex flex-col items-center p-3 rounded-2xl bg-brand-50 border border-brand-100 transition hover:bg-white hover:shadow-2xs">
                     <span
-                        class="text-lg font-black text-emerald-600">{{ number_format($user->savedStories->count(), 0, ',', '.') }}</span>
-                    <span class="text-[9px] font-black text-emerald-400 uppercase tracking-tighter">Library</span>
+                        class="text-lg font-black text-brand-600">{{ number_format($user->savedStories->count(), 0, ',', '.') }}</span>
+                    <span class="text-[9px] font-black text-brand-400 uppercase tracking-tighter">Library</span>
                 </a>
             </div>
         </header>
@@ -74,7 +74,7 @@
         <main class="pb-24 my-3">
             @if (session()->has('success'))
                 <div
-                    class="mb-6 p-4 bg-emerald-500 text-white text-xs font-bold rounded-2xl shadow-lg shadow-emerald-200 flex items-center gap-3 animate-bounce">
+                    class="mb-6 p-4 bg-brand-500 text-white text-xs font-bold rounded-2xl shadow-lg shadow-brand-200 flex items-center gap-3 animate-bounce">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
@@ -135,25 +135,26 @@
             </div>
 
             <div
-                class="mb-3 relative overflow-hidden bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-3.5 text-white shadow-md shadow-emerald-600/20 flex flex-col justify-between min-h-[110px]">
+                class="mb-3 relative overflow-hidden bg-gradient-to-br from-brand-600 to-brand-700 rounded-2xl p-3.5 text-white shadow-md shadow-brand-600/20 flex flex-col justify-between min-h-[110px]">
                 <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl font-black select-none pointer-events-none">
                     💰</div>
 
                 <div class="relative z-10 flex items-center justify-between mb-2">
-                    <span class="text-[9px] font-extrabold tracking-wider uppercase text-emerald-100/90">Royalti
+                    <span class="text-[9px] font-extrabold tracking-wider uppercase text-brand-100/90">Royalti
                         Penulis</span>
-                    <span class="px-1.5 py-0.5 bg-emerald-900/40 text-[8px] font-bold rounded">Aktif</span>
+                    <span class="px-1.5 py-0.5 bg-brand-900/40 text-[8px] font-bold rounded">Aktif</span>
                 </div>
 
                 <div class="flex justify-between z-10 space-y-2 mt-auto">
                     <div class="text-xl font-black leading-none">
                         {{ number_format($user->earned_beans ?? 0) }}
-                        <p class="text-[10px] text-amber-100/70 font-medium mt-1">Pendapatan royalti dari cerita premium
+                        <p class="text-[10px] text-amber-100/70 font-medium mt-1">Pendapatan royalti dari cerita
+                            premium
                         </p>
                     </div>
                     <button type="button"
-                        class="inline-flex items-center gap-1 bg-white text-emerald-900 text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-xs hover:bg-emerald-50 active:scale-95 transition-all">
-                        <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="inline-flex items-center gap-1 bg-white text-brand-900 text-[10px] font-extrabold px-3 py-1.5 rounded-xl shadow-xs hover:bg-brand-50 active:scale-95 transition-all">
+                        <svg class="w-3 h-3 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -182,7 +183,7 @@
                                 };
 
                                 $statusClass = match ($tx->status) {
-                                    'success' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                    'success' => 'bg-brand-50 text-brand-700 border-brand-200',
                                     'pending' => 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse',
                                     'failed', 'expired' => 'bg-rose-50 text-rose-700 border-rose-200',
                                     default => 'bg-slate-50 text-slate-600 border-slate-200',
@@ -217,11 +218,36 @@
                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2 mb-1">General Settings
                 </h4>
 
-                <button wire:click="switchAction('edit')"
-                    class="group w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-2xs hover:border-emerald-200 transition">
+
+
+                <a href="{{ route('pen-names.index') }}"
+                    class="group w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-2xs hover:border-brand-200 transition">
                     <div class="flex items-center gap-4">
                         <div
-                            class="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-emerald-50 text-slate-400 group-hover:text-emerald-600 flex items-center justify-center transition">
+                            class="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-brand-50 text-slate-400 group-hover:text-brand-600 flex items-center justify-center transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <span class="block text-sm font-bold text-slate-700">Manajemen Nama Pena</span>
+                            <span class="block text-[10px] text-slate-400">Kelola persona kepenulisan, foto profil, dan
+                                bio kamu</span>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" stroke-width="3"
+                        viewBox="0 0 24 24">
+                        <path d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </a>
+
+                <button wire:click="switchAction('edit')"
+                    class="group w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-2xs hover:border-brand-200 transition">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-brand-50 text-slate-400 group-hover:text-brand-600 flex items-center justify-center transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -240,10 +266,10 @@
                 </button>
 
                 <button wire:click="switchAction('change-password')"
-                    class="group w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-2xs hover:border-emerald-200 transition">
+                    class="group w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-2xs hover:border-brand-200 transition">
                     <div class="flex items-center gap-4">
                         <div
-                            class="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-emerald-50 text-slate-400 group-hover:text-emerald-600 flex items-center justify-center transition">
+                            class="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-brand-50 text-slate-400 group-hover:text-brand-600 flex items-center justify-center transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -275,7 +301,7 @@
     @elseif($action === 'edit')
         <nav class="flex p-3 items-center justify-between border-b border-slate-100 bg-white">
             <button wire:click="switchAction('view')"
-                class="p-2 bg-white/80 backdrop-blur-md rounded-xl shadow-sm text-slate-600 hover:text-emerald-600 transition">
+                class="p-2 bg-white/80 backdrop-blur-md rounded-xl shadow-sm text-slate-600 hover:text-brand-600 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
@@ -292,7 +318,7 @@
     @else
         <nav class="flex p-3 items-center justify-between border-b border-slate-100 bg-white">
             <button wire:click="switchAction('view')"
-                class="p-2 bg-white/80 backdrop-blur-md rounded-xl shadow-sm text-slate-600 hover:text-emerald-600 transition">
+                class="p-2 bg-white/80 backdrop-blur-md rounded-xl shadow-sm text-slate-600 hover:text-brand-600 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>

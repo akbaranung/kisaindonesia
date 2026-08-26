@@ -33,10 +33,15 @@
 
         {{-- Judul & Penulis --}}
         <h1 class="text-lg font-black text-slate-800 leading-tight px-4">{{ $story->title }}</h1>
-        <p class="text-xs text-slate-400 font-bold mt-1">Karya: <span
-                class="text-slate-500">{{ $story->author->name ?? 'Penulis Kisa' }}</span></p>
+        <p class="text-xs text-slate-400 font-bold mt-1">Karya: <span class="text-slate-500">
+                <a
+                    href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ $story->penName->name ?? 'Penulis Kisa' }}</a>
+            </span>
+        </p>
 
-        <livewire:follow-button :author-id="$story->author->id" variant="compact" />
+        @if ($story->penName)
+            <livewire:follow-button :pen-name="$story->penName" variant="compact" />
+        @endif
 
         <div class="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

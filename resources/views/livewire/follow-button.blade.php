@@ -36,7 +36,7 @@
                 class="inline-flex items-center justify-center w-8 h-8 rounded-full transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
                 {{ $isFollowing
                     ? 'bg-slate-800 text-white hover:bg-slate-900'
-                    : 'border border-indigo-600 text-indigo-600 hover:bg-indigo-50' }}">
+                    : 'border border-brand-600 text-brand-600 hover:bg-brand-50' }}">
 
                 <span wire:loading.remove wire:target="toggleFollow">
                     @if ($isFollowing)
@@ -70,7 +70,7 @@
                 class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed
                 {{ $isFollowing
                     ? 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 active:bg-slate-100'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800' }}">
+                    : 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800' }}">
 
                 <span wire:loading.remove wire:target="toggleFollow" class="flex items-center gap-2">
                     @if ($isFollowing)

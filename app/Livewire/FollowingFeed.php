@@ -17,15 +17,20 @@ class FollowingFeed extends Component
     {
         $user = Auth::user();
 
-        $followingIds = $user ? $user->followings()->pluck('following_id')->toArray() : [];
+        $followedPenNameIds = $user ? $user->followedPenNames()->pluck('pen_names.id')->toArray() : [];
 
-        $latestChapters = Chapter::with(['story.user'])->whereHas('story', function ($query) use ($followingIds) {
-            $query->whereIn('user_id', $followingIds)->where('status', 'published');
-        })->where('status', 'published')->orderBy('created_at', 'desc')->paginate($this->perPage);
+        $latestChapters = Chapter::with(['story.penName', 'story.genre'])
+            ->whereHas('story', function ($query) use ($followedPenNameIds) {
+                $query->whereIn('pen_name_id', $followedPenNameIds)
+                    ->where('status', 'published');
+            })
+            ->where('status', 'published')
+            ->latest()
+            ->paginate($this->perPage);
 
         return view('livewire.following-feed', [
             'chapters' => $latestChapters,
-            'followingIds' => $followingIds
+            'followedPenNameIds' => $followedPenNameIds,
         ]);
     }
 }
