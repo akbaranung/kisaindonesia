@@ -104,7 +104,7 @@ class ApplyPremium extends Component
             }
         }
 
-        $this->isEligible = ($this->totalChapters >= 20) && ($validPremiumChapters > 0) && ($invalidChaptersCount === 0);
+        $this->isEligible = ($this->totalChapters >= 6) && ($validPremiumChapters > 0) && ($invalidChaptersCount === 0);
     }
 
     public function submitApplication()

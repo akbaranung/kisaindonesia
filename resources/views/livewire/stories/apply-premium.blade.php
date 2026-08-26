@@ -91,7 +91,7 @@
                         <div class="flex items-center justify-between text-[11px]">
                             <span class="text-slate-500">Total Bab Cerita:</span>
                             <span class="font-bold {{ $totalChapters >= 20 ? 'text-emerald-600' : 'text-rose-500' }}">
-                                {{ $totalChapters }} / 20 Bab (Min)
+                                {{ $totalChapters }} / 6 Bab (Min)
                             </span>
                         </div>
                     </div>
