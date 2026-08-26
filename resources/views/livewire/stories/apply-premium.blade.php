@@ -235,7 +235,7 @@
             <div class="p-4 bg-slate-100 rounded-2xl border border-slate-200 text-center space-y-1.5">
                 <p class="text-xs font-bold text-slate-700">Belum Memenuhi Syarat Minimal</p>
                 <p class="text-[10px] text-slate-500 leading-relaxed">
-                    Syarat minimal pengajuan cerita premium adalah <strong>20 Bab</strong> dan total untuk tipe
+                    Syarat minimal pengajuan cerita premium adalah <strong>6 Bab</strong> dan total untuk tipe
                     <strong>{{ strtoupper($storyType) }}</strong> adalah
                     <strong>{{ $minWords . ' - ' . $maxWords }}</strong>
                     Kata. Silakan tambah bab atau isi cerita terlebih dahulu.

@@ -84,7 +84,7 @@ class ApplyPremium extends Component
 
             // Bab 1-5 sampel gratis, perhitungan estimasi koin dimulai dari bab 6
             if ($index >= 5) {
-                $type = strtolower($chapter->type ?? $this->selectedStory->type ?? 'regular');
+                $type = strtolower($this->selectedStory->type ?? 'regular');
                 $isValidWordCount = false;
 
                 if ($type === 'puisi') {
