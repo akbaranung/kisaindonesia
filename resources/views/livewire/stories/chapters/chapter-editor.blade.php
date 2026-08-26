@@ -8,12 +8,26 @@
                 </svg>
             </a>
             <div class="max-w-[150px] sm:max-w-xs">
-                <h1 class="text-xs font-bold text-slate-100 truncate">Bab {{ $chapter->order_number }}:
-                    {{ $title ?: 'Tanpa Judul' }}</h1>
+                <h1 class="text-xs font-bold text-slate-100 truncate">Bab {{ $chapter->order_number }}</h1>
                 <p class="text-[10px] text-brand-400 font-semibold truncate">
                     ⚡ {{ number_format($this->calculateWordCount()) }} Kata • {{ ucfirst($type) }}
                 </p>
             </div>
+        </div>
+        <div class="flex gap-1">
+            <!-- Status Chapter -->
+            <select wire:model="status"
+                class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-semibold focus:outline-none focus:border-brand-500">
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+            </select>
+
+            <!-- Tombol Simpan Bab -->
+            <button wire:click="saveChapter" wire:loading.attr="disabled"
+                class="px-4 py-1.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5">
+                <span wire:loading.remove wire:target="saveChapter"><i class="fas fa-save"></i></span>
+                <span wire:loading wire:target="saveChapter">Menyimpan...</span>
+            </button>
         </div>
     </header>
 
@@ -38,21 +52,6 @@
             @endif
         </div>
 
-        <div class="flex gap-1">
-            <!-- Status Chapter -->
-            <select wire:model="status"
-                class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-semibold focus:outline-none focus:border-brand-500">
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-            </select>
-
-            <!-- Tombol Simpan Bab -->
-            <button wire:click="saveChapter" wire:loading.attr="disabled"
-                class="px-4 py-1.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5">
-                <span wire:loading.remove wire:target="saveChapter"><i class="fas fa-save"></i> Simpan Bab</span>
-                <span wire:loading wire:target="saveChapter">Menyimpan...</span>
-            </button>
-        </div>
 
         <!-- Input Judul Bab -->
         <div class="max-w-xl mx-auto">
