@@ -51,9 +51,9 @@
             <h3 class="text-base font-bold text-slate-800 mb-1">Belum Ada Nama Pena</h3>
             <p class="text-xs text-slate-500 max-w-sm mx-auto mb-6">Kamu belum memiliki nama pena. Buat nama pena
                 pertamamu untuk mulai mempublikasikan cerita.</p>
-            <button wire:click="openModal"
+            <button wire:click="openCreateModal"
                 class="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold hover:bg-brand-700 transition">
-                + Buat Nama Pena Pertamaku
+                + Buat Nama Pena
             </button>
         </div>
     @else
