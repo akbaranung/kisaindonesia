@@ -95,11 +95,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/topup', Topup::class)->name('topup');
 
-    Route::get('/my-stories/{story:slug}/manage', StoryChapters::class)->name('stories.manage');
-    Route::get('/stories/{story}/chapters', ManageStoryChapters::class)->name('stories.chapters');
-    Route::get('/stories/{story}/characters', ManageStoryChapters::class)->name('stories.characters');
+    Route::middleware(['owns.story'])->group(function () {
+        Route::get('/my-stories/{story:slug}/manage', StoryChapters::class)->name('stories.manage');
+        Route::get('/stories/{story}/chapters', ManageStoryChapters::class)->name('stories.chapters');
+        Route::get('/stories/{story}/characters', ManageStoryChapters::class)->name('stories.characters');
+        Route::get('/stories/{story}/chapters/{chapter}/editor', ChapterEditor::class)->name('chapters.editor');
+    });
+
     Route::get('/stories/{story:slug}/chapters/{chapter:slug}', StoryReader::class)->name('stories.chapter.read');
-    Route::get('/stories/{story}/chapters/{chapter}/editor', ChapterEditor::class)->name('chapters.editor');
     Route::get('/my-pen-names', ManagePenNames::class)->name('pen-names.index');
     Route::get('/author/{slug}', PenNameProfile::class)->name('pen-name.show');
 

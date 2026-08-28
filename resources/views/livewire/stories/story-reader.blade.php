@@ -358,7 +358,9 @@
 
         @endif
 
+        <livewire:story.chapter.chapter-comments :chapter="$chapter" />
     </main>
+
 
     {{-- Spacer Aman Bawah --}}
     <div class="h-10 w-full" aria-hidden="true"></div>

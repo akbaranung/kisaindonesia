@@ -41,7 +41,7 @@ class Chapter extends Model
     public function calculateKisaBean(): int
     {
         $words = $this->word_count;
-        $type = strtolower($this->type ?? 'regular');
+        $type = strtolower($this->story->type ?? 'regular');
 
         if ($type === 'puisi') {
             if ($words >= 700 && $words <= 1500) {
@@ -79,28 +79,6 @@ class Chapter extends Model
 
         return [];
     }
-
-    // public function calculateWordCount(): int
-    // {
-    //     $data = $this->parseJsonData();
-    //     $type = strtolower($data['type'] ?? $this->type ?? 'regular');
-
-    //     if ($type === 'chat') {
-    //         return 0;
-    //     }
-
-    //     $htmlContent = $data['content'] ?? '';
-    //     $pureText = strip_tags($htmlContent);
-
-    //     $pureText = html_entity_decode($pureText);
-    //     $pureText = trim(preg_match('/\s+/', ' ', $pureText));
-
-    //     if (empty($pureText)) {
-    //         return 0;
-    //     }
-
-    //     return count(explode(' ', $pureText));
-    // }
 
     public function calculateWordCount(): int
     {
@@ -156,5 +134,10 @@ class Chapter extends Model
         }
 
         return str_word_count($pureText);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->whereNull('parent_id')->latest();
     }
 }
