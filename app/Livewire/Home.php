@@ -70,7 +70,7 @@ class Home extends Component
     {
         //Untuk menampilkan cerita yang status nya sudah published
         $query = Story::query()
-            ->with(['author', 'genre'])
+            ->with(['penName', 'genre'])
             ->where('status', 'published');
 
         if (auth()->check()) {
@@ -80,7 +80,7 @@ class Home extends Component
         // function untuk search judul/penulis
         if (!empty($this->search)) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')->orWhereHas('author', function ($authorQuery) {
+                $q->where('title', 'like', '%' . $this->search . '%')->orWhereHas('penName', function ($authorQuery) {
                     $authorQuery->where('name', 'like', '%' . $this->search . '%');
                 });
             });
@@ -93,7 +93,7 @@ class Home extends Component
 
         // filter monetisasi
         if (!empty($this->selectedMonetization) && $this->selectedMonetization !== 'all') {
-            $query->where('monetization_type', $this->selectedCategory);
+            $query->where('monetization_type', $this->selectedMonetization);
         }
 
         // sorting / urutan

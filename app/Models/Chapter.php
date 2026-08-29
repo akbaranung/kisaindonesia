@@ -45,11 +45,11 @@ class Chapter extends Model
 
         if ($type === 'puisi') {
             if ($words >= 700 && $words <= 1500) {
-                return (int) ceil(($words / 100) * 1.2);
+                return (int) ceil(($words / 100));
             }
         } else {
             if ($words >= 1000 && $words <= 1500) {
-                return (int) ceil(($words / 100) * 1.5);
+                return (int) ceil(($words / 100));
             }
         }
 

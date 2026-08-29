@@ -440,25 +440,17 @@ class ChapterEditor extends Component
             return 0;
         }
 
-        if ($this->type === 'chat') {
-            $bubbleCount = count($this->bubbles);
-
-            if ($bubbleCount <= 50) {
-                return 5;
-            } elseif ($bubbleCount <= 80) {
-                return 8;
-            } else {
-                return 10;
-            }
-        }
+        $type = strtolower($this->story->type ?? 'regular');
 
         $wordCount = $this->calculateWordCount();
-        if ($wordCount <= 1000) {
-            return 5;
-        } elseif ($wordCount <= 1300) {
-            return 8;
+        if ($type === 'puisi') {
+            if ($wordCount >= 700 && $wordCount <= 1500) {
+                return (int) ceil(($wordCount / 100));
+            }
         } else {
-            return 10;
+            if ($wordCount >= 1000 && $wordCount <= 1500) {
+                return (int) ceil(($wordCount / 100));
+            }
         }
     }
 

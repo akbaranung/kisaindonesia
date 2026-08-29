@@ -84,6 +84,9 @@ class Story extends Model
 
     public function penName()
     {
-        return $this->belongsTo(PenName::class);
+        return $this->belongsTo(PenName::class, 'pen_name_id')->withDefault([
+            'name' => 'Anonim',
+            'slug' => 'anonim',
+        ]);
     }
 }
