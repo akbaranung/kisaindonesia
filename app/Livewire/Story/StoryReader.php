@@ -64,7 +64,6 @@ class StoryReader extends Component
 
         if (!$this->isLocked) {
             $contentData = $chapter->parseJsonData();
-            $regularContent = $contentData['content'] ?? '';
             $bubbles        = $contentData['bubbles'] ?? [];
             if ($chapter->type === 'chat') {
                 $this->chatRows = $bubbles;
@@ -80,6 +79,10 @@ class StoryReader extends Component
                     }
                 }
             } else {
+                $cleaned = preg_replace('/color:\s*[^;"]+;?/i', '', $contentData['content']);
+                $dataContent = preg_replace('/style="\s*;?\s*"/', '', $cleaned);
+
+                $regularContent = $contentData['content'] ? $dataContent : '';
                 $this->regularContent = $regularContent;
             }
 
