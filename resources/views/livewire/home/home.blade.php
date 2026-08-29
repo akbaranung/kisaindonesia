@@ -37,7 +37,7 @@
     </section>
 
     <section class="py-4 w-full">
-        <div class="relative py-3">
+        {{-- <div class="relative py-3">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -54,7 +54,19 @@
                     ✕
                 </button>
             @endif
-        </div>
+        </div> --}}
+
+        <form wire:submit="searchStories" class="flex items-center gap-2">
+            <div class="relative w-full">
+                <input type="text" wire:model="search" placeholder="Cari judul atau penulis..."
+                    class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            </div>
+
+            <button type="submit"
+                class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl transition">
+                Cari
+            </button>
+        </form>
 
         @if ($featuredStory)
             @php
@@ -68,7 +80,7 @@
                     class="absolute -top-12 -right-12 w-40 h-40 bg-amber-500/20 rounded-full blur-2xl pointer-events-none">
                 </div>
                 <div
-                    class="absolute -bottom-12 -left-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none">
+                    class="absolute -bottom-12 -left-12 w-40 h-40 bg-brand-500/20 rounded-full blur-2xl pointer-events-none">
                 </div>
 
                 @if ($featuredStory)
@@ -107,7 +119,7 @@
 
                                     @if ($featuredStory->type === 'chat')
                                         <span
-                                            class="text-[8px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-lg">
+                                            class="text-[8px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-2 py-0.5 rounded-lg">
                                             💬 Chat Fic
                                         </span>
                                     @endif

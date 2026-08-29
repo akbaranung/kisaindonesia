@@ -149,6 +149,7 @@
                             </a>
                         @endif
                     </div>
+                    <livewire:story.chapter.chapter-comments :chapter="$chapter" />
                 </div>
             @else
                 {{-- 💬 KONTEN CHAT FIC (TAP-TO-REVEAL WITH ALPINE.JS) --}}
@@ -353,6 +354,7 @@
                             </a>
                         @endif
                     </div>
+                    <livewire:story.chapter.chapter-comments :chapter="$chapter" />
                 </div>
             @endif
 
@@ -360,7 +362,6 @@
 
     </main>
 
-    <livewire:story.chapter.chapter-comments :chapter="$chapter" />
 
     {{-- Spacer Aman Bawah --}}
     <div class="h-10 w-full" aria-hidden="true"></div>

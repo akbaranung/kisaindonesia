@@ -20,9 +20,9 @@ class Home extends Component
     public string $selectedMonetization = '';
     public string $sortBy = 'latest';
 
-    // Reset halaman pagination saat input pencarian/filter berubah
-    public function updateSearch()
+    public function searchStories()
     {
+        // Cukup reset paginasi ke halaman 1 agar hasil pencarian mulai dari awal
         $this->resetPage();
     }
 
