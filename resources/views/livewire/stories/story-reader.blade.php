@@ -149,7 +149,7 @@
                             </a>
                         @endif
                     </div>
-                    <livewire:story.chapter.chapter-comments :chapter="$chapter" />
+                    {{-- <livewire:story.chapter.chapter-comments :chapter="$chapter" /> --}}
                 </div>
             @else
                 {{-- 💬 KONTEN CHAT FIC (TAP-TO-REVEAL WITH ALPINE.JS) --}}
@@ -354,8 +354,11 @@
                             </a>
                         @endif
                     </div>
-                    <livewire:story.chapter.chapter-comments :chapter="$chapter" />
+                    <div x-show="visibleCount >= totalRows">
+                        <livewire:story.chapter.chapter-comments :chapter="$chapter" />
+                    </div>
                 </div>
+
             @endif
 
         @endif
