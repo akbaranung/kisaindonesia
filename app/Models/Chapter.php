@@ -44,12 +44,12 @@ class Chapter extends Model
         $type = strtolower($this->story->type ?? 'regular');
 
         if ($type === 'puisi') {
-            if ($words >= 700 && $words <= 1500) {
-                return (int) ceil(($words / 100));
+            if ($words >= 700) {
+                return $words <= 1200 ? 4 : 6;
             }
         } else {
-            if ($words >= 1000 && $words <= 1500) {
-                return (int) ceil(($words / 100));
+            if ($words >= 1000) {
+                return $words <= 1200 ? 4 : 6;
             }
         }
 

@@ -224,15 +224,18 @@
                     <div class="p-2 flex gap-4 transition">
                         {{-- Cover Image Dinamis --}}
                         <div class="rounded-lg w-20 h-35 bg-slate-100 overflow-hidden shrink-0 relative shadow-2xs">
-                            @if ($story->cover_path)
-                                <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                            @else
-                                <div
-                                    class="w-full h-full flex items-center justify-center text-2xl bg-amber-50 text-amber-500 font-black">
-                                    📚
-                                </div>
-                            @endif
+                            <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
+                                class="hover:text-brand-600 transition">
+                                @if ($story->cover_path)
+                                    <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
+                                        class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                @else
+                                    <div
+                                        class="w-full h-full flex items-center justify-center text-2xl bg-amber-50 text-amber-500 font-black">
+                                        📚
+                                    </div>
+                                @endif
+                            </a>
 
                             {{-- Badge Monetisasi --}}
                             @if ($story->monetization_type === 'premium')

@@ -1,4 +1,4 @@
-<div class="max-w-5xl mx-auto px-4 py-8">
+<div class="w-full max-w-5xl mx-auto px-2 py-8">
     {{-- 1. HEADER PROFIL NAMA PENA --}}
     <div class="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-sm mb-8">
         <div class="flex flex-col md:flex-row items-center md:items-start gap-6">

@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-6">
+<div class="w-full px-3 max-w-4xl mx-auto py-8 space-y-6">
     <!-- Header Halaman -->
     <div class="flex items-center justify-between border-b border-slate-200 pb-5">
         <div>
@@ -65,7 +65,7 @@
 
                     {{-- Content: Detail Bab & Cerita --}}
                     <div class="flex gap-4">
-                        <a href="{{ route('stories.chapters', $chapter->story->slug ?? $chapter->story->id) }}"
+                        <a href="{{ route('stories.chapter.read', [$chapter->story->slug, $chapter->slug]) }}"
                             class="w-16 h-24 md:w-20 md:h-28 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
                             @if ($chapter->story->cover_path)
                                 <img src="{{ asset('storage/' . $chapter->story->cover_path) }}"
@@ -106,7 +106,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="pt-4">
+        <div class="py-8">
             {{ $chapters->links() }}
         </div>
     @endif

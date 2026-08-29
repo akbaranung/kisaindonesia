@@ -27,8 +27,8 @@
 
         {{-- Badge Jenis Cerita --}}
         <span
-            class="text-[9px] font-extrabold px-2 py-0.5 rounded-md text-white tracking-wider {{ $story->type === 'chat' ? 'bg-emerald-600' : 'bg-slate-800' }} uppercase mb-2">
-            {{ $story->type === 'chat' ? '💬 Chat Fic' : '📝 Novel Regular' }}
+            class="text-[9px] font-extrabold px-2 py-0.5 rounded-md text-white tracking-wider bg-brand-600 uppercase mb-2">
+            {{ $story->genre->name }}
         </span>
 
         {{-- Judul & Penulis --}}
