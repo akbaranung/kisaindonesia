@@ -98,7 +98,7 @@ class Home extends Component
 
         // sorting / urutan
         match ($this->sortBy) {
-            'popular' => $query->orderBy('views', 'desc'),
+            'popular' => $query->orderBy('views_count', 'desc'),
             'title' => $query->orderBy('title', 'asc'),
             default => $query->orderBy('created_at', 'desc')
         };
