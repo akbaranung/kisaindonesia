@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\PremiumStoryRequest;
+use App\Notifications\MonetizeStatusUpdatedNotification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -87,6 +88,12 @@ class ManagePremiumRequests extends Component
             }
         }
 
+        $user = $requestItem->user;
+
+        if ($user) {
+            $user->notify(new MonetizeStatusUpdatedNotification('approved'));
+        }
+
         session()->flash('message', 'Pengajuan cerita premium berhasil disetujui!');
         $this->closeModals();
     }
@@ -101,7 +108,7 @@ class ManagePremiumRequests extends Component
     {
         $this->validate(
             [
-                'rejectionReason' => 'required|min:5|max|255',
+                'rejectionReason' => 'required|min:5|max:255',
             ],
             [
                 'rejectionReason.required' => 'Alasan penolakan wajib diisi!',
@@ -115,6 +122,16 @@ class ManagePremiumRequests extends Component
                 'rejection_reason' => $this->rejectionReason,
                 'processed_by' => Auth::id()
             ]);
+
+            $user = $this->selectedRequest->user;
+
+            if ($user) {
+                // Kirim notifikasi status 'rejected' beserta alasannya
+                $user->notify(new MonetizeStatusUpdatedNotification(
+                    'rejected',
+                    $this->rejectionReason
+                ));
+            }
 
             session()->flash('message', 'Pengajuan berhasil ditolak!');
         }

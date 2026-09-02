@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="px-2.5 py-1 bg-amber-50 border border-amber-200/80 rounded-full flex items-center gap-1.5">
-            <span class="text-xs">🪙</span>
+            <span class="text-xs">🫘</span>
             <span
                 class="text-[11px] font-black text-amber-700">{{ number_format(auth()->user()->kisa_bean_balance ?? 0) }}</span>
         </div>
@@ -58,7 +58,7 @@
                     </div>
                     <div class="flex items-center gap-1.5 mb-1">
 
-                        <span class="text-base">🪙</span>
+                        <span class="text-base">🫘</span>
                         <span class="text-base font-black text-slate-800">{{ number_format($pkg['beans']) }}</span>
                         @if ($pkg->bonus_beans > 0)
                             <span

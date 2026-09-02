@@ -17,7 +17,7 @@
         </div>
 
         <div class="px-2.5 py-1 bg-amber-50 border border-amber-200/80 rounded-full flex items-center gap-1.5">
-            <span class="text-xs">🪙</span>
+            <span class="text-xs">🫘</span>
             <span
                 class="text-[11px] font-black text-amber-700">{{ number_format(auth()->user()->kisa_bean_balance ?? 0) }}</span>
         </div>
@@ -56,11 +56,11 @@
                         'spend' => '📖',
                         'earn' => '💰',
                         'payout' => '🏦',
-                        default => '🪙',
+                        default => '🫘',
                     };
 
                     $statusClass = match ($tx->status) {
-                        'success' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                        'success' => 'bg-brand-50 text-brand-700 border-brand-200',
                         'pending' => 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse',
                         'failed', 'expired' => 'bg-rose-50 text-rose-700 border-rose-200',
                         default => 'bg-slate-50 text-slate-600 border-slate-200',
@@ -96,8 +96,8 @@
 
                         {{-- Perubahan Saldo Bean --}}
                         <div class="text-right shrink-0">
-                            <span class="text-xs font-black {{ $isPositive ? 'text-emerald-600' : 'text-slate-800' }}">
-                                {{ $isPositive ? '+' : '-' }}{{ number_format($tx->amount) }} 🪙
+                            <span class="text-xs font-black {{ $isPositive ? 'text-brand-600' : 'text-slate-800' }}">
+                                {{ $isPositive ? '+' : '-' }}{{ number_format($tx->amount) }} 🫘
                             </span>
                             @if ($tx->gross_amount > 0)
                                 <p class="text-[10px] font-medium text-slate-400">

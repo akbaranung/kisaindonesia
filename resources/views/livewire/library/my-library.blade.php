@@ -57,15 +57,17 @@
 
                     {{-- Cover Cerita --}}
                     <div class="w-20 h-28 bg-slate-100 rounded-2xl overflow-hidden shrink-0 relative shadow-2xs">
-                        @if ($story->cover_path)
-                            <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
-                                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                        @else
-                            <div
-                                class="w-full h-full flex items-center justify-center text-2xl bg-amber-50 text-amber-500 font-black">
-                                📚
-                            </div>
-                        @endif
+                        <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
+                            @if ($story->cover_path)
+                                <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            @else
+                                <div
+                                    class="w-full h-full flex items-center justify-center text-2xl bg-amber-50 text-amber-500 font-black">
+                                    📚
+                                </div>
+                            @endif
+                        </a>
 
                         @if ($story->monetization_type === 'premium')
                             <span
@@ -94,7 +96,8 @@
 
                             <h3
                                 class="text-sm font-black text-slate-900 truncate group-hover:text-[#38CAC8] transition">
-                                {{ $story->title }}
+                                <a href="{{ route('stories.read', $story->slug) }}"
+                                    wire:navigate>{{ $story->title }}</a>
                             </h3>
 
                             <p class="text-xs text-slate-400 font-medium line-clamp-2 mt-1 leading-relaxed">
@@ -104,16 +107,10 @@
 
                         <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-50">
                             <span class="text-[11px] font-bold text-slate-500 truncate">
-                                Dibuat oleh: {{ $story->author->name ?? 'Penulis' }}
+                                {{-- Dibuat oleh: {{ $story->author->name ?? 'Penulis' }} --}}
+                                Dibuat Oleh: <a
+                                    href={{ route('pen-name.show', [$story->penName->slug]) }}>{{ $story->penName->name ?? 'Penulis Kisa' }}</a>
                             </span>
-
-                            @if ($firstChapter)
-                                <a href="{{ route('stories.chapter.read', [$story->slug, $firstChapter->slug]) }}"
-                                    wire:navigate
-                                    class="px-3.5 flex py-1.5 bg-[#38CAC8] hover:bg-[#60D5D2] text-white font-bold text-xs rounded-xl shadow-2xs transition transform active:scale-95">
-                                    Baca
-                                </a>
-                            @endif
                         </div>
                     </div>
 

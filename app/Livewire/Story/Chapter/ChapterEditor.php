@@ -6,6 +6,7 @@ use App\Models\Chapter;
 use App\Models\Story;
 use App\Models\StoryCharacter;
 use App\Notifications\NewChapterPublishedNotification;
+use App\Notifications\NewContentPublishedNotification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -376,10 +377,21 @@ class ChapterEditor extends Component
             $this->saveChapterFile();
 
             if ($this->status === 'published') {
-                $followers = $this->chapter->story->user->followers;
 
-                if ($followers->isNotEmpty()) {
-                    Notification::send($followers, new NewChapterPublishedNotification($this->chapter));
+                $penName = $this->story->penName ?? null;
+
+                if ($penName) {
+                    // Ambil semua User yang mengikuti PenName ini (mengembalikan Collection, tidak akan null)
+                    $followers = $penName->followers()->get();
+
+                    if ($followers->isNotEmpty()) {
+                        $authorUser = $this->chapter->story->user;
+
+                        Notification::send(
+                            $followers,
+                            new NewContentPublishedNotification($authorUser, $this->story, $this->chapter)
+                        );
+                    }
                 }
             }
 

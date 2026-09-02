@@ -21,20 +21,34 @@ class NotificationBell extends Component
         }
     }
 
-    public function markAsRead($notificationId, $storySlug = null, $chapterSlug = null)
+    public function markAsRead($notificationId, $storySlug = null, $chapterSlug = null, $type = 'story')
     {
         if (Auth::check()) {
             $notification = Auth::user()->notifications()->find($notificationId);
             if ($notification) {
                 $notification->markAsRead();
+                $this->loadUnreadCount();
             }
-        }
 
-        if ($storySlug && $chapterSlug) {
-            return redirect()->route('stories.chapter.read', [$storySlug, $chapterSlug]);
-        }
+            $data = $notification->data;
+            $type = $data['type'] ?? 'story';
+            $storySlug = $data['story_slug'] ?? null;
+            $chapterSlug = $data['chapter_slug'] ?? null;
 
-        $this->loadUnreadCount();
+            // Navigasi URL berdasarkan tipe notifikasi
+            return match ($type) {
+                'follow' => null,
+                'monetize_request' => redirect()->to('/admin/premium-requests'),
+                'monetize_status' => redirect()->route('my-stories'),
+                'new_chapter' => redirect()->route('stories.chapter.read', [$storySlug, $chapterSlug]),
+                'new_story', 'comment' => redirect()->route('stories.read', [$storySlug]),
+                default => match (true) {
+                    !empty($storySlug) && !empty($chapterSlug) => redirect()->route('stories.chapter.read', [$storySlug, $chapterSlug]),
+                    !empty($storySlug) => redirect()->route('storie.read', [$storySlug]),
+                    default => null,
+                },
+            };
+        }
     }
 
     public function markAllAsRead()

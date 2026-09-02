@@ -4,7 +4,7 @@
     </h3>
 
     @if (session()->has('success'))
-        <div class="py-3 mb-3 text-xs font-bold text-emerald-700 bg-emerald-50 rounded-xl">
+        <div class="py-3 mb-3 text-xs font-bold text-brand-700 bg-brand-50 rounded-xl">
             🎉 {{ session('success') }}
         </div>
     @endif
@@ -17,7 +17,7 @@
 
     @if (!$hasSubmitted && !auth()->check())
         <div class="text-center py-2 text-xs text-slate-400 font-medium">
-            Silakan <a href="{{ route('login') }}" wire:navigate class="text-emerald-600 font-bold underline">login</a>
+            Silakan <a href="{{ route('login') }}" wire:navigate class="text-brand-600 font-bold underline">login</a>
             terlebih dahulu untuk memberikan ulasan.
         </div>
     @else
@@ -42,19 +42,19 @@
                         "{{ $review ?: 'Hanya memberikan rating bintang.' }}"
                     </p>
                     <button type="button" wire:click="$set('hasSubmitted', false)"
-                        class="text-[10px] text-emerald-600 font-bold mt-2 hover:underline">
+                        class="text-[10px] text-brand-600 font-bold mt-2 hover:underline">
                         ✍️ Ubah Ulasan
                     </button>
                 @else
                     <textarea wire:model="review" rows="3"
                         placeholder="Tulis pendapatmu tentang cerita ini, Bro... (maks 500 karakter)"
-                        class="w-full p-3 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 font-medium placeholder-slate-300 transition"></textarea>
+                        class="w-full p-3 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 font-medium placeholder-slate-300 transition"></textarea>
                     @error('review')
                         <span class="text-[10px] text-rose-500 font-bold">{{ $message }}</span>
                     @enderror
 
                     <button type="submit"
-                        class="w-full py-2.5 bg-slate-900 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-3xs transition">
+                        class="w-full py-2.5 bg-slate-900 hover:bg-brand-600 text-white font-bold text-xs rounded-xl shadow-3xs transition">
                         Kirim Ulasan 🚀
                     </button>
                 @endif

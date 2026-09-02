@@ -3,7 +3,7 @@
     <div
         class="p-4 border-b border-slate-50 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-xs z-50">
         <a href="{{ url('/') }}" wire:navigate
-            class="text-slate-600 font-bold text-xs flex items-center gap-1 hover:text-emerald-600 transition">
+            class="text-slate-600 font-bold text-xs flex items-center gap-1 hover:text-brand-600 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
             </svg>
@@ -59,7 +59,7 @@
 
     {{-- 📝 BLOK SINOPSIS --}}
     <div class="my-3 border-b border-slate-50">
-        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-0.5">Sinopsis Cerita</h2>
+        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-0.5">Blurb</h2>
         <p
             class="text-xs text-slate-600 leading-relaxed bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/60 text-justify">
             {{ $story->synopsis ?? 'Belum ada sinopsis resmi yang dibagikan oleh penulis untuk kisah ini, Bro.' }}
@@ -69,8 +69,8 @@
     @if ($lastReadChapter)
         <div class="pb-2 animate-fade-in">
             <a href="{{ route('stories.chapter.read', [$story->slug, $lastReadChapter->slug]) }}" wire:navigate
-                class="flex items-center justify-center gap-2 w-full p-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl shadow-md transition transform hover:scale-[1.01]">
-                ⚡ LANJUTKAN MEMBACA: {{ Str::limit($lastReadChapter->title, 20) }}
+                class="flex items-center justify-center gap-2 w-full p-3.5 bg-brand-600 hover:bg-brand-700 text-white font-black text-xs rounded-2xl shadow-md transition transform hover:scale-[1.01]">
+                LANJUTKAN MEMBACA: {{ Str::limit($lastReadChapter->title, 20) }}
             </a>
         </div>
     @endif
@@ -87,18 +87,18 @@
             @forelse($chapters as $index => $ch)
                 {{-- KUNCI UTAMA: Wajib pakai wire:navigate agar transisi pindah ke simulator baca berjalan instan --}}
                 <a href="{{ route('stories.chapter.read', [$story->slug, $ch->slug]) }}" wire:navigate
-                    class="group flex items-center justify-between p-3.5 bg-white border border-slate-100 rounded-2xl hover:border-emerald-500/40 hover:bg-emerald-50/10 transition shadow-3xs">
+                    class="group flex items-center justify-between p-3.5 bg-white border border-slate-100 rounded-2xl hover:border-brand-500/40 hover:bg-brand-50/10 transition shadow-3xs">
                     <div class="flex flex-col gap-0.5">
                         <span
-                            class="text-[9px] text-slate-400 font-extrabold uppercase group-hover:text-emerald-600 transition">BAB
+                            class="text-[9px] text-slate-400 font-extrabold uppercase group-hover:text-brand-600 transition">BAB
                             {{ $index + 1 }}</span>
                         <span
                             class="text-xs font-bold text-slate-800 group-hover:text-slate-900 transition">{{ $ch->title }}</span>
                     </div>
                     <div class="flex items-center gap-1">
                         <span
-                            class="text-[10px] text-emerald-600 font-black tracking-wide bg-emerald-50 px-2 py-1 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition">
-                            ⚡{{ $ch->bean_price }}
+                            class="text-[10px] text-brand-600 font-black tracking-wide bg-brand-50 px-2 py-1 rounded-lg group-hover:bg-brand-600 group-hover:text-brand-600 transition">
+                            🫘 {{ $ch->bean_price }}
                         </span>
                     </div>
                 </a>

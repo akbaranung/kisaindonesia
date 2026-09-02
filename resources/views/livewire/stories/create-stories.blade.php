@@ -124,7 +124,7 @@
          </div>
          <div>
              <label
-                 class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Sinopsis</label>
+                 class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Blurb</label>
              <textarea wire:model="synopsis" rows="5" placeholder="Tulis blurb atau sinopsis singkat cerita..."
                  class="w-full px-4 py-3.5 bg-slate-50 border @error('synopsis') border-rose-500 @else border-slate-100 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-500 focus:bg-white transition-all shadow-2xs resize-none"></textarea>
              @error('synopsis')

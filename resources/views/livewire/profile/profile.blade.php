@@ -86,7 +86,7 @@
                 class="relative overflow-hidden bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 rounded-2xl p-4 text-white shadow-md shadow-amber-500/20 mb-3">
                 {{-- Hiasan Background Pattern --}}
                 <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl font-black select-none pointer-events-none">
-                    🪙
+                    🫘
                 </div>
 
                 <div class="relative z-10 space-y-3">
@@ -94,7 +94,7 @@
                     <div class="flex items-center justify-between">
                         <div
                             class="flex items-center gap-1.5 bg-amber-900/30 backdrop-blur-md border border-amber-300/30 px-2.5 py-1 rounded-full">
-                            <span class="text-xs">🪙</span>
+                            <span class="text-xs">🫘</span>
                             <span class="text-[10px] font-bold text-amber-100 tracking-wide uppercase">Saldo Kisa
                                 Bean</span>
                         </div>
@@ -179,7 +179,7 @@
                                     'spend' => '📖',
                                     'earn' => '💰',
                                     'payout' => '🏦',
-                                    default => '🪙',
+                                    default => '🫘',
                                 };
 
                                 $statusClass = match ($tx->status) {

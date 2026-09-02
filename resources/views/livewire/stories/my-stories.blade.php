@@ -49,23 +49,22 @@
                     <div class="flex gap-4 items-center">
                         <div
                             class="w-16 h-22 bg-slate-50 rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center">
-                            @if ($story->cover_path)
-                                <img src="{{ asset('storage/' . $story->cover_path) }}"
-                                    class="w-full h-full object-cover">
-                            @else
-                                <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor"
-                                    stroke-width="1.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                                </svg>
-                            @endif
+                            <a href="{{ route('stories.chapters', $story->id) }}" wire:navigate>
+                                @if ($story->cover_path)
+                                    <img src="{{ asset('storage/' . $story->cover_path) }}"
+                                        class="w-full h-full object-cover">
+                                @else
+                                    <svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor"
+                                        stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                                    </svg>
+                                @endif
+                            </a>
                         </div>
 
                         <div class="flex-2 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">
-                                    <livewire:update-story-status :story="$story" :key="'story-status-' . $story->id" />
-                                </span>
                                 @if ($story->monetization_type === 'premium')
                                     <span
                                         class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-800 text-[10px] font-extrabold uppercase">
@@ -79,7 +78,9 @@
                                 @endif
                                 <p class="text-[10px] font-bold text-slate-400">{{ $story->genre->name }}</p>
                             </div>
-                            <h3 class="text-sm font-bold text-slate-800 truncate">{{ $story->title }}</h3>
+                            <h3 class="text-sm font-bold text-slate-800 truncate"><a
+                                    href="{{ route('stories.chapters', $story->id) }}"
+                                    wire:navigate>{{ $story->title }}</a></h3>
 
                             <div class="flex items-center gap-3 mt-2 text-[11px] font-semibold text-slate-400">
                                 <span class="flex items-center gap-0.5">
@@ -101,8 +102,7 @@
                     </div>
 
                     <div class="block mt-5">
-                        <div class="flex items-center gap-2 self-end sm:self-center">
-
+                        <div class="flex items-center gap-1 self-end sm:self-center">
                             {{-- Status 1: Sudah Premium --}}
                             @if ($story->monetization_type === 'premium')
                                 <span
@@ -117,7 +117,7 @@
                                 {{-- Status 2: Sedang Dalam Peninjauan Admin --}}
                             @elseif($isPending)
                                 <span
-                                    class="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold flex items-center gap-1">
+                                    class="px-2 py-0.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -130,24 +130,27 @@
                                 {{-- Status 3: Masih Gratis -> Tampilkan Tombol Ajukan Premium --}}
                             @else
                                 <a href="{{ route('monetization.apply', ['story_id' => $story->id]) }}"
-                                    class="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-600 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5">
+                                    class="px-2 py-0.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all shadow-xs flex items-center">
                                     <span>Ajukan Premium</span>
                                 </a>
                             @endif
-                            <a href="{{ route('stories.chapters', $story->id) }}" wire:navigate
-                                class="px-3.5 py-1.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-xs font-bold transition-all text-white">
+                            {{-- <a href="{{ route('stories.chapters', $story->id) }}" wire:navigate
+                                class="px-2 py-0.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-xs font-bold transition-all text-white">
                                 Open
-                            </a>
+                            </a> --}}
+                            <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">
+                                <livewire:update-story-status :story="$story" :key="'story-status-' . $story->id" />
+                            </span>
 
                             <button wire:click="editStory({{ $story->id }})"
-                                class="p-2.5 bg-slate-50 hover:bg-brand-50 hover:text-brand-600 rounded-xl text-xs text-slate-400 transition flex items-center justify-center">
+                                class="px-2 py-0.5 bg-brand-600 hover:bg-brand-500 rounded-xl text-xs text-white transition flex items-center justify-center">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="m16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
-                                Ubah
                             </button>
+
                         </div>
                     </div>
                 </div>

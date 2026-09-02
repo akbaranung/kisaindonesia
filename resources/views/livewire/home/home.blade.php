@@ -37,25 +37,6 @@
     </section>
 
     <section class="py-4 w-full">
-        {{-- <div class="relative py-3">
-            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-            <input type="text" wire:model.live.debounce.300ms="search"
-                placeholder="Cari judul cerita atau nama penulis..."
-                class="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition shadow-2xs">
-
-            @if (!empty($search))
-                <button wire:click="$set('search', '')"
-                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
-                    ✕
-                </button>
-            @endif
-        </div> --}}
-
         <form wire:submit="searchStories" class="flex items-center gap-2">
             <div class="relative w-full">
                 <input type="text" wire:model="search" placeholder="Cari judul atau penulis..."
@@ -68,108 +49,10 @@
             </button>
         </form>
 
-        @if ($featuredStory)
-            @php
-                $featuredFirstChapter = $featuredStory->chapters()->orderBy('order_number', 'asc')->first();
-            @endphp
+    </section>
 
-            <div
-                class="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-5 md:p-6 shadow-xl border border-slate-800 group">
-                {{-- Background Ornament Blur Accent --}}
-                <div
-                    class="absolute -top-12 -right-12 w-40 h-40 bg-amber-500/20 rounded-full blur-2xl pointer-events-none">
-                </div>
-                <div
-                    class="absolute -bottom-12 -left-12 w-40 h-40 bg-brand-500/20 rounded-full blur-2xl pointer-events-none">
-                </div>
-
-                @if ($featuredStory)
-                    <div class="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-5 items-start sm:items-center">
-
-                        {{-- Cover Cerita Hero --}}
-                        <div
-                            class="w-24 h-36 sm:w-28 sm:h-40 bg-slate-800 rounded-2xl overflow-hidden shrink-0 relative shadow-md self-center sm:self-auto">
-                            @if ($featuredStory->cover_path)
-                                <img src="{{ asset('storage/' . $featuredStory->cover_path) }}"
-                                    alt="{{ $featuredStory->title }}"
-                                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                            @else
-                                <div
-                                    class="w-full h-full flex items-center justify-center text-3xl bg-amber-500/10 text-amber-400 font-black">
-                                    🔥
-                                </div>
-                            @endif
-
-                            {{-- Tag Sorotan --}}
-                            <span
-                                class="absolute top-2 left-2 bg-rose-500 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider shadow-xs">
-                                Rekomendasi
-                            </span>
-                        </div>
-
-                        {{-- Detail Cerita Hero --}}
-                        <div class="flex-1 min-w-0 flex flex-col justify-between h-full">
-                            <div>
-                                {{-- Badges --}}
-                                <div class="flex flex-wrap items-center gap-2 mb-2">
-                                    <span
-                                        class="text-[8px] font-black tracking-wider uppercase text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-lg border border-amber-400/20">
-                                        {{ $featuredStory->category->name ?? 'Unggulan' }}
-                                    </span>
-
-                                    @if ($featuredStory->type === 'chat')
-                                        <span
-                                            class="text-[8px] font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-2 py-0.5 rounded-lg">
-                                            💬 Chat Fic
-                                        </span>
-                                    @endif
-
-                                    @if ($featuredStory->monetization_type === 'premium')
-                                        <span
-                                            class="text-[8px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-lg">
-                                            🫘 Premium
-                                        </span>
-                                    @endif
-                                </div>
-
-                                {{-- Judul Cerita --}}
-                                <h2
-                                    class="text-[15px] text-base sm:text-lg font-black text-white leading-snug truncate group-hover:text-amber-400 transition">
-                                    {{ $featuredStory->title }}
-                                </h2>
-
-                                {{-- Sinopsis Singkat --}}
-                                <p class="text-xs text-slate-300 font-normal line-clamp-2 mt-1.5 leading-relaxed">
-                                    {{ $featuredStory->synopsis }}
-                                </p>
-                            </div>
-
-                            {{-- Footer Hero (Penulis & Tombol Baca) --}}
-                            <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800">
-                                <span class="text-xs text-slate-400 font-medium truncate">
-                                    Oleh <span
-                                        class="text-slate-200 font-bold">{{ $featuredStory->author->name ?? 'Penulis' }}</span>
-                                </span>
-
-                                @if ($featuredFirstChapter)
-                                    <a href="{{ route('stories.chapter.read', [$featuredStory->slug, $featuredFirstChapter->slug]) }}"
-                                        wire:navigate
-                                        class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg transition transform active:scale-95 flex items-center gap-1.5">
-                                        <span>Baca</span>
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                        </svg>
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-
-                    </div>
-                @endif
-            </div>
-        @endif
+    <section>
+        <livewire:home.hero-carousel />
     </section>
 
     {{-- ================= SEKSYEN 3: KATEGORI & URUTAN LIST REAL-DATA ================= --}}
@@ -321,8 +204,8 @@
 
                                         <div
                                             class="flex items-center gap-3 mt-2 bg-white/80 p-1 px-2.5 rounded-full border border-slate-100 shadow-3xs">
-                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none"
-                                                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor"
+                                                stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                     d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                             </svg>

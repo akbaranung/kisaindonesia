@@ -16,7 +16,7 @@
         </button>
     @else
         <button wire:click="setStatus('published')" wire:loading.attr="disabled" title="Klik untuk publikasikan"
-            class="px-2 py-0.5 text-[10px] rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50">
+            class="px-2 py-0.5 text-[10px] rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50">
             <span wire:loading.remove wire:target="setStatus('published')">
                 <span>Publish Cerita</span>
             </span>
