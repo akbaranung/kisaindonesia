@@ -1,4 +1,4 @@
-<div class="w-full sm:px-4 py-2">
+<div class="w-full py-4">
     @if ($featuredStories->isNotEmpty())
         <!-- Container Carousel Khusus Mobile dengan Touch Swipe -->
         <div x-data="{
@@ -8,6 +8,7 @@
             touchStartX: 0,
             touchEndX: 0,
             startAutoplay() {
+                this.stopAutoplay();
                 this.timer = setInterval(() => { this.next(); }, 5000);
             },
             stopAutoplay() {
@@ -34,23 +35,23 @@
             }
         }" x-init="startAutoplay()" @touchstart="handleTouchStart($event)"
             @touchend="handleTouchEnd($event)"
-            class="relative bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800/80 text-white select-none min-h-[220px]">
+            class="relative bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800/80 text-white select-none h-[230px]">
 
-            <!-- Carousel Slides -->
-            <div class="relative w-full">
+            <!-- Carousel Slides (Fixed Height Container) -->
+            <div class="relative w-full h-full">
                 @foreach ($featuredStories as $index => $hero)
-                    <div x-show="activeSlide === {{ $index }}"
+                    <div x-show="activeSlide === {{ $index }}" x-cloak
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-x-4"
                         x-transition:enter-end="opacity-100 translate-x-0"
                         x-transition:leave="transition ease-in duration-200"
                         x-transition:leave-start="opacity-100 translate-x-0"
                         x-transition:leave-end="opacity-0 -translate-x-4"
-                        class="p-4 flex flex-col justify-between min-h-[220px]">
+                        class="absolute inset-0 w-full h-full p-4 flex flex-col justify-between">
 
                         <!-- Background Blur Cover -->
                         <div class="absolute inset-0 bg-cover bg-center filter blur-xl opacity-25 scale-110 pointer-events-none"
-                            style="background-image: url('{{ $hero->cover_path ?? asset('images/default-cover.jpg') }}');">
+                            style="background-image: url('{{ asset('storage/' . $hero->cover_path) }}');">
                         </div>
                         <div
                             class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/30 pointer-events-none">
@@ -68,7 +69,7 @@
                                 @if ($hero->monetization_type === 'premium')
                                     <span
                                         class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/30 text-amber-300 border border-amber-500/40">
-                                        🫘 Premium
+                                        Premium
                                     </span>
                                 @endif
                             </div>
@@ -83,10 +84,10 @@
                                 <span class="text-brand-400 font-semibold truncate max-w-[120px]">
                                     {{ $hero->penName->name ?? 'Anonim' }}
                                 </span>
-                                <span> • </span>
+                                <span>•</span>
                                 <div class="flex items-center space-x-1 overflow-hidden">
                                     <span class="bg-slate-800/90 text-slate-300 px-1.5 py-0.5 rounded text-[9px]">
-                                        {{ $hero->genre->name }}
+                                        {{ $hero->genre->name ?? 'Umum' }}
                                     </span>
                                 </div>
                             </div>
@@ -98,14 +99,13 @@
                         </div>
 
                         <!-- CTA Button & Indicators (Bottom Row) -->
-                        <div
-                            class="relative z-10 pt-3 flex items-center justify-between border-t border-slate-800/60 mt-2">
+                        <div class="relative z-10 pt-2 flex items-center justify-between border-t border-slate-800/60">
 
                             <!-- Indicator Dots (Minimalis) -->
                             <div class="flex space-x-1 items-center">
-                                @foreach ($featuredStories as $index => $hero)
-                                    <button @click="activeSlide = {{ $index }}"
-                                        :class="activeSlide === {{ $index }} ? 'bg-brand-500 w-4' : 'bg-slate-700 w-1.5'"
+                                @foreach ($featuredStories as $dotIndex => $dotHero)
+                                    <button @click="activeSlide = {{ $dotIndex }}"
+                                        :class="activeSlide === {{ $dotIndex }} ? 'bg-brand-500 w-4' : 'bg-slate-700 w-1.5'"
                                         class="h-1.5 rounded-full transition-all duration-300 focus:outline-none">
                                     </button>
                                 @endforeach
@@ -115,7 +115,6 @@
                             <a href="{{ route('stories.read', $hero->slug) }}"
                                 class="inline-flex items-center space-x-1.5 bg-brand-600 active:bg-brand-700 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition shadow-md shadow-brand-600/30">
                                 <span>Baca</span>
-
                             </a>
 
                         </div>

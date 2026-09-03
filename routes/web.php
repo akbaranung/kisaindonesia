@@ -25,6 +25,7 @@ use App\Livewire\Story\MyLibrary;
 use App\Livewire\Story\MyStories;
 use App\Livewire\Story\StoryChapters;
 use App\Livewire\Story\StoryDetail;
+use App\Livewire\Story\StoryIndex;
 use App\Livewire\Story\StoryReader;
 use App\Models\Chapter;
 use App\Models\User;
@@ -102,6 +103,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/stories/{story}/chapters/{chapter}/editor', ChapterEditor::class)->name('chapters.editor');
     });
 
+    Route::get('/stories', StoryIndex::class)->name('stories.index');
     Route::get('/stories/{story:slug}/chapters/{chapter:slug}', StoryReader::class)->name('stories.chapter.read');
     Route::get('/my-pen-names', ManagePenNames::class)->name('pen-names.index');
     Route::get('/author/{slug}', PenNameProfile::class)->name('pen-name.show');
