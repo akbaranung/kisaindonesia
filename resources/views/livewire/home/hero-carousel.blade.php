@@ -51,7 +51,7 @@
 
                         <!-- Background Blur Cover -->
                         <div class="absolute inset-0 bg-cover bg-center scale-110 pointer-events-none"
-                            style="background-image: url('{{ asset('storage/covers/J2rGhsZJE3cDLLhCxVo6SCQy6ojKFP4ZWR9gxu9J.png') }}');">
+                            style="background-image: url('{{ asset('storage/' . $hero->cover_path) }}');">
                         </div>
                         <div
                             class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/30 pointer-events-none">
@@ -63,12 +63,12 @@
                             <!-- Badges -->
                             <div class="flex items-center space-x-1.5">
                                 <span
-                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500/30 text-brand-300 border border-brand-500/40">
+                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-brand-300 border border-brand-500">
                                     Cerita Pilihan
                                 </span>
                                 @if ($hero->monetization_type === 'premium')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/30 text-amber-300 border border-amber-500/40">
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-amber-300 border border-amber-500">
                                         Premium
                                     </span>
                                 @endif
