@@ -29,7 +29,8 @@ class StoryReader extends Component
     public $isLocked = false;
     public $showUnlockModal = false;
 
-    const AUTHOR_SHARE_PERCENTAGE = 70;
+    const AUTHOR_SHARE_PERCENTAGE = 50;
+    const ADMIN_SHARE_PERCENTAGE = 50;
 
     public function mount(Story $story, Chapter $chapter, StoryViewService $viewService)
     {
@@ -128,8 +129,9 @@ class StoryReader extends Component
         }
 
         $authorEarnedBeans = (int) floor(($price * self::AUTHOR_SHARE_PERCENTAGE) / 100);
+        $adminEarnedBeans = $price - $authorEarnedBeans;
 
-        DB::transaction(function () use ($reader, $price, $chapter, $authorEarnedBeans, $author) {
+        DB::transaction(function () use ($reader, $price, $chapter, $authorEarnedBeans, $adminEarnedBeans, $author) {
             $refGroup = 'BUY-' . date('Ymd') . '-' . strtoupper(Str::random(6));
 
             // Potong saldo user
@@ -147,7 +149,7 @@ class StoryReader extends Component
                 'description'    => 'Membeli Bab ' . $chapter->order_number . ': ' . $chapter->story->title,
             ]);
 
-            // B. Tambah Saldo Royalti Penulis
+            // B. Tambah Saldo Royalti Penulis (50%)
             $author->increment('earned_beans', $authorEarnedBeans);
 
             UserTransaction::create([
@@ -160,6 +162,23 @@ class StoryReader extends Component
                 'status'         => 'success',
                 'description'    => 'Royalti Bab ' . $chapter->order_number . ' dari ' . $reader->name,
             ]);
+
+            // C. Tambah Saldo / Record Admin KISA (50%)
+            $admin = User::where('role', 'admin')->first();
+            if ($admin) {
+                $admin->increment('earned_beans', $adminEarnedBeans);
+
+                UserTransaction::create([
+                    'user_id'        => $admin->id,
+                    'reference_code' => $refGroup . '-ADM',
+                    'type'           => 'earn',
+                    'amount'         => $adminEarnedBeans,
+                    'gross_amount'   => 0,
+                    'payment_method' => 'PLATFORM_SHARE',
+                    'status'         => 'success',
+                    'description'    => 'Bagian Admin KISA (50%) Bab ' . $chapter->order_number . ' dari ' . $reader->name,
+                ]);
+            }
 
             // Catat transaksi di tabel user_purchased_chapters
             DB::table('user_purchased_chapters')->insert([
