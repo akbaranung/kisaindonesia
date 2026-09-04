@@ -18,7 +18,7 @@
         @endauth
     </section>
 
-    <section class="py-4 w-full">
+    <section class="py-2 w-full">
         <form action="{{ route('stories.index') }}" method="GET" class="flex items-center gap-2">
             <div class="relative w-full">
                 <input type="text" name="search" placeholder="Cari judul atau penulis..."
