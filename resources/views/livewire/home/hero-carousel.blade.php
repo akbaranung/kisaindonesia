@@ -50,8 +50,8 @@
                         class="absolute inset-0 w-full h-full p-4 flex flex-col justify-between">
 
                         <!-- Background Blur Cover -->
-                        <div class="absolute inset-0 bg-cover bg-center filter blur-xl opacity-25 scale-110 pointer-events-none"
-                            style="background-image: url('{{ asset('storage/' . $hero->cover_path) }}');">
+                        <div class="absolute inset-0 bg-cover bg-center scale-110 pointer-events-none"
+                            style="background-image: url('{{ asset('storage/covers/J2rGhsZJE3cDLLhCxVo6SCQy6ojKFP4ZWR9gxu9J.png') }}');">
                         </div>
                         <div
                             class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/30 pointer-events-none">
