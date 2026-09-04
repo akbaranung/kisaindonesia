@@ -6,7 +6,7 @@
     </div>
 
     {{-- Filter & Search Bar --}}
-    <div class="flex flex-col gap-3 bg-white rounded-2xl border border-slate-100 shadow-2xs mb-6">
+    <div class="flex flex-col p-2 gap-3 bg-white rounded-2xl border border-slate-100 shadow-2xs mb-6">
         <div class="relative w-full">
             <input type="text" wire:model.live.debounce.1000ms="search" placeholder="Cari judul atau penulis..."
                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
