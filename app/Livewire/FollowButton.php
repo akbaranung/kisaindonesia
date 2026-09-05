@@ -52,6 +52,11 @@ class FollowButton extends Component
             $user->followedPenNames()->attach($this->penName->id);
             $this->isFollowing = true;
             $this->dispatch('show-toast', type: 'success', message: 'Berhasil mengikuti penulis!');
+
+            $author = $this->penName->user;
+            if ($author && $author->id !== $user->id) {
+                $author->notify(new \App\Notifications\UserFollowedNotification($user));
+            }
         }
 
 

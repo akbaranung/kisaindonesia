@@ -32,11 +32,27 @@ class UpdateStoryStatus extends Component
             }
         }
 
+        $oldStatus = $this->story->status;
+
         $this->story->update([
             'status' => $newStatus
         ]);
 
         $this->status = $newStatus;
+
+        if ($oldStatus !== 'published' && $newStatus === 'published') {
+            $penName = $this->story->penName ?? null;
+            if ($penName) {
+                $followers = $penName->followers()->get();
+                if ($followers->isNotEmpty()) {
+                    $authorUser = $this->story->user;
+                    \Illuminate\Support\Facades\Notification::send(
+                        $followers,
+                        new \App\Notifications\NewContentPublishedNotification($authorUser, $this->story)
+                    );
+                }
+            }
+        }
 
         $message = $newStatus === 'published'
             ? 'Cerita berhasil dipublikasikan dan sekarang dapat dibaca publik!'

@@ -28,10 +28,15 @@ class ChapterComments extends Component
 
         $this->validate();
 
-        $this->chapter->comments()->create([
+        $comment = $this->chapter->comments()->create([
             'user_id' => auth()->id(),
             'body' => trim($this->body),
         ]);
+
+        $author = $this->chapter->story->user ?? null;
+        if ($author && $author->id !== auth()->id()) {
+            $author->notify(new \App\Notifications\NewCommentNotification(auth()->user(), $this->chapter->story, $comment->body, $this->chapter));
+        }
 
         $this->reset('body');
         session()->flash('comment_status', 'Komentar berhasil dikirim!');
@@ -53,12 +58,18 @@ class ChapterComments extends Component
             'replyBody' => 'required|string|min:2|max:1000',
         ]);
 
-        Comment::create([
+        $reply = Comment::create([
             'user_id' => auth()->id(),
             'chapter_id' => $this->chapter->id,
             'body' => trim($this->replyBody),
             'parent_id' => $parentId,
         ]);
+
+        $parentComment = Comment::find($parentId);
+        $targetUser = $parentComment->user ?? $this->chapter->story->user ?? null;
+        if ($targetUser && $targetUser->id !== auth()->id()) {
+            $targetUser->notify(new \App\Notifications\NewCommentNotification(auth()->user(), $this->chapter->story, $reply->body, $this->chapter, true));
+        }
 
         $this->reset(['replyToId', 'replyBody']);
     }

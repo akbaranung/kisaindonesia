@@ -34,7 +34,7 @@ class Home extends Component
             auth()->user()->load('savedStories');
         }
 
-        $popularStories = Story::with(['penName'])->orderByDesc('views_count')->take(10)->get();
+        $popularStories = Story::with(['penName'])->where('status', 'published')->orderByDesc('views_count')->take(10)->get();
         $recentChapters = Chapter::with(['story.penName'])
             ->where('status', 'published')
             ->latest()

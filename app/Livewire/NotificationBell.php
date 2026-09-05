@@ -41,10 +41,13 @@ class NotificationBell extends Component
                 'monetize_request' => redirect()->to('/admin/premium-requests'),
                 'monetize_status' => redirect()->route('my-stories'),
                 'new_chapter' => redirect()->route('stories.chapter.read', [$storySlug, $chapterSlug]),
-                'new_story', 'comment' => redirect()->route('stories.read', [$storySlug]),
+                'new_story' => redirect()->route('stories.read', [$storySlug]),
+                'comment' => !empty($chapterSlug)
+                    ? redirect()->route('stories.chapter.read', [$storySlug, $chapterSlug])
+                    : redirect()->route('stories.read', [$storySlug]),
                 default => match (true) {
                     !empty($storySlug) && !empty($chapterSlug) => redirect()->route('stories.chapter.read', [$storySlug, $chapterSlug]),
-                    !empty($storySlug) => redirect()->route('storie.read', [$storySlug]),
+                    !empty($storySlug) => redirect()->route('stories.read', [$storySlug]),
                     default => null,
                 },
             };

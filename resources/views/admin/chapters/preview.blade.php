@@ -145,15 +145,25 @@
                                         @endif
 
                                         <div
-                                            class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-amber-500 text-slate-950 rounded-br-xs' : 'bg-white text-slate-800 rounded-bl-xs border border-slate-200/80' }}">
-                                            @if (($row['message_type'] ?? 'text') === 'image' && !empty($row['image_url']))
-                                                <img src="{{ asset('storage/' . $row['image_url']) }}" alt="Chat Image"
-                                                    class="rounded-lg max-w-xs my-1 object-cover cursor-pointer hover:opacity-95 transition"
+                                            class="p-1.5 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-amber-500 text-slate-950 rounded-br-xs' : 'bg-white text-slate-800 rounded-bl-xs border border-slate-200/80' }}">
+                                            @php
+                                                $rawImg = $row['image_url'] ?? ($row['existing_image_url'] ?? '');
+                                                if (!empty($rawImg)) {
+                                                    $imgSrc = \Illuminate\Support\Str::startsWith($rawImg, ['http://', 'https://'])
+                                                        ? $rawImg
+                                                        : (\Illuminate\Support\Str::startsWith($rawImg, 'storage/') ? asset($rawImg) : asset('storage/' . $rawImg));
+                                                } else {
+                                                    $imgSrc = null;
+                                                }
+                                            @endphp
+                                            @if ($imgSrc)
+                                                <img src="{{ $imgSrc }}" alt="Chat Image"
+                                                    class="rounded-xl w-full max-w-[240px] sm:max-w-xs max-h-[320px] object-cover cursor-pointer hover:opacity-95 transition"
                                                     onclick="window.open(this.src, '_blank')">
                                             @endif
-                                            @if (!empty($row['message']))
-                                                <p class="text-[10px] font-semibold text-slate-300 px-1 py-0.5">
-                                                    {{ $row['message'] }}</p>
+                                            @if (!empty($row['message']) || !empty($row['caption']))
+                                                <p class="text-xs font-semibold px-2 py-1 mt-1 {{ $isRight ? 'text-slate-950' : 'text-slate-800' }}">
+                                                    {{ $row['message'] ?? $row['caption'] }}</p>
                                             @endif
                                         </div>
                                     </div>

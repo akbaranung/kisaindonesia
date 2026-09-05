@@ -18,7 +18,7 @@ class MonetizeStatusUpdatedNotification extends Notification implements ShouldQu
 
     public function via(object $notifiable): array
     {
-        return ['main', 'database'];
+        return ['mail', 'database'];
     }
 
     public function toMail(object $notifiable): MailMessage

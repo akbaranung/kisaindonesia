@@ -71,15 +71,19 @@ class StoryIndex extends Component
 
     public function render()
     {
-        $query = Story::query()->with(['penName'])
+        $query = Story::query()
+            ->where('status', 'published')
+            ->with(['penName'])
             ->withCount(['chapters' => function ($q) {
                 $q->where('status', 'published');
             }])
             ->when($this->search, function ($query) {
-                $query->where('title', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('penName', function ($q) {
-                        $q->where('name', 'like', '%' . $this->search . '%');
-                    });
+                $query->where(function ($q) {
+                    $q->where('title', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('penName', function ($pq) {
+                            $pq->where('name', 'like', '%' . $this->search . '%');
+                        });
+                });
             })
             ->when($this->selectedCategory, function ($query) {
                 $query->where('category', $this->selectedCategory);

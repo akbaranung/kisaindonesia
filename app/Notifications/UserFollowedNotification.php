@@ -14,13 +14,17 @@ class UserFollowedNotification extends Notification implements ShouldQueue
 
     public function __construct(public User $follower) {}
 
+    public function via(object $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject($this->follower->name . ' mulai mengikuti anda.')
             ->greeting('Halo ' . $notifiable->name . '!')
             ->line($this->follower->name . ' sekarang mengikuti profil anda.')
-            ->action('Lihat Profil', route('profile.show', $this->follower->id))
             ->line('Terima kasih telah berinteraksi di platform kami!');
     }
 
