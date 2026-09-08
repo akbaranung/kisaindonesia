@@ -172,6 +172,7 @@
                     </div>
                     <div class="space-y-2">
                         @foreach ($recentTransactions as $tx)
+                            @php $isExpired = $tx->created_at->addMinutes(60)->isPast(); @endphp
                             @php
                                 $isPositive = in_array($tx->type, ['topup', 'earn']);
                                 $icon = match ($tx->type) {
@@ -208,6 +209,12 @@
                                 <span class="font-black text-xs shrink-0 {{ $statusClass }}">
                                     {{ ($isPositive ? '+' : '-') ? '+' : '-' }}{{ number_format($tx->amount) }}
                                 </span>
+                                @if ($tx->status === 'pending')
+                                    <button wire:click="reopenPayment({{ $tx->id }})"
+                                        class="bg-brand-600 hover:bg-brand-700 text-white text-xs p-1 rounded transition">
+                                        Bayar Sekarang
+                                    </button>
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -217,8 +224,6 @@
             <section class="mt-4 flex flex-col gap-3">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2 mb-1">General Settings
                 </h4>
-
-
 
                 <a href="{{ route('pen-names.index') }}"
                     class="group w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-2xs hover:border-brand-200 transition">
@@ -286,6 +291,20 @@
                         <path d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                 </button>
+
+                <a href="{{ route('support') }}"
+                    class="group w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-2xs hover:border-brand-200 transition">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-brand-50 text-slate-400 group-hover:text-brand-600 flex items-center justify-center transition">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">Pusat Bantuan & Support</span>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
 
                 <a href="{{ route('logout') }}" wire:navigate
                     class="mt-4 group w-full flex items-center justify-center gap-2 p-4 border-2 border-rose-50 border-dashed rounded-2xl hover:bg-rose-50 transition">

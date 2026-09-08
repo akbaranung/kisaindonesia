@@ -94,34 +94,56 @@
          </div>
 
          <div>
-             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Genre
-                 / Kategori</label>
-             <select wire:model="type"
-                 class="select2 w-full px-4 py-3.5 bg-slate-50 border @error('genreId') border-rose-500 @else border-slate-100 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-500 focus:bg-white transition-all shadow-2xs text-slate-700">
-                 <option value="">-- Pilih Type --</option>
-                 <option value="novel" {{ $type === 'novel' ? 'selected' : '' }}>Novel</option>
-                 <option value="puisi" {{ $type === 'puisi' ? 'selected' : '' }}>Puisi</option>
-             </select>
-             @error('genreId')
-                 <span class="text-[10px] text-rose-500 mt-1 block font-bold px-1">{{ $message }}</span>
+             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tipe Karya</label>
+             <div class="grid grid-cols-3 gap-2">
+                 @foreach (['novel' => 'Novel', 'puisi' => 'Puisi', 'non_fiksi' => 'Non-Fiksi'] as $key => $label)
+                     <button type="button" wire:click="$set('type', '{{ $key }}')"
+                         class="py-2.5 px-3 rounded-2xl border text-xs font-bold text-center transition flex items-center justify-center gap-1.5
+                        {{ $type === $key ? 'border-brand-500 bg-brand-50 text-brand-600 ring-2 ring-brand-500/20' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300' }}">
+                         {{ $label }}
+                     </button>
+                 @endforeach
+             </div>
+             @error('type')
+                 <span class="text-[10px] text-rose-500 font-medium mt-1 block">{{ $message }}</span>
              @enderror
          </div>
 
-         <div>
-             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Genre
-                 / Kategori</label>
-             <select wire:model="genreId"
-                 class="select2 w-full px-4 py-3.5 bg-slate-50 border @error('genreId') border-rose-500 @else border-slate-100 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-500 focus:bg-white transition-all shadow-2xs text-slate-700">
-                 <option value="">-- Pilih Genre --</option>
-                 @foreach ($genres as $genre)
-                     <option value="{{ $genre->id }}" {{ $genreId == $genre->id ? 'selected' : '' }}>
-                         {{ $genre->name }}</option>
-                 @endforeach
-             </select>
-             @error('genreId')
-                 <span class="text-[10px] text-rose-500 mt-1 block font-bold px-1">{{ $message }}</span>
-             @enderror
+         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+             {{-- Dropdown Genre Utama --}}
+             <div>
+                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Genre
+                     Utama</label>
+                 <select wire:model.live="parent_genre_id"
+                     class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
+                     <option value="">-- Pilih Genre --</option>
+                     @foreach ($parentGenres as $parent)
+                         <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+                     @endforeach
+                 </select>
+                 @error('parent_genre_id')
+                     <span class="text-[10px] text-rose-500 font-medium mt-1 block">{{ $message }}</span>
+                 @enderror
+             </div>
+
+             {{-- Dropdown Sub-Genre (Terhubung secara dinamis) --}}
+             <div>
+                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Sub-Genre</label>
+                 <select wire:model.live="genreId" {{ empty($subGenres) ? 'disabled' : '' }}
+                     class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium disabled:opacity-50 disabled:bg-slate-100">
+                     <option value="">
+                         {{ empty($parent_genre_id) ? '-- Pilih Genre Utama Dulu --' : (empty($subGenres) ? '-- Tidak Ada Sub-Genre --' : '-- Pilih Sub-Genre --') }}
+                     </option>
+                     @foreach ($subGenres as $sub)
+                         <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                     @endforeach
+                 </select>
+                 @error('genreId')
+                     <span class="text-[10px] text-rose-500 font-medium mt-1 block">{{ $message }}</span>
+                 @enderror
+             </div>
          </div>
+
          <div>
              <label
                  class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mb-1.5 px-1">Blurb</label>

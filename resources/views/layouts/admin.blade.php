@@ -32,6 +32,30 @@
         crossorigin="anonymous"></script>
 
     @livewireScripts
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('show-toast', (data) => {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    background: '#0f172a', // Slate 900
+                    color: '#f8fafc',
+                    customClass: {
+                        popup: 'border border-slate-800 rounded-xl shadow-2xl'
+                    }
+                });
+
+                Toast.fire({
+                    icon: data.type || 'error',
+                    title: data.message
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

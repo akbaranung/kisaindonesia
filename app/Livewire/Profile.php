@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\UserTransaction;
+use App\Traits\HasDuitkuPayment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,7 @@ class Profile extends Component
 {
 
     use WithFileUploads;
+    use HasDuitkuPayment;
 
     public $action = 'view';
     public $name;

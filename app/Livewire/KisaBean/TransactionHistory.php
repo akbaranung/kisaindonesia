@@ -3,6 +3,7 @@
 namespace App\Livewire\KisaBean;
 
 use App\Models\UserTransaction;
+use App\Traits\HasDuitkuPayment;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,6 +11,7 @@ use Livewire\WithPagination;
 class TransactionHistory extends Component
 {
     use WithPagination;
+    use HasDuitkuPayment;
 
     public $filterType = 'all';
 

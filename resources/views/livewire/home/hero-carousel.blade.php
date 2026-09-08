@@ -81,14 +81,34 @@
 
                             <!-- Info Penulis & Genre -->
                             <div class="flex items-center space-x-2 text-[11px] text-slate-300">
-                                <span class="text-brand-400 font-semibold truncate max-w-[120px]">
-                                    {{ $hero->penName->name ?? 'Anonim' }}
-                                </span>
-                                <span>•</span>
+
                                 <div class="flex items-center space-x-1 overflow-hidden">
-                                    <span class="bg-slate-800/90 text-slate-300 px-1.5 py-0.5 rounded text-[9px]">
-                                        {{ $hero->genre->name ?? 'Umum' }}
-                                    </span>
+
+                                    <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-bold mb-2">
+                                        <span class="text-brand-400 font-semibold truncate max-w-[120px]">
+                                            {{ $hero->penName->name ?? 'Anonim' }}
+                                        </span>
+                                        <span>•</span>
+                                        {{-- Tipe Karya (Novel, Puisi, Non-Fiksi) --}}
+                                        <span class="text-brand-600 rounded-md uppercase tracking-wider">
+                                            {{ str_replace('_', ' ', $hero->type ?? 'novel') }}
+                                        </span>
+
+                                        <span class="text-slate-300">•</span>
+
+                                        {{-- Genre Utama (Parent Genre) --}}
+                                        <span class="text-brand-600">
+                                            {{ $hero->genre?->parent?->name ?? ($hero->genre?->name ?? 'Tanpa Genre') }}
+                                        </span>
+
+                                        {{-- Sub-Genre (Hanya tampil jika ada/terisi) --}}
+                                        @if ($hero->genre?->parent_id)
+                                            <span class="text-slate-300">/</span>
+                                            <span class="text-purple-600">
+                                                {{ $hero->genre->name }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 

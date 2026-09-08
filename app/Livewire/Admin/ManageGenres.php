@@ -10,12 +10,18 @@ class ManageGenres extends Component
 {
     use WithPagination;
 
+    public $name, $type = 'novel', $parent_id = null, $genre_id;
     public $search = '';
-    public $name = '';
-    public $genreId = null;
+    public $filterType = '';
 
     public $isModalOpen = false;
     protected $paginationTheme = 'tailwind';
+
+    protected $rules = [
+        'name' => 'required|string|max:255',
+        'type' => 'required|in:novel,puisi,non_fiksi',
+        'parent_id' => 'nullable|exists:genres,id',
+    ];
 
     public function updatingSearch()
     {
@@ -37,30 +43,26 @@ class ManageGenres extends Component
     private function resetInput()
     {
         $this->name = '';
-        $this->genreId = null;
-        $this->resetErrorBag();
+        $this->type = 'novel';
+        $this->parent_id = null;
+        $this->genre_id = null;
+        $this->resetValidation();
     }
 
     public function store()
     {
-        $this->validate(
+        $this->validate();
+
+        Genre::updateOrCreate(
+            ['id' => $this->genre_id],
             [
-                'name' => 'required|min:3|max:50|unique:genres,name,' . $this->genreId,
-            ],
-            [
-                'name.required' => 'Nama genre wajib diisi!',
-                'name.unique' => 'Nama genre ini sudah ada!',
-                'name.min' => 'Nama genre minimal 3 karakter!',
-                'name.max' => 'Nama genre maksimal 50 karakter!'
+                'name' => $this->name,
+                'type' => $this->type,
+                'parent_id' => $this->parent_id ?: null,
             ]
         );
 
-        Genre::updateOrCreate(
-            ['id' => $this->genreId],
-            ['name' => $this->name]
-        );
-
-        session()->flash('message', $this->genreId ? 'Genre berhasil diperbarui!' : 'Genre baru berhasil ditambahkan!');
+        session()->flash('message', $this->genre_id ? 'Genre berhasil diperbarui!' : 'Genre baru berhasil ditambahkan!');
 
         $this->closeModal();
     }
@@ -68,8 +70,10 @@ class ManageGenres extends Component
     public function edit($id)
     {
         $genre = Genre::findOrFail($id);
-        $this->genreId = $id;
+        $this->genre_id = $id;
         $this->name = $genre->name;
+        $this->type = $genre->type ?? 'novel';
+        $this->parent_id = $genre->parent_id;
 
         $this->isModalOpen = true;
     }
@@ -82,10 +86,19 @@ class ManageGenres extends Component
 
     public function render()
     {
-        $genres = Genre::where('name', 'like', '%' . $this->search . '%')->latest()->paginate(10);
+        $parentGenres = Genre::whereNull('parent_id')
+            ->when($this->type, fn($q) => $q->where('type', $this->type))
+            ->get();
+
+        $genres = Genre::with('parent')
+            ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+            ->when($this->filterType, fn($q) => $q->where('type', $this->filterType))
+            ->latest()
+            ->paginate(10);
 
         return view('livewire.admin.manage-genres', [
-            'genres' => $genres
+            'genres' => $genres,
+            'parentGenres' => $parentGenres,
         ])->layout('layouts.admin');
     }
 }

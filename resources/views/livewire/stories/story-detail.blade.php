@@ -26,10 +26,28 @@
         </div>
 
         {{-- Badge Jenis Cerita --}}
-        <span
-            class="text-[9px] font-extrabold px-2 py-0.5 rounded-md text-white tracking-wider bg-brand-600 uppercase mb-2">
-            {{ $story->genre->name }}
-        </span>
+
+        <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-bold mb-2">
+            {{-- Tipe Karya (Novel, Puisi, Non-Fiksi) --}}
+            <span class="text-brand-600 rounded-md uppercase tracking-wider">
+                {{ str_replace('_', ' ', $story->type ?? 'novel') }}
+            </span>
+
+            <span class="text-slate-300">•</span>
+
+            {{-- Genre Utama (Parent Genre) --}}
+            <span class="text-brand-600">
+                {{ $story->genre?->parent?->name ?? ($story->genre?->name ?? 'Tanpa Genre') }}
+            </span>
+
+            {{-- Sub-Genre (Hanya tampil jika ada/terisi) --}}
+            @if ($story->genre?->parent_id)
+                <span class="text-slate-300">/</span>
+                <span class="text-purple-600">
+                    {{ $story->genre->name }}
+                </span>
+            @endif
+        </div>
 
         {{-- Judul & Penulis --}}
         <h1 class="text-lg font-black text-slate-800 leading-tight px-4">{{ $story->title }}</h1>

@@ -1,15 +1,19 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Duitku\DuitkuController;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\DuitkuSettings;
 use App\Livewire\Admin\ManageGenres;
 use App\Livewire\Admin\ManagePremiumRequests;
 use App\Livewire\Admin\ManageUsers;
+use App\Livewire\Admin\TransactionManagement;
 use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Auth\VerifyEmail;
+use App\Livewire\ContactSupport;
 use App\Livewire\FollowingFeed;
 use App\Livewire\FullNotificationList;
 use App\Livewire\Home;
@@ -112,6 +116,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/kisa-bean/history', TransactionHistory::class)->name('kisa-bean.history');
     Route::get('/notifications', FullNotificationList::class)->name('notifications.index');
+
+    Route::post('/topup/process', [DuitkuController::class, 'createTopup'])->name('topup.process');
+    Route::get('/topup/return', [DuitkuController::class, 'returnPage'])->name('topup.return');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -125,10 +132,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
         return view('admin.chapters.preview', compact('chapter'));
     })->name('chapters.preview');
+
+    Route::get('/transactions', TransactionManagement::class)->name('transactions.index');
+    Route::get('/settings/duitku', DuitkuSettings::class)->name('settings.duitku');
 });
 
 Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+Route::post('/duitku/callback', [DuitkuController::class, 'callback'])->name('duitku.callback');
+Route::get('/support', ContactSupport::class)->name('support');
 
 Route::get('/logout', function () {
     Auth::logout();

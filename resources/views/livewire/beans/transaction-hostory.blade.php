@@ -48,6 +48,7 @@
         {{-- LIST TRANSAKSI --}}
         <div class="space-y-2.5">
             @forelse($transactions as $tx)
+                @php $isExpired = $tx->created_at->addMinutes(60)->isPast(); @endphp
                 @php
                     // Konfigurasi visual berdasarkan jenis transaksi
                     $isPositive = in_array($tx->type, ['topup', 'earn']);
@@ -116,6 +117,13 @@
                             {{ $statusLabel }}
                         </span>
                     </div>
+
+                    @if ($tx->status === 'pending' && !$isExpired)
+                        <button wire:click="reopenPayment({{ $tx->id }})"
+                            class="bg-brand-600 hover:bg-brand-700 text-white text-xs p-1 rounded transition">
+                            Bayar Sekarang
+                        </button>
+                    @endif
                 </div>
             @empty
                 <div class="p-8 bg-white rounded-2xl border border-dashed border-slate-200 text-center space-y-2">

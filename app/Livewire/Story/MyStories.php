@@ -25,6 +25,7 @@ class MyStories extends Component
 
     public $storyId = null; //Digunakan ketika akan edit data
     public $title = '';
+    public $parent_genre_id = '';
     public $genreId = '';
     public $synopsis = '';
     public $type = 'novel';
@@ -42,6 +43,9 @@ class MyStories extends Component
     public bool $isEditingPenName = false;
     public ?int $editingPenNameId = null;
 
+    public $parentGenres = [];
+    public $subGenres = [];
+
 
     public function switchAction($target)
     {
@@ -58,7 +62,40 @@ class MyStories extends Component
             if ($defaultPenName) {
                 $this->pen_name_id = $defaultPenName->id;
             }
+
+            $this->loadParentGenres();
         }
+    }
+
+    public function updatedType()
+    {
+        $this->parent_genre_id = '';
+        $this->genreId = '';
+        $this->subGenres = [];
+        $this->loadParentGenres();
+    }
+
+    public function updatedParentGenreId($value)
+    {
+        $this->genreId = '';
+        if ($value) {
+            $this->subGenres = Genre::where('parent_id', $value)->get();
+
+            if ($this->subGenres->isEmpty()) {
+                $this->genreId = $value;
+            }
+        } else {
+            $this->subGenres = [];
+        }
+    }
+
+    private function loadParentGenres()
+    {
+        $this->parentGenres = Genre::whereNull('parent_id')
+            ->where(function ($q) {
+                $q->where('type', $this->type)->orWhereNull('type');
+            })
+            ->get();
     }
 
     public function resetForm()
@@ -152,15 +189,37 @@ class MyStories extends Component
 
     public function editStory($id)
     {
-        $story = Story::findOrFail($id);
+        $story = Story::with('genre.parent')->findOrFail($id);
         $this->storyId = $story->id;
         $this->title = $story->title;
         $this->pen_name_id = $story->pen_name_id;
-        $this->genreId = $story->category;
-        $this->type = $story->type;
+        $this->type = $story->type ?? 'novel';
         $this->synopsis = $story->synopsis;
         $this->status = $story->status;
         $this->existingCover = $story->cover_path;
+        $this->loadParentGenres();
+
+        $genre = $story->genre;
+
+        if ($genre) {
+            $this->genreId = $genre->id;
+            if ($genre->parent_id) {
+                // Jika genre_id adalah Sub-Genre
+                $this->parent_genre_id = $genre->parent_id;
+
+                // Populate daftar sub-genre berdasarkan parent_id
+                $this->subGenres = Genre::where('parent_id', $genre->parent_id)->get();
+            } else {
+                // Jika genreId adalah Genre Utama (tanpa Sub-Genre)
+                $this->parent_genre_id = $genre->id;
+                $this->subGenres = Genre::where('parent_id', $genre->id)->get();
+            }
+        } else {
+            $this->parent_genre_id = '';
+            $this->genreId = '';
+            $this->subGenres = [];
+        }
+
         $this->action = 'create';
     }
 
@@ -168,15 +227,17 @@ class MyStories extends Component
     {
         $this->validate([
             'title' => 'required|string|max:255',
+            'parent_genre_id' => 'required|exists:genres,id',
             'genreId' => 'required|exists:genres,id',
-            'type' => 'required|in:novel,puisi',
+            'type' => 'required|in:novel,puisi,non_fiksi',
             'synopsis' => 'required|string|max:1000',
             'cover' => 'nullable|image|max:2048',
             'pen_name_id' => 'required|exists:pen_names,id'
         ], [
             'title.required' => 'Judul novelnya jangan lupa diisi, Bro.',
             'type.required' => 'Tipe novelnya jangan lupa dipilih, Bro.',
-            'genreId.required' => 'Pilih dulu genre ceritamu.',
+            'parent_genre_id.required' => 'Pilih genre utama cerita kamu.',
+            'genreId.required' => 'Pilih sub-genre yang sesuai.',
             'genreId.exists' => 'Genre yang kamu pilih tidak terdaftar.',
             'synopsis.required' => 'Sinopsis singkat wajib ada biar pembaca penasaran.',
             'cover.image' => 'File harus berupa gambar (jpg, jpeg, png).',
@@ -184,11 +245,24 @@ class MyStories extends Component
             'pen_name_id.required' => 'Pilih terlebih dahulu nama pena/penulis nya!'
         ]);
 
-        $slug = Str::slug($this->title);
-
-        $count = Story::where('slug', 'LIKE', $slug . '%')->count();
-        if ($count > 0) {
-            $slug = $slug . '-' . ($count + 1);
+        if ($this->storyId) {
+            $story = Story::find($this->storyId);
+            // Jika judul tidak berubah saat edit, gunakan slug yang sudah ada
+            if ($story && $story->title === $this->title) {
+                $slug = $story->slug;
+            } else {
+                $slug = Str::slug($this->title);
+                $count = Story::where('slug', 'LIKE', $slug . '%')->where('id', '!=', $this->storyId)->count();
+                if ($count > 0) {
+                    $slug = $slug . '-' . ($count + 1);
+                }
+            }
+        } else {
+            $slug = Str::slug($this->title);
+            $count = Story::where('slug', 'LIKE', $slug . '%')->count();
+            if ($count > 0) {
+                $slug = $slug . '-' . ($count + 1);
+            }
         }
 
         $coverPath = $this->existingCover;;

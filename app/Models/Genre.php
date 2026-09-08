@@ -9,7 +9,17 @@ class Genre extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['parent_id', 'name', 'type'];
+
+    public function parent()
+    {
+        return $this->belongsTo(Genre::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Genre::class, 'parent_id');
+    }
 
     public function stories()
     {

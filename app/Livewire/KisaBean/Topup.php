@@ -5,6 +5,7 @@ namespace App\Livewire\KisaBean;
 use Livewire\Component;
 use App\Models\CoinPackage;
 use App\Models\UserTransaction;
+use App\Services\Duitku\DuitkuService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -12,7 +13,7 @@ use Illuminate\Support\Str;
 class Topup extends Component
 {
     public $selectedPackage = null;
-    public $paymentMethod = 'qris'; // Default payment method
+    public $paymentMethod = 'NQ'; // Default payment method
 
     public function selectPackage($packageId)
     {
@@ -20,7 +21,7 @@ class Topup extends Component
         $this->selectedPackage = $package;
     }
 
-    public function processTopup()
+    public function processTopup(DuitkuService $duitkuService)
     {
         if (!Auth::check()) {
             return $this->redirect(route('login'), navigate: true);
@@ -41,32 +42,46 @@ class Topup extends Component
         }
 
         $totalBeansGained = $package->total_beans; // Mendapatkan beans + bonus_beans
+        $price = ($package->discount_price && $package->discount_price < $package->price)
+            ? $package->discount_price
+            : $package->price;
 
-        $userId = Auth::id();
+        $user = Auth::user();
+        $userId = $user->id;
 
-        DB::transaction(function () use ($userId, $totalBeansGained, $package) {
-            $refCode = 'KB-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+        $refCode = 'KB-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+        $result = $duitkuService->createInvoice(
+            $refCode,
+            (int) $price,
+            $this->paymentMethod,
+            $user->email,
+            $user->name ?? 'User Kisa'
+        );
 
-            $transaction = UserTransaction::create([
-                'user_id' => $userId,
-                'reference_code' => $refCode,
-                'type' => 'topup',
-                'amount' => $totalBeansGained,
-                'gross_amount' => $package->price,
-                'payment_method' => strtoupper($this->paymentMethod),
-                'status' => 'success',
-                'description' => 'Top Up ' . number_format($totalBeansGained) . ' Kisa Bean via' . strtoupper($this->paymentMethod),
+        if (isset($result['statusCode']) && $result['statusCode'] == '00') {
+            DB::transaction(function () use ($userId, $totalBeansGained, $package, $refCode, $result) {
+                UserTransaction::create([
+                    'user_id' => $userId,
+                    'reference_code' => $refCode,
+                    'type' => 'topup',
+                    'amount' => $totalBeansGained,
+                    'gross_amount' => $package->price,
+                    'payment_method' => strtoupper($this->paymentMethod),
+                    'status' => 'pending',
+                    'description' => 'Top Up ' . number_format($totalBeansGained) . ' Kisa Bean via ' . strtoupper($this->paymentMethod),
+                    'payment_payload' => json_encode($result),
+                ]);
+            });
+
+
+            $this->dispatch('open-duitku-popup', [
+                'reference' => $result['reference'],
+                'referenceCode' => $refCode
             ]);
+            return;
+        }
 
-
-            // Update saldo kisa bean ke user
-            DB::table('users')
-                ->where('id', $userId)
-                ->increment('kisa_bean_balance', $totalBeansGained);
-        });
-
-        session()->flash('success', "Berhasil menambahkan {$totalBeansGained} KISA Bean ke akunmu!");
-        return redirect()->route('profile');
+        session()->flash('error', $result['statusMessage'] ?? 'Gagal membuat transaksi ke payment gateway.');
     }
 
     public function render()

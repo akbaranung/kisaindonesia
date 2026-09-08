@@ -54,7 +54,7 @@
                             @foreach ($element as $page => $url)
                                 @if ($page == $paginator->currentPage())
                                     <span
-                                        class="inline-flex items-center px-3 py-1 text-xs font-bold text-white bg-emerald-600 rounded-lg shadow-sm">
+                                        class="inline-flex items-center px-3 py-1 text-xs font-bold text-white bg-brand-600 rounded-lg shadow-sm">
                                         {{ $page }}
                                     </span>
                                 @else
