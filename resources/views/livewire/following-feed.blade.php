@@ -1,4 +1,4 @@
-<div class="w-full px-3 max-w-4xl mx-auto py-8 space-y-6">
+<div class="w-full px-4 max-w-4xl mx-auto py-8 space-y-6">
     <!-- Header Halaman -->
     <div class="flex items-center justify-between border-b border-slate-200 pb-5">
         <div>

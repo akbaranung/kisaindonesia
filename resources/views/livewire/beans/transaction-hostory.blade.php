@@ -2,7 +2,7 @@
 
     {{-- TOP NAVIGATION BAR --}}
     <div
-        class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 py-3.5 flex items-center justify-between">
+        class="sticky p-4 top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 py-3.5 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <a href="{{ route('profile') }}"
                 class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 active:scale-95 transition-all">

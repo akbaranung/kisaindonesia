@@ -62,14 +62,32 @@
 
                             <!-- Badges -->
                             <div class="flex items-center space-x-1.5">
-                                <span
-                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-brand-300 border border-brand-500">
-                                    Cerita Pilihan
-                                </span>
                                 @if ($hero->monetization_type === 'premium')
                                     <span
                                         class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-amber-300 border border-amber-500">
-                                        Premium
+                                        <i class="fa-solid fa-crown"></i>
+                                    </span>
+                                @endif
+
+                                @if ($hero->hasTypeChat())
+                                    <span
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500">
+                                        <i class="fa-regular fa-comment-dots"></i>
+                                    </span>
+                                @elseif(!$hero->hasTypeChat() && $hero->type === 'novel')
+                                    <span
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </span>
+                                @elseif($hero->type === 'puisi')
+                                    <span
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500">
+                                        <i class="fa-solid fa-feather"></i>
+                                    </span>
+                                @elseif($hero->type === 'non_fiksi')
+                                    <span
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
                                     </span>
                                 @endif
                             </div>
@@ -86,16 +104,9 @@
 
                                     <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-bold mb-2">
                                         <span class="text-brand-400 font-semibold truncate max-w-[120px]">
-                                            {{ $hero->penName->name ?? 'Anonim' }}
+                                            {{ '@' . $hero->penName->name ?? 'anonim' }}
                                         </span>
-                                        <span>•</span>
-                                        {{-- Tipe Karya (Novel, Puisi, Non-Fiksi) --}}
-                                        <span class="text-brand-600 rounded-md uppercase tracking-wider">
-                                            {{ str_replace('_', ' ', $hero->type ?? 'novel') }}
-                                        </span>
-
                                         <span class="text-slate-300">•</span>
-
                                         {{-- Genre Utama (Parent Genre) --}}
                                         <span class="text-brand-600">
                                             {{ $hero->genre?->parent?->name ?? ($hero->genre?->name ?? 'Tanpa Genre') }}
@@ -103,8 +114,8 @@
 
                                         {{-- Sub-Genre (Hanya tampil jika ada/terisi) --}}
                                         @if ($hero->genre?->parent_id)
-                                            <span class="text-slate-300">/</span>
-                                            <span class="text-purple-600">
+                                            <span class="text-slate-300">•</span>
+                                            <span class="text-brand-600">
                                                 {{ $hero->genre->name }}
                                             </span>
                                         @endif

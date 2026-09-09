@@ -1,11 +1,11 @@
 <div
-    class="w-full min-h-screen bg-slate-50 flex flex-col justify-between max-w-2xl mx-auto border-x border-slate-100 shadow-xs relative">
+    class="p-4 w-full min-h-screen bg-slate-50 flex flex-col justify-between max-w-2xl mx-auto border-x border-slate-100 shadow-xs relative">
 
     {{-- ════════════════════════════════════════════════════════════════ --}}
     {{-- 1. HEADER BACA CERITA --}}
     {{-- ════════════════════════════════════════════════════════════════ --}}
     <header
-        class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 px-4 py-3.5 flex items-center justify-between gap-3">
+        class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 py-3.5 flex items-center justify-between gap-3">
         <a href="/stories/{{ $story->slug }}" wire:navigate
             class="p-2 -ml-2 text-slate-500 hover:text-slate-800 transition rounded-xl hover:bg-slate-100">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,21 +285,26 @@
                                                 @php
                                                     $rawImg = $row['image_url'] ?? ($row['existing_image_url'] ?? '');
                                                     if (!empty($rawImg)) {
-                                                        $imgSrc = \Illuminate\Support\Str::startsWith($rawImg, ['http://', 'https://'])
+                                                        $imgSrc = \Illuminate\Support\Str::startsWith($rawImg, [
+                                                            'http://',
+                                                            'https://',
+                                                        ])
                                                             ? $rawImg
-                                                            : (\Illuminate\Support\Str::startsWith($rawImg, 'storage/') ? asset($rawImg) : asset('storage/' . $rawImg));
+                                                            : (\Illuminate\Support\Str::startsWith($rawImg, 'storage/')
+                                                                ? asset($rawImg)
+                                                                : asset('storage/' . $rawImg));
                                                     } else {
                                                         $imgSrc = null;
                                                     }
                                                 @endphp
                                                 @if ($imgSrc)
-                                                    <img src="{{ $imgSrc }}"
-                                                        alt="Chat Image"
+                                                    <img src="{{ $imgSrc }}" alt="Chat Image"
                                                         class="rounded-xl w-full max-w-[240px] sm:max-w-xs max-h-[320px] object-cover cursor-pointer hover:opacity-95 transition"
                                                         onclick="window.open(this.src, '_blank')">
                                                 @endif
                                                 @if (!empty($row['message']) || !empty($row['caption']))
-                                                    <p class="text-xs font-semibold px-2 py-1 mt-1 {{ $isRight ? 'text-slate-950' : 'text-slate-800' }}">
+                                                    <p
+                                                        class="text-xs font-semibold px-2 py-1 mt-1 {{ $isRight ? 'text-slate-950' : 'text-slate-800' }}">
                                                         {{ $row['message'] ?? $row['caption'] }}
                                                     </p>
                                                 @endif

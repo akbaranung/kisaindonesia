@@ -50,6 +50,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', Home::class)->name('home');
 Route::get('/stories/{story:slug}', StoryDetail::class)->name('stories.read');
+Route::get('/stories', StoryIndex::class)->name('stories.index');
 
 // tampilan pemberitahuan verifikasi
 Route::get('/email/verify', VerifyEmail::class)->name('verification.notice');
@@ -107,7 +108,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/stories/{story}/chapters/{chapter}/editor', ChapterEditor::class)->name('chapters.editor');
     });
 
-    Route::get('/stories', StoryIndex::class)->name('stories.index');
     Route::get('/stories/{story:slug}/chapters/{chapter:slug}', StoryReader::class)->name('stories.chapter.read');
     Route::get('/my-pen-names', ManagePenNames::class)->name('pen-names.index');
     Route::get('/author/{slug}', PenNameProfile::class)->name('pen-name.show');

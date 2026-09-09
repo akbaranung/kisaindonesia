@@ -18,8 +18,7 @@
 
 </head>
 
-<body
-    class="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen flex flex-col justify-between p-3 max-w-md mx-auto">
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between max-w-md mx-auto">
     {{ $slot }}
     @include('partials.bottom-nav')
 

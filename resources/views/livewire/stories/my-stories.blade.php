@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-slate-50/50 pb-12">
+<div class="min-h-screen bg-slate-50/50 pb-12 p-4 pt-2">
     @if ($action === 'list')
         <header class="flex items-center justify-between w-full pb-5 border-b border-slate-100 mb-6">
             <div class="flex flex-col">

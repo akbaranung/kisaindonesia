@@ -1,4 +1,4 @@
-<div class="w-full max-w-6xl mx-auto py-6 mb-20">
+<div class="w-full max-w-6xl mx-auto px-4 py-6 mb-20">
     {{-- Header --}}
     <div class="flex flex-col gap-1 mb-6">
         <h1 class="text-2xl font-black text-slate-800">Jelajahi Semua Cerita</h1>
@@ -55,8 +55,7 @@
     {{-- Story Grid Catalog --}}
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         @forelse ($stories as $story)
-            <div
-                class="flex flex-col bg-white rounded-2xl border border-slate-100 p-2 shadow-2xs hover:shadow-md transition">
+            <div class="flex flex-col rounded-2xl border border-white p-2 hover:shadow-md transition">
                 <div class="w-full h-44 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
                     <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
                         @if ($story->cover_path)
@@ -70,12 +69,38 @@
                         @endif
                     </a>
 
-                    @if ($story->monetization_type === 'premium')
-                        <span
-                            class="absolute top-2 left-2 bg-amber-500/90 backdrop-blur-xs text-white text-[9px] font-black px-1.5 py-0.5 rounded-md">
-                            🫘 Premium
-                        </span>
-                    @endif
+                    <div class="absolute inset-0 pointer-events-none">
+                        <div class="flex items-center space-x-0.5 p-2">
+                            @if ($story->monetization_type === 'premium')
+                                <span
+                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-white border border-amber-500">
+                                    <i class="fa-solid fa-crown"></i>
+                                </span>
+                            @endif
+
+                            @if ($story->hasTypeChat())
+                                <span
+                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
+                                    <i class="fa-solid fa-comment-dots"></i>
+                                </span>
+                            @elseif(!$story->hasTypeChat() && $story->type === 'novel')
+                                <span
+                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </span>
+                            @elseif($story->type === 'puisi')
+                                <span
+                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
+                                    <i class="fa-solid fa-feather-pointed"></i>
+                                </span>
+                            @elseif($story->type === 'non_fiksi')
+                                <span
+                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex flex-col flex-1 justify-between gap-1">
@@ -95,10 +120,13 @@
                     <div
                         class="flex items-center justify-between text-[10px] font-bold text-slate-500 pt-1 border-t border-slate-50">
                         <div class="flex items-center gap-0.5 text-amber-500">
-                            <span>★</span>
+                            <span><span><i class="fa-solid fa-star"></i></span></span>
                             <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
                         </div>
-                        <span class="text-slate-400">{{ $story->chapters_count ?? 0 }} Bab</span>
+                        <span class="text-slate-400">
+                            <i class="fa-regular fa-eye"></i>
+                            {{ number_format_short($story->views_count ?? 0) }}
+                        </span>
                     </div>
                 </div>
             </div>

@@ -89,4 +89,9 @@ class Story extends Model
             'slug' => 'anonim',
         ]);
     }
+
+    public function hasTypeChat(): bool
+    {
+        return $this->chapters()->where('type', 'chat')->exists();
+    }
 }

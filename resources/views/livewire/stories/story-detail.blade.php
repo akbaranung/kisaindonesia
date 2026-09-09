@@ -1,7 +1,7 @@
-<div>
+<div class="p-4">
     {{-- 📱 TOP NAVIGATION BAR --}}
     <div
-        class="p-4 border-b border-slate-50 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-xs z-50">
+        class="border-b border-slate-50 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-xs z-50">
         <a href="{{ url('/') }}" wire:navigate
             class="text-slate-600 font-bold text-xs flex items-center gap-1 hover:text-brand-600 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

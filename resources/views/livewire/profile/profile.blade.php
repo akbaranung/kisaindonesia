@@ -1,4 +1,4 @@
-<div class="relative min-h-screen bg-slate-50/50">
+<div class="relative min-h-screen bg-slate-50/50 p-4">
     @if ($action === 'view')
         <nav class="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-6">
             <a href="{{ url('/') }}" wire:navigate
@@ -172,7 +172,6 @@
                     </div>
                     <div class="space-y-2">
                         @foreach ($recentTransactions as $tx)
-                            @php $isExpired = $tx->created_at->addMinutes(60)->isPast(); @endphp
                             @php
                                 $isPositive = in_array($tx->type, ['topup', 'earn']);
                                 $icon = match ($tx->type) {

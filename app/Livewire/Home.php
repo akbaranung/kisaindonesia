@@ -28,13 +28,14 @@ class Home extends Component
     {
         $query = Story::query()
             ->with(['penName', 'genre'])
-            ->where('status', 'published');
+            ->where('status', 'published')
+            ->where('monetization_type', 'premium');
 
         if (auth()->check()) {
             auth()->user()->load('savedStories');
         }
 
-        $popularStories = Story::with(['penName'])->where('status', 'published')->orderByDesc('views_count')->take(10)->get();
+        $popularStories = Story::with(['penName'])->where('status', 'published')->where('monetization_type', 'premium')->orderByDesc('views_count')->take(10)->get();
         $recentChapters = Chapter::with(['story.penName'])
             ->where('status', 'published')
             ->latest()
