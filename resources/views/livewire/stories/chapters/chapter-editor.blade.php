@@ -239,6 +239,22 @@
                                     ],
                                     imageResize: {
                                         displaySize: true
+                                    },
+                                    clipboard: {
+                                        matchers: [
+                                            [Node.ELEMENT_NODE, function(node, delta) {
+                                                if (delta.ops) {
+                                                    delta.ops.forEach(op => {
+                                                        if (op.attributes) {
+                                                            // Hapus format warna teks dan background saat user melakukan paste
+                                                            delete op.attributes.color;
+                                                            delete op.attributes.background;
+                                                        }
+                                                    });
+                                                }
+                                                return delta;
+                                            }]
+                                        ]
                                     }
                                 }
                             });
@@ -258,7 +274,7 @@
                     }
                 }" x-init="initQuill()" wire:ignore
                     class="bg-slate-950 rounded-xl overflow-hidden border border-slate-800">
-                    <div x-ref="editor" class="text-slate-200 min-h-[350px]"></div>
+                    <div x-ref="editor" id="editor" class="text-slate-200 min-h-[350px]"></div>
                 </div>
             </div>
         @endif

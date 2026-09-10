@@ -99,10 +99,6 @@
             });
         });
     </script>
-
-
-
-
     @stack('scripts')
 </body>
 
