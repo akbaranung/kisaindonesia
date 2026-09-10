@@ -1,4 +1,4 @@
-<div class="my-6">
+<div class="mb-15 p-4">
     <main class="w-full my-auto mt-6">
         <div class="mb-8">
             <div class="mb-8">

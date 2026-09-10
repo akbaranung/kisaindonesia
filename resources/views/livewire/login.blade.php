@@ -1,4 +1,4 @@
-<div>
+<div class="p-4 mb-15">
     <main class="w-full my-auto">
         <div class="mb-8">
             <img src="images/logo-2.png" alt="logo">
