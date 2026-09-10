@@ -53,9 +53,9 @@
     </div>
 
     {{-- Story Grid Catalog --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2">
         @forelse ($stories as $story)
-            <div class="w-40 flex-shrink-0 snap-start transition">
+            <div class="w-28 flex-shrink-0 snap-start transition">
                 {{-- Cover Image --}}
                 <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
                     <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
@@ -73,35 +73,35 @@
                     <div class="absolute inset-0 pointer-events-none">
                         <div class="flex items-center space-x-1.5 p-2">
                             <span
-                                class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-black border border-white">
+                                class="px-0.5 py-0.5 rounded-md text-[8px] font-bold bg-white text-black border border-white">
                                 <i class="fa-regular fa-eye"></i>
                                 {{ number_format_short($story->views_count ?? 0) }}
                             </span>
                             <div class="absolute right-2">
                                 @if ($story->monetization_type === 'premium')
                                     <span
-                                        class="px-1 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-white border border-amber-500 me-1">
+                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-amber-500 text-white border border-amber-500 me-1">
                                         <i class="fa-solid fa-crown"></i>
                                     </span>
                                 @endif
                                 @if ($story->hasTypeChat())
                                     <span
-                                        class="px-1 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
+                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
                                         <i class="fa-solid fa-comment-dots"></i>
                                     </span>
                                 @elseif(!$story->hasTypeChat() && $story->type === 'novel')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
+                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
                                         <i class="fa-solid fa-pencil"></i>
                                     </span>
                                 @elseif($story->type === 'puisi')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
+                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
                                         <i class="fa-solid fa-feather-pointed"></i>
                                     </span>
                                 @elseif($story->type === 'non_fiksi')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
+                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </span>
                                 @endif
@@ -112,7 +112,7 @@
 
                 {{-- Detail Cerita --}}
                 <div class="flex flex-col">
-                    <h3 class="text-xs font-bold text-slate-800 line-clamp-1 leading-snug">
+                    <h3 class="text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
                         <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
                             class="hover:text-brand-600 transition">
                             {{ $story->title }}

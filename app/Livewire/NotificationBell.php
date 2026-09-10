@@ -57,7 +57,7 @@ class NotificationBell extends Component
     public function markAllAsRead()
     {
         if (Auth::check()) {
-            Auth::user()->unreadNotifications()->markAsRead();
+            Auth::user()->unreadNotifications->markAsRead();
             $this->loadUnreadCount();
         }
     }
