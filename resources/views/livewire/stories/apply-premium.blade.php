@@ -90,8 +90,9 @@
                         </div>
                         <div class="flex items-center justify-between text-[11px]">
                             <span class="text-slate-500">Total Bab Cerita:</span>
-                            <span class="font-bold {{ $totalChapters >= 20 ? 'text-emerald-600' : 'text-rose-500' }}">
-                                {{ $totalChapters }} / 6 Bab (Min)
+                            <span
+                                class="font-bold {{ $totalChapters >= $minBab ? 'text-emerald-600' : 'text-rose-500' }}">
+                                {{ $totalChapters }} / {{ $minBab }} Bab (Min)
                             </span>
                         </div>
                     </div>
@@ -235,7 +236,8 @@
             <div class="p-4 bg-slate-100 rounded-2xl border border-slate-200 text-center space-y-1.5">
                 <p class="text-xs font-bold text-slate-700">Belum Memenuhi Syarat Minimal</p>
                 <p class="text-[10px] text-slate-500 leading-relaxed">
-                    Syarat minimal pengajuan cerita premium adalah <strong>6 Bab</strong> dan total untuk tipe
+                    Syarat minimal pengajuan cerita premium adalah <strong>{{ $minBab }} Bab</strong> dan total
+                    untuk tipe
                     <strong>{{ strtoupper($storyType) }}</strong> adalah
                     <strong>{{ $minWords . ' - ' . $maxWords }}</strong>
                     Kata. Silakan tambah bab atau isi cerita terlebih dahulu.

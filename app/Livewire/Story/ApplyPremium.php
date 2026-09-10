@@ -5,6 +5,7 @@ namespace App\Livewire\Story;
 use Livewire\Component;
 use App\Models\Story;
 use App\Models\PremiumStoryRequest;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 
 class ApplyPremium extends Component
@@ -79,6 +80,7 @@ class ApplyPremium extends Component
         foreach ($this->selectedStory->chapters as $index => $chapter) {
             $words = $chapter->word_count;
             $beans = $chapter->calculateKisaBean();
+            $minBab = Setting::get('min_apply_bab');
 
             $this->totalWords += $words;
 
@@ -104,7 +106,7 @@ class ApplyPremium extends Component
             }
         }
 
-        $this->isEligible = ($this->totalChapters >= 6) && ($validPremiumChapters > 0) && ($invalidChaptersCount === 0);
+        $this->isEligible = ($this->totalChapters >= $minBab) && ($validPremiumChapters > 0) && ($invalidChaptersCount === 0);
     }
 
     public function submitApplication()
@@ -143,8 +145,11 @@ class ApplyPremium extends Component
             ->where('monetization_type', 'free')
             ->get();
 
+        $minBab = Setting::get('min_apply_bab');
+
         return view('livewire.stories.apply-premium', [
             'myStories' => $myStories,
+            'minBab' => $minBab
         ]);
     }
 }

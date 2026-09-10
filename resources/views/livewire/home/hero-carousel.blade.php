@@ -1,4 +1,4 @@
-<div class="w-full py-4">
+<div class="w-full py-1">
     @if ($featuredStories->isNotEmpty())
         <!-- Container Carousel Khusus Mobile dengan Touch Swipe -->
         <div x-data="{
