@@ -456,14 +456,15 @@ class ChapterEditor extends Component
 
         $wordCount = $this->calculateWordCount();
         if ($type === 'puisi') {
-            if ($wordCount >= 700 && $wordCount <= 1500) {
-                return (int) ceil(($wordCount / 100));
+            if ($wordCount >= 700) {
+                return $wordCount <= 1200 ? 4 : 6;
             }
         } else {
-            if ($wordCount >= 1000 && $wordCount <= 1500) {
-                return (int) ceil(($wordCount / 100));
+            if ($wordCount >= 1000) {
+                return $wordCount <= 1200 ? 4 : 6;
             }
         }
+        return 0;
     }
 
     public function removeImagePreview()
