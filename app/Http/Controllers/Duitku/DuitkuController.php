@@ -34,38 +34,53 @@ class DuitkuController extends Controller
         $referenceCode = 'TOPUP-' . time() . '-' . $user->id;
         $amount = (int) $request->amount;
 
-        $result = $this->duitkuService->createInvoice(
-            $referenceCode,
-            $amount,
-            $request->payment_method,
-            $user->email,
-            $user->name
-        );
+        try {
+            $result = DB::transaction(function () use ($user, $referenceCode, $amount, $request) {
+                $transaction = UserTransaction::create([
+                    'user_id' => $user->id,
+                    'reference_code' => $referenceCode,
+                    'type' => 'topup',
+                    'amount' => $amount,
+                    'gross_amount' => $amount,
+                    'payment_method' => $request->payment_method,
+                    'status' => 'pending',
+                    'description' => 'Topup saldo via ' . strtoupper($request->payment_method),
+                ]);
 
-        if (isset($result['statusCode']) && $result['statusCode'] == '00') {
-            UserTransaction::create([
-                'user_id' => $user->id,
-                'reference_code' => $referenceCode,
-                'type' => 'topup',
-                'amount' => $amount,
-                'gross_amount' => $result['amount'] ?? $amount,
-                'payment_method' => $request->payment_method,
-                'status' => 'pending',
-                'description' => 'Topup saldo via ' . strtoupper($request->payment_method),
-                'payment_payload' => json_encode($result),
-            ]);
+                $duitkuResponse = $this->duitkuService->createInvoice(
+                    $referenceCode,
+                    $amount,
+                    $request->payment_method,
+                    $user->email,
+                    $user->name
+                );
+
+                if (!isset($duitkuResponse['statusCode']) || $duitkuResponse['statusCode'] != '00') {
+                    $errorMessage = $duitkuResponse['statusMessage'] ?? 'Gagal membuat invoice Duitku.';
+                    throw new \Exception($errorMessage);
+                }
+
+                $transaction->update([
+                    'gross_amount' => $duitkuResponse['amount'] ?? $amount,
+                    'payment_payload' => json_encode($duitkuResponse),
+                ]);
+
+                return [
+                    'status' => 'success',
+                    'payment_url' => $duitkuResponse['paymentUrl'],
+                    'reference_code' => $referenceCode,
+                ];
+            });
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            Log::error('Topup Error: ' . $e->getMessage());
 
             return response()->json([
-                'status' => 'success',
-                'payment_url' => $result['paymentUrl'],
-                'reference_code' => $referenceCode,
-            ]);
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 400);
         }
-
-        return response()->json([
-            'status' => 'error',
-            'message' => $result['statusMessage'] ?? 'Gagal membuat transaksi.',
-        ], 400);
     }
 
     public function callback(Request $request)

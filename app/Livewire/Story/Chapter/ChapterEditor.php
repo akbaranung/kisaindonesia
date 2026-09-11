@@ -363,11 +363,24 @@ class ChapterEditor extends Component
             }
             $this->imagesToDelete = [];
 
+
+
+            // Jika judul tidak berubah saat edit, gunakan slug yang sudah ada
+            if ($this->chapter->title === $this->title) {
+                $slug = $this->chapter->slug;
+            } else {
+                $slug = Str::slug($this->title);
+                $count = Chapter::where('slug', 'LIKE', $slug . '%')->where('id', '!=', $this->chapter->id)->count();
+                if ($count > 0) {
+                    $slug = $slug . '-' . ($count + 1);
+                }
+            }
+
             // Update Judul Bab di Database
             $this->chapter->update([
                 'title'      => trim($this->title),
                 'word_count' => $this->calculateWordCount(),
-                'slug'         => $this->slug ?: Str::slug($this->title),
+                'slug'         => $slug,
                 'status'       => $this->status,
                 'is_premium' => $isPremium,
                 'bean_price' => $this->calculateKisaBean()
@@ -416,30 +429,17 @@ class ChapterEditor extends Component
 
     private function validatePremiumChapterRequirements(): ?string
     {
-        if ($this->type === 'chat') {
-            $minBubbles = 30;
-            $maxBubbles = 100;
-            $currentBubbles = $this->calculateWordCount();
+        $minWords = ($this->story->type === 'puisi') ? 700 : 1000;
+        $maxWords = 1500;
 
-            if ($currentBubbles < $minBubbles) {
-                return "Bab Chat Premium minimal harus memiliki {$minBubbles} gelembung percakapan! (Saat ini: {$currentBubbles} bubble)";
-            }
+        $currentWords = $this->calculateWordCount();
 
-            if ($currentBubbles > $maxBubbles) {
-                return "Batas maksimal gelembung percakapan untuk bab premium adalah {$maxBubbles} bubble! (Saat ini: {$currentBubbles} bubble)";
-            }
-        } else {
-            $minWords = ($this->story->type === 'puisi') ? 700 : 1000;
-            $maxWords = 1500;
-            $currentWords = $this->calculateWordCount();
+        if ($currentWords < $minWords) {
+            return "Karena cerita ini berstatus Premium, Bab 6 ke atas wajib memiliki minimal {$minWords} kata! (Saat ini: {$currentWords} kata)";
+        }
 
-            if ($currentWords < $minWords) {
-                return "Karena cerita ini berstatus Premium, Bab 6 ke atas wajib memiliki minimal {$minWords} kata! (Saat ini: {$currentWords} kata)";
-            }
-
-            if ($currentWords > $maxWords) {
-                return "Batas maksimal kata per bab premium adalah {$maxWords} kata! (Saat ini: {$currentWords} kata)";
-            }
+        if ($currentWords > $maxWords) {
+            return "Batas maksimal kata per bab premium adalah {$maxWords} kata! (Saat ini: {$currentWords} kata)";
         }
 
         return null;

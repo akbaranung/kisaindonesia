@@ -50,8 +50,14 @@
         });
     </script>
 
+    @php
+        $isDuitkuSandbox = filter_var(
+            \App\Models\Setting::get('duitku_is_sandbox', config('services.duitku.sandbox', true)),
+            FILTER_VALIDATE_BOOLEAN
+        );
+    @endphp
     <script
-        src="{{ config('services.duitku.sandbox', true) ? 'https://app-sandbox.duitku.com/lib/js/duitku.js' : 'https://app-prod.duitku.com/lib/js/duitku.js' }}">
+        src="{{ $isDuitkuSandbox ? 'https://app-sandbox.duitku.com/lib/js/duitku.js' : 'https://app-prod.duitku.com/lib/js/duitku.js' }}">
     </script>
 
     <script>
