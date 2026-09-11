@@ -434,7 +434,7 @@ class ChapterEditor extends Component
 
         $currentWords = $this->calculateWordCount();
 
-        if ($currentWords < $minWords) {
+        if ($currentWords < $minWords && $this->status === 'published') {
             return "Karena cerita ini berstatus Premium, Bab 6 ke atas wajib memiliki minimal {$minWords} kata! (Saat ini: {$currentWords} kata)";
         }
 
