@@ -42,13 +42,11 @@
                 @foreach ($packages as $pkg)
                     @php
                         $isSelected = $selectedPackage ? $selectedPackage->id === $pkg->id : false;
-                        $finalPrice =
-                            $pkg->discount_price && $pkg->discount_price < $pkg->price
-                                ? $pkg->discount_price
-                                : $pkg->price;
                     @endphp
-                    <button type="button" wire:click="selectPackage({{ $pkg->id }})"
+                    <button type="button" wire:key="package-{{ $pkg->id }}"
+                        wire:click="selectPackage({{ $pkg->id }})"
                         class="relative p-3.5 rounded-2xl border text-left transition-all active:scale-95 {{ $isSelected ? 'bg-amber-500/10 border-amber-500 ring-2 ring-amber-500/20' : 'bg-white border-slate-200/80 hover:border-slate-300' }}">
+
                         @if ($pkg->badge_label)
                             <div
                                 class="absolute -top-2 right-2 bg-amber-500 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded-full shadow-xs tracking-wider">
@@ -62,13 +60,14 @@
                                 {{ $pkg->name }}
                             </span>
                         </div>
+
                         <div class="flex items-center gap-1.5 mb-1">
                             <span class="text-base">🫘</span>
                             <span class="text-base font-black text-slate-800">{{ number_format($pkg->beans) }}</span>
                             @if ($pkg->bonus_beans > 0)
                                 <span
                                     class="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md">
-                                    +{{ $pkg->bonus_beans }}
+                                    +{{ number_format($pkg->bonus_beans) }}
                                 </span>
                             @endif
                         </div>
@@ -91,32 +90,45 @@
         </div>
 
         {{-- Section 2: Pilihan Kode Metode Pembayaran Duitku --}}
-        <div class="space-y-2.5 my-4">
-            <label class="text-xs font-bold text-slate-800 uppercase tracking-wider block">Metode Pembayaran</label>
+        <div class="mb-15">
+            <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Pilih Metode
+                Pembayaran</label>
 
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-2 space-y-1">
-                @php
-                    $paymentMethods = [
-                        'NQ' => 'QRIS (All E-Wallet & Mobile Banking)',
-                        'BC' => 'BCA Virtual Account',
-                        'M2' => 'Mandiri Virtual Account',
-                        'BR' => 'BRI Virtual Account',
-                        'BN' => 'BNI Virtual Account',
-                        'SP' => 'ShopeePay',
-                    ];
-                @endphp
+            @if (count($availableMethods) > 0)
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    @foreach ($availableMethods as $method)
+                        <label wire:key="method-{{ $method['paymentMethod'] }}"
+                            class="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all duration-200 {{ $paymentMethod === $method['paymentMethod'] ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/20' : 'border-slate-200 hover:border-slate-300 bg-white' }}">
+                            <div class="flex items-center gap-3">
+                                <input type="radio" name="paymentMethod" value="{{ $method['paymentMethod'] }}"
+                                    wire:model.live="paymentMethod" class="hidden">
+                                <img src="{{ $method['paymentImage'] }}" alt="{{ $method['paymentName'] }}"
+                                    class="h-6 object-contain">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-800">{{ $method['paymentName'] }}</p>
+                                    <p class="text-xs text-slate-500">
+                                        Fee:
+                                        @if ($method['totalFee'] > 0)
+                                            Rp {{ number_format($method['totalFee'], 0, ',', '.') }}
+                                        @else
+                                            <span class="text-emerald-600 font-semibold">Bebas Biaya</span>
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        </label>
+                    @endforeach
+                </div>
+            @else
+                <div
+                    class="p-4 bg-amber-50 rounded-2xl border border-amber-200/70 text-amber-800 text-xs text-center font-medium">
+                    Tidak ada metode pembayaran yang tersedia untuk nominal ini atau belum diaktifkan oleh Admin.
+                </div>
+            @endif
 
-                @foreach ($paymentMethods as $code => $label)
-                    <label
-                        class="flex items-center justify-between p-2.5 rounded-xl transition-all cursor-pointer {{ $paymentMethod === $code ? 'bg-amber-50/60 font-bold border border-amber-200/60' : 'hover:bg-slate-50' }}">
-                        <div class="flex items-center gap-2.5 text-xs text-slate-700">
-                            <input type="radio" wire:model.live="paymentMethod" value="{{ $code }}"
-                                class="text-amber-500 focus:ring-amber-500">
-                            <span>{{ $label }}</span>
-                        </div>
-                    </label>
-                @endforeach
-            </div>
+            @error('paymentMethod')
+                <span class="text-xs text-rose-500 mt-1.5 block font-medium">{{ $message }}</span>
+            @enderror
         </div>
     </div>
 
@@ -129,16 +141,16 @@
                     : $selectedPackage->price;
         @endphp
         <div
-            class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 p-3 z-30 max-w-md mx-auto mb-12">
+            class="fixed bottom-12 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 p-3.5 z-30 max-w-md mx-auto">
             <div class="flex items-center justify-between mb-2 px-1">
                 <span class="text-[11px] font-medium text-slate-500">Total Pembayaran:</span>
                 <span class="text-sm font-black text-amber-600">Rp {{ number_format($totalToPay, 0, ',', '.') }}</span>
             </div>
 
             <button wire:click="processTopup" wire:loading.attr="disabled"
-                class="w-full py-3.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2">
-                <span wire:loading.remove>Konfirmasi & Bayar Sekarang</span>
-                <span wire:loading class="flex items-center gap-2">
+                class="w-full py-3.5 bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                <span wire:loading.remove wire:target="processTopup">Konfirmasi & Bayar Sekarang</span>
+                <span wire:loading wire:target="processTopup" class="flex items-center gap-2">
                     <svg class="w-4 h-4 animate-spin text-slate-950" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

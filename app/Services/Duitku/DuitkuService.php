@@ -16,20 +16,49 @@ class DuitkuService
     public function __construct()
     {
         // Ambil konfigurasi dari Database (Setting Model) dengan fallback ke config/services.php
-        $this->merchantCode = Setting::get('duitku_merchant_code', config('services.duitku.merchant_code'));
-        $this->apiKey       = Setting::get('duitku_api_key', config('services.duitku.api_key'));
+        $this->merchantCode = Setting::get('duitku_merchant_code');
+        $this->apiKey       = Setting::get('duitku_api_key');
 
         $sandboxSetting     = Setting::get('duitku_is_sandbox');
-        $this->isSandbox    = $sandboxSetting !== null
-            ? filter_var($sandboxSetting, FILTER_VALIDATE_BOOLEAN)
-            : config('services.duitku.sandbox', true);
-
+        $this->isSandbox    = filter_var(Setting::get('duitku_is_sandbox', true), FILTER_VALIDATE_BOOLEAN);
         $this->expiryPeriod = (int) Setting::get('duitku_expiry_period', 60);
     }
 
-    /**
-     * Mengambil Base URL API Duitku berdasarkan Mode (Sandbox / Production)
-     */
+    public function getPaymentMethods($amount = 10000)
+    {
+        $datetime = date('Y-m-d H:i:s');
+        $signature = hash('sha256', $this->merchantCode . (int)$amount . $datetime . $this->apiKey);
+        $endpoint  = $this->isSandbox
+            ? 'https://sandbox.duitku.com/webapi/api/merchant/paymentmethod/getpaymentmethod'
+            : 'https://passport.duitku.com/webapi/api/merchant/paymentmethod/getpaymentmethod';
+
+        $payload = [
+            'merchantcode' => $this->merchantCode,
+            'amount' => (int) $amount,
+            'datetime' => $datetime,
+            'signature' => $signature
+        ];
+
+        try {
+            $response = Http::withoutVerifying()
+                ->timeout(10)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post($endpoint, $payload);
+            if ($response->successful() && isset($response->json()['paymentFee'])) {
+                return [
+                    'status' => true,
+                    'methods' => $response->json()['paymentFee']
+                ];
+            }
+
+            Log::error('Duitku Get Payment Method Failed', ['response' => $response->json()]);
+            return ['status' => false, 'methods' => []];
+        } catch (\Throwable $th) {
+            Log::error('Duitku Get Payment Method Exception: ' . $e->getMessage());
+            return ['status' => false, 'methods' => []];
+        }
+    }
+
     private function getInquiryEndpoint()
     {
         return $this->isSandbox

@@ -55,6 +55,33 @@
             @enderror
         </div>
 
+        <div class="rounded-2xl shadow-sm mt-6">
+            <h3 class="font-bold text-slate-200 text-lg mb-1">Metode Pembayaran Aktif (Real-time dari Duitku)</h3>
+            <p class="text-xs text-slate-500 mb-4">Pilih metode pembayaran yang ingin kamu aktifkan untuk pengguna.</p>
+
+            @if (count($apiPaymentMethods) > 0)
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    @foreach ($apiPaymentMethods as $item)
+                        <label
+                            class="flex items-center justify-between p-3 border rounded-xl cursor-pointer bg-gray-50 transition">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" value="{{ $item['paymentMethod'] }}" wire:model="enabledMethods"
+                                    class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                                <img src="{{ $item['paymentImage'] }}" alt="{{ $item['paymentName'] }}"
+                                    class="h-6 object-contain">
+                                <span class="text-sm font-semibold text-gray-800">{{ $item['paymentName'] }}</span>
+                            </div>
+                            <span class="text-xs text-gray-400">Fee: Rp {{ number_format($item['totalFee']) }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            @else
+                <div class="p-4 bg-amber-50 text-amber-700 text-xs rounded-xl border border-amber-200">
+                    Gagal mengambil data dari API Duitku. Pastikan Merchant Code dan API Key sudah diisi dengan benar.
+                </div>
+            @endif
+        </div>
+
         <div class="flex justify-end">
             <button type="submit"
                 class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm rounded-lg transition">
