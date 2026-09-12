@@ -15,18 +15,14 @@ use Livewire\Component;
 class ManageStoryChapters extends Component
 {
     public Story $story;
-
     public $isCreateModalOpen = false;
-
     public $title = '';
-
     public $type = 'regular';
-
     public $status = 'draft';
 
     public function mount(Story $story)
     {
-        $this->$story = $story;
+        $this->story = $story;
     }
 
     public function openCreateModal()
@@ -83,10 +79,21 @@ class ManageStoryChapters extends Component
                     throw new \Exception("Sistem gagal menulis file json bab ke storage.");
                 }
 
+                $baseSlug = Str::slug($this->title);
+                $slug = $baseSlug;
+
+                $count = Chapter::where('story_id', $this->story->id)
+                    ->where('slug', 'LIKE', $baseSlug . '%')
+                    ->count();
+
+                if ($count > 0) {
+                    $slug = "{$baseSlug}-" . ($count + 1);
+                }
+
                 return Chapter::create([
                     'story_id' => $this->story->id,
                     'title' => $this->title,
-                    'slug' => Str::slug($this->title),
+                    'slug' => $slug,
                     'file_path' => $filePath,
                     'word_count' => 0,
                     'order_number' => $nextOrder,
@@ -116,6 +123,71 @@ class ManageStoryChapters extends Component
 
             $this->dispatch('show-toast', type: 'error', message: $th->getMessage());
             $this->closeCreateModal();
+        }
+    }
+
+    public function deleteChapter($chapterId)
+    {
+        $chapter = $this->story->chapters()->find($chapterId);
+
+        if (!$chapter) {
+            $this->dispatch('show-toast', type: 'error', message: 'Bab tidak ditemukan.');
+            return;
+        }
+
+        // 1. Validasi: Wajib berstatus draft
+        if ($chapter->status !== 'draft') {
+            $this->dispatch('show-toast', type: 'error', message: 'Gagal! Bab yang sudah dipublikasikan tidak dapat dihapus.');
+            return;
+        }
+
+        // 2. Validasi: Cek apakah sudah ada transaksi pembelian
+        $hasPurchases = DB::table('user_purchased_chapters')
+            ->where('chapter_id', $chapter->id)
+            ->exists();
+
+        if ($hasPurchases) {
+            $this->dispatch('show-toast', type: 'error', message: 'Gagal! Bab ini tidak dapat dihapus karena sudah dibeli oleh pembaca.');
+            return;
+        }
+
+        try {
+            DB::transaction(function () use ($chapter) {
+                // Hapus file JSON fisik dari storage local
+                if ($chapter->file_path && Storage::disk('local')->exists($chapter->file_path)) {
+                    Storage::disk('local')->delete($chapter->file_path);
+                }
+
+                // Hapus record bab
+                $chapter->delete();
+
+                // Re-index order_number bab yang tersisa
+                $remainingChapters = $this->story->chapters()
+                    ->orderBy('order_number', 'asc')
+                    ->get();
+
+                foreach ($remainingChapters as $index => $item) {
+                    $newOrder = $index + 1;
+
+                    // Update order_number & penyesuaian otomatis is_premium jika melewati bab 5
+                    $item->update([
+                        'order_number' => $newOrder,
+                        'is_premium' => ($this->story->monetization_type === 'premium' && $newOrder > 5),
+                    ]);
+                }
+            });
+
+            // Reload relasi chapters di instance story agar view ter-render ulang dengan data presisi
+            $this->story->load('chapters');
+
+            $this->dispatch('show-toast', type: 'success', message: 'Bab draft berhasil dihapus dan nomor urut disesuaikan!');
+        } catch (\Throwable $th) {
+            Log::error(
+                'Gagal menghapus bab: ' . $th->getMessage(),
+                ['story_id' => $this->story->id, 'chapter_id' => $chapterId, 'user_id' => auth()->id()]
+            );
+
+            $this->dispatch('show-toast', type: 'error', message: 'Terjadi kesalahan saat menghapus bab.');
         }
     }
 

@@ -288,6 +288,12 @@ class ChapterEditor extends Component
     public function saveChapter()
     {
 
+        if ($this->chapter->exists && $this->chapter->status === 'published' && $this->status === 'draft') {
+            $this->status = 'published';
+            $this->dispatch('show-toast', type: 'error', message: 'Bab yang sudah dipublikasikan tidak dapat dikembalikan ke status Draft!');
+            return;
+        }
+
         $rules = [
             'title' => 'required|string|max:255',
             'status' => 'required|in:draft,published',
@@ -333,6 +339,25 @@ class ChapterEditor extends Component
             }
         }
 
+        if ($this->status === 'published') {
+            $minWords = ($this->story->type === 'puisi') ? 700 : 1000;
+            $maxWords = 1500;
+
+            $currentWords = $this->calculateWordCount();
+
+            if ($currentWords < $minWords) {
+                $message = "Untuk mempublish bab ini harus memiliki minimal {$minWords} kata! (Saat ini: {$currentWords} kata)";
+                $this->dispatch('show-toast', type: 'error', message: $message);
+                return;
+            }
+
+            if ($currentWords > $maxWords) {
+                $message = "Batas maksimal kata per bab adalah {$maxWords} kata! (Saat ini: {$currentWords} kata)";
+                $this->dispatch('show-toast', type: 'error', message: $message);
+                return;
+            }
+        }
+
         try {
             foreach ($this->bubbles as $index => &$bubble) {
                 if (($bubble['message_type'] ?? '') === 'image') {
@@ -361,9 +386,8 @@ class ChapterEditor extends Component
                     Storage::disk('public')->delete($oldImagePath);
                 }
             }
+
             $this->imagesToDelete = [];
-
-
 
             // Jika judul tidak berubah saat edit, gunakan slug yang sudah ada
             if ($this->chapter->title === $this->title) {

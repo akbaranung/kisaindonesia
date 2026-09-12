@@ -15,19 +15,81 @@
             </div>
         </div>
         <div class="flex gap-1">
-            <!-- Status Chapter -->
+
             <select wire:model="status"
-                class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-semibold focus:outline-none focus:border-brand-500">
-                <option value="draft">Draft</option>
+                class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-semibold focus:outline-none focus:border-brand-500"
+                {{ $chapter->status === 'published' ? 'disabled' : '' }}>
+                <option value="draft" {{ $chapter->status === 'published' ? 'disabled' : '' }}>Draft</option>
                 <option value="published">Published</option>
             </select>
 
-            <!-- Tombol Simpan Bab -->
-            <button wire:click="saveChapter" wire:loading.attr="disabled"
-                class="px-4 py-1.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5">
-                <span wire:loading.remove wire:target="saveChapter"><i class="fas fa-save"></i></span>
-                <span wire:loading wire:target="saveChapter">Menyimpan...</span>
-            </button>
+            <div x-data="{ showConfirmModal: false }">
+                <!-- Tombol Simpan (Trigger) -->
+                <button type="button"
+                    @click="
+            if ($wire.status === 'published' && '{{ $chapter->status }}' !== 'published') {
+                showConfirmModal = true;
+            } else {
+                $wire.saveChapter();
+            }
+        "
+                    wire:loading.attr="disabled" wire:target="saveChapter"
+                    class="px-4 py-1.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5 disabled:opacity-50">
+                    <span wire:loading.remove wire:target="saveChapter"><i class="fas fa-save"></i></span>
+                    <span wire:loading wire:target="saveChapter">Menyimpan...</span>
+                </button>
+
+                <!-- Modal Konfirmasi Publikasi -->
+                <template x-teleport="body">
+                    <div x-show="showConfirmModal" x-cloak x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+
+                        <div @click.away="showConfirmModal = false"
+                            class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4">
+
+                            <div class="flex items-center gap-3 text-amber-500">
+                                <div class="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-100">Konfirmasi Publikasi</h3>
+                                    <p class="text-[10px] text-slate-400">Tindakan ini tidak dapat dibatalkan</p>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-slate-800/50 border border-slate-700/50 rounded-xl">
+                                <p class="text-xs text-slate-300 leading-relaxed">
+                                    Konten yang sudah dipublikasikan <strong class="text-rose-400">tidak dapat
+                                        dihapus</strong> dan tidak bisa dikembalikan ke status Draft, hanya diizinkan
+                                    untuk diedit.
+                                </p>
+                                <p class="text-xs font-semibold text-slate-200 mt-2">Lanjutkan publikasi bab ini?</p>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                                <button type="button" @click="showConfirmModal = false"
+                                    class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition">
+                                    Batal
+                                </button>
+                                <button type="button"
+                                    @click="
+                            showConfirmModal = false;
+                            $wire.saveChapter();
+                        "
+                                    class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-brand-500/10 transition">
+                                    Ya, Publikasikan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
         </div>
     </header>
 

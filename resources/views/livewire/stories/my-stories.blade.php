@@ -106,7 +106,7 @@
                             {{-- Status 1: Sudah Premium --}}
                             @if ($story->monetization_type === 'premium')
                                 <span
-                                    class="px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700 border border-brand-200 text-xs font-bold flex items-center gap-1">
+                                    class="text-[9px] px-2 py-0.5 rounded-xl bg-brand-50 text-brand-700 border border-brand-200 font-bold flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                         <path
                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -117,7 +117,7 @@
                                 {{-- Status 2: Sedang Dalam Peninjauan Admin --}}
                             @elseif($isPending)
                                 <span
-                                    class="px-2 py-0.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold flex items-center gap-1">
+                                    class="text-[9px] px-2 py-0.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-bold flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -130,20 +130,20 @@
                                 {{-- Status 3: Masih Gratis -> Tampilkan Tombol Ajukan Premium --}}
                             @else
                                 <a href="{{ route('monetization.apply', ['story_id' => $story->id]) }}"
-                                    class="px-2 py-0.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all shadow-xs flex items-center">
-                                    <span>Ajukan Premium</span>
+                                    class="text-[9px] px-2 py-0.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-xs flex items-center">
+                                    <span>Monetisasi Konten</span>
                                 </a>
                             @endif
                             {{-- <a href="{{ route('stories.chapters', $story->id) }}" wire:navigate
                                 class="px-2 py-0.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-xs font-bold transition-all text-white">
                                 Open
                             </a> --}}
-                            <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">
+                            <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-xl">
                                 <livewire:update-story-status :story="$story" :key="'story-status-' . $story->id" />
                             </span>
 
                             <button wire:click="editStory({{ $story->id }})"
-                                class="px-2 py-0.5 bg-brand-600 hover:bg-brand-500 rounded-xl text-xs text-white transition flex items-center justify-center">
+                                class="text-[9px] px-2 py-0.5 bg-brand-600 hover:bg-brand-500 rounded-xl text-white transition flex items-center justify-center">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round"

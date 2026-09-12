@@ -116,7 +116,7 @@
                     <div class="flex items-center gap-1">
                         <span
                             class="text-[10px] text-brand-600 font-black tracking-wide bg-brand-50 px-2 py-1 rounded-lg group-hover:bg-brand-600 group-hover:text-brand-600 transition">
-                            🫘 {{ $ch->bean_price }}
+                            🫘 {{ $ch->is_premium ? $ch->bean_price : 0 }}
                         </span>
                     </div>
                 </a>

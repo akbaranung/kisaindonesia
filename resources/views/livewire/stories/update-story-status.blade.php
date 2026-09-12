@@ -3,7 +3,7 @@
         <button wire:click="setStatus('draft')" wire:loading.attr="disabled"
             onclick="confirm('Sembunyikan cerita ini dari publik?') || event.stopImmediatePropagation()"
             title="Klik untuk ubah ke Draft"
-            class="px-2 py-0.5 text-[10px] rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50">
+            class="px-2 py-0.5 text-[9px] rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold transition-all flex items-center gap-1.5 disabled:opacity-50">
             <span wire:loading.remove wire:target="setStatus('draft')">
                 <span>Draft Cerita</span>
             </span>
@@ -16,7 +16,7 @@
         </button>
     @else
         <button wire:click="setStatus('published')" wire:loading.attr="disabled" title="Klik untuk publikasikan"
-            class="px-2 py-0.5 text-[10px] rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50">
+            class="px-2 py-0.5 text-[9px] rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50">
             <span wire:loading.remove wire:target="setStatus('published')">
                 <span>Publish Cerita</span>
             </span>

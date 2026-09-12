@@ -1,5 +1,6 @@
 <div class="min-h-screen text-slate-100 pb-20">
-    <div class="sticky top-0 z-3 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between">
+    <div
+        class="sticky top-0 z-3 backdrop-blur-md border-b border-slate-200/20 px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <a href="{{ route('my-stories') }}" class="text-slate-800 hover:text-slate-600">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -13,7 +14,7 @@
         </div>
 
         <button wire:click="openCreateModal"
-            class="px-3 py-1.5 bg-brand-500 text-slate-100 font-bold rounded-lg text-xs flex items-center gap-2 shadow-md shadow-amber-500/10">
+            class="px-3 py-1.5 bg-brand-500 text-slate-100 font-bold rounded-lg text-xs flex items-center gap-2 shadow-md shadow-amber-500/10 hover:bg-brand-600 transition">
             <span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-4">
@@ -21,44 +22,80 @@
                         d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
             </span>
+            <span>Bab Baru</span>
         </button>
     </div>
 
     <div class="p-4 space-y-3">
         @if (session()->has('message'))
-            <div class="p-3 bg-brand-950/80 border border-brand-800 text-brand-300 text-xs rounded-xl">✓
-                {{ session('message') }}</div>
+            <div class="p-3 bg-brand-950/80 border border-brand-800 text-brand-300 text-xs rounded-xl">
+                ✓ {{ session('message') }}
+            </div>
         @endif
+
+        @php
+            // Optimasi N+1 Query: Ambil seluruh ID bab yang sudah pernah dibeli sekali jalan
+            $chapterIds = $chapters->pluck('id')->toArray();
+            $purchasedChapterIds = \Illuminate\Support\Facades\DB::table('user_purchased_chapters')
+                ->whereIn('chapter_id', $chapterIds)
+                ->pluck('chapter_id')
+                ->toArray();
+        @endphp
 
         <div class="space-y-2.5">
             @forelse($chapters as $chap)
-                <div
-                    class="p-3.5 border border-slate-100 rounded-xl flex items-center justify-between gap-3 hover:border-brand-500 shadow-md">
+                @php
+                    $isDraft = $chap->status === 'draft';
+                    $hasPurchases = in_array($chap->id, $purchasedChapterIds);
+                    $canDelete = $isDraft && !$hasPurchases;
+                @endphp
+                <div wire:key="chap-{{ $chap->id }}"
+                    class="p-3.5 border border-slate-100 rounded-xl flex items-center justify-between gap-3 hover:border-brand-500 shadow-sm transition">
                     <div class="space-y-1">
                         <div class="flex items-center gap-2">
                             <span
-                                class="text-[10px] font-bold text-brand-500 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">Bab
-                                {{ $chap->order_number }}</span>
+                                class="text-[10px] font-bold text-brand-500 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
+                                Bab {{ $chap->order_number }}
+                            </span>
                             <span
-                                class="text-[9px] font-bold {{ $chap->status === 'published' ? 'text-brand-400' : 'text-slate-500' }}">●
-                                {{ ucfirst($chap->status) }}</span>
+                                class="text-[9px] font-bold {{ $chap->status === 'published' ? 'text-brand-500' : 'text-slate-400' }}">
+                                ● {{ ucfirst($chap->status) }}
+                            </span>
                         </div>
-                        <h3 class="text-xs font-bold text-slate-700 line-clamp-1">{{ $chap->title }}</h3>
+                        <h3 class="text-xs font-bold text-slate-800 line-clamp-1">{{ $chap->title }}</h3>
                         <p class="text-[10px] text-slate-400">{{ number_format($chap->word_count ?? 0) }} kata</p>
                     </div>
 
-                    <a href="{{ route('chapters.editor', ['story' => $story->id, 'chapter' => $chap->id]) }}"
-                        class="px-3 py-2 bg-brand-500 border border-brand-500 text-slate-100 font-bold text-xs rounded-lg shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-4">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                        </svg>
-                    </a>
+                    <div class="flex items-center gap-2">
+                        @if ($canDelete)
+                            <button type="button" wire:click="deleteChapter({{ $chap->id }})"
+                                wire:confirm="Hapus Bab {{ $chap->order_number }}? Urutan bab setelahnya akan disesuaikan."
+                                wire:loading.attr="disabled" wire:target="deleteChapter({{ $chap->id }})"
+                                class="px-3 py-1.5 bg-red-50 text-red-600 border border-red-100 rounded-lg text-xs font-bold hover:bg-red-100 transition flex items-center gap-1">
+                                <span wire:loading.remove wire:target="deleteChapter({{ $chap->id }})">Hapus</span>
+                                <span wire:loading wire:target="deleteChapter({{ $chap->id }})">...</span>
+                            </button>
+                        @else
+                            <button type="button" disabled
+                                class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-xs font-medium cursor-not-allowed border border-slate-200"
+                                title="{{ !$isDraft ? 'Bab sudah dipublikasikan' : 'Bab sudah dibeli oleh pembaca' }}">
+                                Terkunci
+                            </button>
+                        @endif
+
+                        <a href="{{ route('chapters.editor', ['story' => $story->id, 'chapter' => $chap->id]) }}"
+                            class="px-3 py-1.5 bg-brand-500 border border-brand-500 text-slate-100 font-bold text-xs rounded-lg shrink-0 flex items-center justify-center hover:bg-brand-600 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             @empty
-                <div class="p-8 text-center bg-slate-200/50 border border-slate-100 rounded-2xl">
-                    <p class="text-xs text-slate-600">Belum ada bab. Klik <strong>Bab Baru</strong> untuk mulai.</p>
+                <div class="p-8 text-center bg-slate-50 border border-slate-100 rounded-2xl">
+                    <p class="text-xs text-slate-500">Belum ada bab. Klik <strong>Bab Baru</strong> untuk mulai.</p>
                 </div>
             @endforelse
         </div>
@@ -71,7 +108,8 @@
             <div
                 class="w-full max-w-md bg-slate-900 border-t sm:border border-slate-800 rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <h3 class="text-xs font-bold text-slate-100"><i class="fa-solid fa-book-open"></i> Buat Chapter Baru
+                    <h3 class="text-xs font-bold text-slate-100">
+                        <i class="fa-solid fa-book-open"></i> Buat Chapter Baru
                     </h3>
                     <button wire:click="closeCreateModal" class="text-slate-400 hover:text-slate-200 text-sm">✕</button>
                 </div>
@@ -89,7 +127,6 @@
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-300 mb-1">Jenis Content</label>
                         @if ($story->type === 'puisi')
-                            {{-- Jika Cerita = Puisi --}}
                             <select wire:model="type"
                                 class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500 capitalize">
                                 <option value="regular">Regular</option>
@@ -107,13 +144,13 @@
 
                     <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
                         <button type="button" wire:click="closeCreateModal"
-                            class="px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-xl">Batal</button>
+                            class="px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-xl hover:bg-slate-700 transition">Batal</button>
                         <button type="submit" wire:loading.remove wire:target="createAndRedirect"
-                            class="px-4 py-2 bg-brand-500 text-slate-950 font-bold text-xs rounded-xl">Masuk
+                            class="px-4 py-2 bg-brand-500 text-slate-950 font-bold text-xs rounded-xl hover:bg-brand-600 transition">Masuk
                             Editor</button>
                         <button type="button" wire:loading wire:target="createAndRedirect"
-                            class="px-4 py-2 bg-brand-500 text-slate-950 font-bold text-xs rounded-xl" disabled>Loading
-                            ...</button>
+                            class="px-4 py-2 bg-brand-500 text-slate-950 font-bold text-xs rounded-xl opacity-75 cursor-not-allowed"
+                            disabled>Loading ...</button>
                     </div>
                 </form>
             </div>
