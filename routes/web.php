@@ -2,17 +2,21 @@
 
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Duitku\DuitkuController;
+use App\Livewire\Admin\CoinPackageIndex;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\DuitkuSettings;
 use App\Livewire\Admin\ManageGenres;
 use App\Livewire\Admin\ManagePremiumRequests;
 use App\Livewire\Admin\ManageUsers;
+use App\Livewire\Admin\SystemSettings;
 use App\Livewire\Admin\TransactionManagement;
+use App\Livewire\Admin\WithdrawalIndex;
 use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Auth\VerifyEmail;
+use App\Livewire\Author\WithdrawalIndex as AuthorWithdrawalIndex;
 use App\Livewire\ContactSupport;
 use App\Livewire\FollowingFeed;
 use App\Livewire\FullNotificationList;
@@ -119,6 +123,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/topup/process', [DuitkuController::class, 'createTopup'])->name('topup.process');
     Route::get('/topup/return', [DuitkuController::class, 'returnPage'])->name('topup.return');
+    Route::get('/withdrawals', AuthorWithdrawalIndex::class)->name('withdrawals.index');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -134,7 +139,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     })->name('chapters.preview');
 
     Route::get('/transactions', TransactionManagement::class)->name('transactions.index');
-    Route::get('/settings/duitku', DuitkuSettings::class)->name('settings.duitku');
+    Route::get('/settings', SystemSettings::class)->name('settings');
+    Route::get('/coin-packages', CoinPackageIndex::class)->name('coin-packages.index');
+    Route::get('/withdrawals', WithdrawalIndex::class)->name('withdrawals.index');
 });
 
 Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle']);

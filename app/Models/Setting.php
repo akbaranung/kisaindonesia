@@ -21,4 +21,21 @@ class Setting extends Model
             ['value' => $value]
         );
     }
+
+    public function calculateWithdrawal(int $kisaAmount)
+    {
+        $rate = (float) Setting::get('kisa_to_rupiah_rate', 150);
+        $adminFee = (float) Setting::get('withdrawal_admin_fee', 3000);
+
+        $grossRupiah = $kisaAmount * $rate;
+        $netRupiah = max(0, $grossRupiah - $adminFee);
+
+        return [
+            'kisa' => $kisaAmount,
+            'rate' => $rate,
+            'gross_rupiah' => $grossRupiah,
+            'admin_fee' => $adminFee,
+            'net_rupiah' => $netRupiah,
+        ];
+    }
 }

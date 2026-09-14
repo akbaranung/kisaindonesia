@@ -20,6 +20,14 @@ class CoinPackage extends Model
         'order_priority',
     ];
 
+    protected $casts = [
+        'beans' => 'integer',
+        'bonus_beans' => 'integer',
+        'price' => 'decimal:2',
+        'is_active' => 'boolean',
+        'order_priiority' => 'integer'
+    ];
+
     public function getTotalBeansAttribute(): int
     {
         return $this->beans + $this->bonus_beans;
