@@ -8,6 +8,7 @@ use App\Livewire\Admin\DuitkuSettings;
 use App\Livewire\Admin\ManageGenres;
 use App\Livewire\Admin\ManagePremiumRequests;
 use App\Livewire\Admin\ManageUsers;
+use App\Livewire\Admin\StoryManager;
 use App\Livewire\Admin\SystemSettings;
 use App\Livewire\Admin\TransactionManagement;
 use App\Livewire\Admin\WithdrawalIndex;
@@ -130,6 +131,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/genres', ManageGenres::class)->name('genres');
     Route::get('/users', ManageUsers::class)->name('users');
+    Route::get('/stories', StoryManager::class)->name('stories');
     Route::get('/premium-requests', ManagePremiumRequests::class)->name('premium-requests');
 
     Route::get('/chapters/{id}/preview', function ($id) {

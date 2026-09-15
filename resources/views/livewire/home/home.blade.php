@@ -118,6 +118,105 @@
             </section>
         @endif
 
+        <section class="space-y-4">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider">
+                        Pilihan Editor
+                    </h2>
+                    <p class="text-[11px] text-slate-400">Geser untuk melihat kisah favorit pilihan pembaca</p>
+                </div>
+            </div>
+
+            <!-- Grid Cerita Pilihan Editor -->
+            <div class="flex gap-4 overflow-x-auto pb-4 mx-1 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth">
+                @foreach ($editorChoices as $story)
+                    <div class="w-28 flex-shrink-0 snap-start transition">
+                        {{-- Cover Image --}}
+                        <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
+                            <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
+                                @if ($story->cover_path)
+                                    <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
+                                        class="w-full h-full object-cover hover:scale-105 transition duration-300">
+                                @else
+                                    <div
+                                        class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 text-amber-500 font-black">
+                                        📚
+                                    </div>
+                                @endif
+                            </a>
+
+                            <div class="absolute inset-0 pointer-events-none">
+                                <div class="flex items-center space-x-1.5 p-2">
+                                    <span
+                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-black border border-white">
+                                        <i class="fa-regular fa-eye"></i>
+                                        {{ number_format_short($story->views_count ?? 0) }}
+                                    </span>
+                                    <div class="absolute right-2">
+                                        @if ($story->monetization_type === 'premium')
+                                            <span
+                                                class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-amber-500 text-white border border-amber-500 me-1">
+                                                <i class="fa-solid fa-crown"></i>
+                                            </span>
+                                        @endif
+                                        @if ($story->hasTypeChat())
+                                            <span
+                                                class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                <i class="fa-solid fa-comment-dots"></i>
+                                            </span>
+                                        @elseif(!$story->hasTypeChat() && $story->type === 'novel')
+                                            <span
+                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                <i class="fa-solid fa-pencil"></i>
+                                            </span>
+                                        @elseif($story->type === 'puisi')
+                                            <span
+                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                <i class="fa-solid fa-feather-pointed"></i>
+                                            </span>
+                                        @elseif($story->type === 'non_fiksi')
+                                            <span
+                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                <i class="fa-solid fa-magnifying-glass"></i>
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="absolute inset-0 pointer-events-none">
+                                <div class="absolute bottom-0 flex items-center space-x-1.5 p-2">
+                                    <div
+                                        class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
+                                        <div class="flex items-center gap-0.5 text-amber-500">
+                                            <span><i class="fa-solid fa-star"></i></span>
+                                            <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Detail Cerita --}}
+                        <div class="flex flex-col">
+                            <h3 class="text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
+                                <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
+                                    class="hover:text-brand-600 transition">
+                                    {{ $story->title }}
+                                </a>
+                            </h3>
+
+                            <span class="text-[10px] text-slate-400 font-medium line-clamp-1">
+                                <a
+                                    href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
         <section class="py-4 px-2 w-full">
             {{-- Header Section --}}
             <div class="flex items-center justify-between mb-3">
@@ -133,8 +232,7 @@
                 </a>
             </div>
 
-            <div
-                class="flex items-center gap-4 overflow-x-auto pb-4 mx-1 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth">
+            <div class="flex gap-4 overflow-x-auto pb-4 mx-1 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth">
                 @foreach ($stories as $story)
                     <div class="w-28 flex-shrink-0 snap-start transition">
                         {{-- Cover Image --}}
@@ -189,6 +287,17 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="absolute inset-0 pointer-events-none">
+                                <div class="absolute bottom-0 flex items-center space-x-1.5 p-2">
+                                    <div
+                                        class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
+                                        <div class="flex items-center gap-0.5 text-amber-500">
+                                            <span><i class="fa-solid fa-star"></i></span>
+                                            <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {{-- Detail Cerita --}}
@@ -204,115 +313,12 @@
                                 <a
                                     href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                             </span>
-
-                            <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
-                                <div class="flex items-center gap-0.5 text-amber-500">
-                                    <span><i class="fa-solid fa-star"></i></span>
-                                    <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 @endforeach
             </div>
         </section>
 
-        <section class="py-4 px-2 w-full border-t border-slate-50">
-            <div class="flex items-center justify-between mb-3">
-                <div>
-                    <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider">
-                        Cerita Populer
-                    </h2>
-                    <p class="text-[11px] text-slate-400">Kisah favorit yang paling banyak dibaca</p>
-                </div>
-                <a href="{{ route('stories.index', ['sortBy' => 'popular']) }}" wire:navigate
-                    class="text-xs font-bold text-brand-600 hover:text-brand-700 transition">
-                    Lihat Semua
-                </a>
-            </div>
-
-            <div
-                class="flex items-center gap-4 overflow-x-auto pb-4 mx-1 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth">
-                @foreach ($popularStories ?? $stories as $story)
-                    <div class="w-40 flex-shrink-0 snap-start transition">
-                        {{-- Cover Image --}}
-                        <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
-                            <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
-                                @if ($story->cover_path)
-                                    <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
-                                        class="w-full h-full object-cover hover:scale-105 transition duration-300">
-                                @else
-                                    <div
-                                        class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 text-amber-500 font-black">
-                                        📚
-                                    </div>
-                                @endif
-                            </a>
-
-                            <div class="absolute inset-0 pointer-events-none">
-                                <div class="flex items-center space-x-1.5 p-2">
-                                    <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-black border border-white">
-                                        <i class="fa-regular fa-eye"></i>
-                                        {{ number_format_short($story->views_count ?? 0) }}
-                                    </span>
-                                    <div class="absolute right-2">
-                                        @if ($story->monetization_type === 'premium')
-                                            <span
-                                                class="px-1 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-white border border-amber-500 me-1">
-                                                <i class="fa-solid fa-crown"></i>
-                                            </span>
-                                        @endif
-                                        @if ($story->hasTypeChat())
-                                            <span
-                                                class="px-1 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
-                                                <i class="fa-solid fa-comment-dots"></i>
-                                            </span>
-                                        @elseif(!$story->hasTypeChat() && $story->type === 'novel')
-                                            <span
-                                                class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
-                                                <i class="fa-solid fa-pencil"></i>
-                                            </span>
-                                        @elseif($story->type === 'puisi')
-                                            <span
-                                                class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
-                                                <i class="fa-solid fa-feather-pointed"></i>
-                                            </span>
-                                        @elseif($story->type === 'non_fiksi')
-                                            <span
-                                                class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-brand-500 border border-white">
-                                                <i class="fa-solid fa-magnifying-glass"></i>
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Detail Cerita --}}
-                        <div class="flex flex-col">
-                            <h3 class="text-xs font-bold text-slate-800 line-clamp-1 leading-snug">
-                                <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
-                                    class="hover:text-brand-600 transition">
-                                    {{ $story->title }}
-                                </a>
-                            </h3>
-
-                            <span class="text-[10px] text-slate-400 font-medium line-clamp-1">
-                                <a
-                                    href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
-                            </span>
-
-                            <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
-                                <div class="flex items-center gap-0.5 text-amber-500">
-                                    <span><i class="fa-solid fa-star"></i></span>
-                                    <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
+        <livewire:ranking-tab />
     </div>
 </div>

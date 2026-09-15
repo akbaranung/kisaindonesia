@@ -18,8 +18,12 @@ class Story extends Model
         'cover_path',
         'monetization_type',
         'type',
-        'pen_name_id'
+        'pen_name_id',
+        'is_editor_choice'
     ];
+
+    protected $casts = ['is_editor_choice' => 'boolean'];
+
     use HasFactory;
 
     public function chapters()

@@ -53,7 +53,7 @@
     </div>
 
     {{-- Story Grid Catalog --}}
-    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2">
+    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2 space-y-3">
         @forelse ($stories as $story)
             <div class="w-28 flex-shrink-0 snap-start transition">
                 {{-- Cover Image --}}
@@ -106,6 +106,17 @@
                                     </span>
                                 @endif
                             </div>
+                            <div class="absolute inset-0 pointer-events-none">
+                                <div class="absolute bottom-0 flex items-center space-x-1.5 p-2">
+                                    <div
+                                        class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
+                                        <div class="flex items-center gap-0.5 text-amber-500">
+                                            <span><i class="fa-solid fa-star"></i></span>
+                                            <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -123,13 +134,6 @@
                         <a
                             href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                     </span>
-
-                    <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
-                        <div class="flex items-center gap-0.5 text-amber-500">
-                            <span><i class="fa-solid fa-star"></i></span>
-                            <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         @empty
