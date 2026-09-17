@@ -48,11 +48,18 @@ class Home extends Component
             ->take(6)
             ->get();
 
+        $latestStories = Story::with(['penName', 'genre'])
+            ->where('status', 'published')
+            ->latest()
+            ->take(10)
+            ->get();
+
         return view('livewire.home.home', [
             'stories' => $query->latest()->take(5)->get(),
             'editorChoices' => $editorChoices,
             'popularStories' => $popularStories,
             'recentChapters' => $recentChapters,
+            'latestStories' => $latestStories,
             'user' => Auth::user()
         ]);
     }
