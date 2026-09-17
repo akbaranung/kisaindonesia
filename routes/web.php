@@ -42,6 +42,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+use App\Livewire\Category\CategoryIndex;
+use App\Livewire\Category\CategoryDetail;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -56,6 +59,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', Home::class)->name('home');
 Route::get('/stories/{story:slug}', StoryDetail::class)->name('stories.read');
 Route::get('/stories', StoryIndex::class)->name('stories.index');
+Route::get('/categories', CategoryIndex::class)->name('categories.index');
+Route::get('/categories/{id}', CategoryDetail::class)->name('categories.show');
 
 // tampilan pemberitahuan verifikasi
 Route::get('/email/verify', VerifyEmail::class)->name('verification.notice');
