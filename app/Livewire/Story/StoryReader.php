@@ -8,6 +8,7 @@ use App\Models\Chapter;
 use App\Models\ReadHistory;
 use App\Models\User;
 use App\Models\UserTransaction;
+use App\Models\Setting;
 use App\Services\StoryViewService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,8 @@ class StoryReader extends Component
     public $isLocked = false;
     public $showUnlockModal = false;
 
+    public $expiryDays = 7;
+
     const AUTHOR_SHARE_PERCENTAGE = 100;
 
     public function mount(Story $story, Chapter $chapter, StoryViewService $viewService)
@@ -41,6 +44,7 @@ class StoryReader extends Component
         $this->chapter = $chapter;
         $author = $story->user;
         $reader = Auth::user();
+        $this->expiryDays = (int) Setting::get('chapter_purchase_expiry_days', 7);
 
         if ($chapter->is_premium && $chapter->order_number > 0) {
             if (!auth()->check()) {
@@ -49,10 +53,14 @@ class StoryReader extends Component
                 if ($author->id === $reader->id) {
                     $this->isLocked = false;
                 } else {
-                    // cek apakah user pernah membeli bab ini
+                    // cek apakah user pernah membeli bab ini dan aksesnya belum kadaluarsa
                     $hasPurchased = DB::table('user_purchased_chapters')
                         ->where('user_id', auth()->id())
                         ->where('chapter_id', $chapter->id)
+                        ->where(function ($q) {
+                            $q->whereNull('expires_at')
+                              ->orWhere('expires_at', '>', now());
+                        })
                         ->exists();
 
                     if (!$hasPurchased) {
@@ -128,8 +136,10 @@ class StoryReader extends Component
         }
 
         $authorEarnedBeans = (int) floor(($price * self::AUTHOR_SHARE_PERCENTAGE) / 100);
+        $expiryDays = (int) Setting::get('chapter_purchase_expiry_days', 7);
+        $expiresAt = $expiryDays > 0 ? now()->addDays($expiryDays) : null;
 
-        DB::transaction(function () use ($reader, $price, $chapter, $authorEarnedBeans, $author) {
+        DB::transaction(function () use ($reader, $price, $chapter, $authorEarnedBeans, $author, $expiresAt) {
             $refGroup = 'BUY-' . date('Ymd') . '-' . strtoupper(Str::random(6));
 
             // Potong saldo user
@@ -161,14 +171,18 @@ class StoryReader extends Component
                 'description'    => 'Royalti Bab ' . $chapter->order_number . ' dari ' . $reader->name,
             ]);
 
-            // Catat transaksi di tabel user_purchased_chapters
-            DB::table('user_purchased_chapters')->insert([
-                'user_id' => $reader->id,
-                'chapter_id' => $this->chapter->id,
-                'beans_spent' => $price,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Catat atau perbarui transaksi di tabel user_purchased_chapters dengan expired_at
+            DB::table('user_purchased_chapters')->updateOrInsert(
+                [
+                    'user_id' => $reader->id,
+                    'chapter_id' => $this->chapter->id,
+                ],
+                [
+                    'beans_spent' => $price,
+                    'expires_at' => $expiresAt,
+                    'updated_at' => now(),
+                ]
+            );
         });
 
         $this->isLocked = false;

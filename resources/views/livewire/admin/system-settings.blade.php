@@ -55,6 +55,16 @@
                         @enderror
                     </div>
 
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Masa Kadaluarsa Akses Bab Terkunci (Hari)</label>
+                        <input type="number" wire:model="chapter_purchase_expiry_days" min="1"
+                            class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-brand-400">
+                        <p class="text-[10px] text-slate-500 mt-1">Durasi waktu pembaca dapat mengakses bab yang dibeli dengan KISA Bean (Default: 7 Hari).</p>
+                        @error('chapter_purchase_expiry_days')
+                            <span class="text-rose-400 text-[10px]">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     <button type="submit"
                         class="px-4 py-2 bg-brand-400 hover:bg-brand-500 text-slate-950 font-bold text-xs rounded-xl transition">
                         Simpan Pengaturan Pencairan

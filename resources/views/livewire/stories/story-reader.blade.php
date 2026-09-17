@@ -51,6 +51,11 @@
                         Bean</span> untuk melanjutkan membaca.
                 </p>
 
+                <div class="mt-3 text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200/70 px-3.5 py-1.5 rounded-xl flex items-center justify-center gap-1.5 max-w-[280px] shadow-3xs">
+                    <i class="fa-solid fa-clock text-amber-600"></i>
+                    <span>Masa akses bab berlaku <strong>{{ $expiryDays }} Hari</strong></span>
+                </div>
+
                 {{-- Alert Error Saldo Kurang --}}
                 @if (session()->has('error'))
                     <div
@@ -83,9 +88,14 @@
                                     {{ $chapter->order_number }}</span>.
                             </p>
 
+                            <div class="my-3 p-2.5 bg-amber-50 border border-amber-200/80 rounded-2xl text-[11px] text-amber-800 font-semibold flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-clock text-amber-600"></i>
+                                <span>Akses bab berlaku <strong>{{ $expiryDays }} Hari</strong> setelah dibuka</span>
+                            </div>
+
                             {{-- Ringkasan Saldo --}}
                             <div
-                                class="my-4 p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs font-semibold">
+                                class="mb-4 p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs font-semibold">
                                 <span class="text-slate-400">Saldo Kamu:</span>
                                 <span class="text-slate-800 font-bold">🫘 {{ auth()->user()->kisa_bean_balance ?? 0 }}
                                     Beans</span>

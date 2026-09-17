@@ -23,6 +23,7 @@ class SystemSettings extends Component
     public float $kisa_to_rupiah_rate = 150;
     public float $withdrawal_admin_fee = 3000;
     public int $min_withdrawal_kisa = 100;
+    public int $chapter_purchase_expiry_days = 7;
 
     public function mount(DuitkuService $duitkuService)
     {
@@ -46,6 +47,7 @@ class SystemSettings extends Component
         $this->kisa_to_rupiah_rate = (float) Setting::get('kisa_to_rupiah_rate', 150);
         $this->withdrawal_admin_fee = (float) Setting::get('withdrawal_admin_fee', 3000);
         $this->min_withdrawal_kisa = (int) Setting::get('min_withdrawal_kisa', 100);
+        $this->chapter_purchase_expiry_days = (int) Setting::get('chapter_purchase_expiry_days', 7);
     }
 
     public function setTab(string $tab)
@@ -59,13 +61,15 @@ class SystemSettings extends Component
             'kisa_to_rupiah_rate' => 'required|numeric|min:1',
             'withdrawal_admin_fee' => 'required|numeric|min:0',
             'min_withdrawal_kisa' => 'required|integer|min:1',
+            'chapter_purchase_expiry_days' => 'required|integer|min:1',
         ]);
 
         Setting::set('kisa_to_rupiah_rate', $this->kisa_to_rupiah_rate);
         Setting::set('withdrawal_admin_fee', $this->withdrawal_admin_fee);
         Setting::set('min_withdrawal_kisa', $this->min_withdrawal_kisa);
+        Setting::set('chapter_purchase_expiry_days', $this->chapter_purchase_expiry_days);
 
-        $this->dispatch('show-toast', type: 'success', message: 'Pengaturan Pencairan & Kisa berhasil disimpan!');
+        $this->dispatch('show-toast', type: 'success', message: 'Pengaturan Pencairan, Kisa & Masa Berlaku Bab berhasil disimpan!');
     }
 
     public function saveDuitkuSettings()
