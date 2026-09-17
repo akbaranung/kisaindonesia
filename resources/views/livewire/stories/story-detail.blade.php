@@ -61,8 +61,8 @@
         <div class="flex gap-2 items-center text-brand-600 font-bold">
             <div
                 class="w-8 h-8 rounded-full overflow-hidden bg-brand-100 flex-shrink-0 border-4 border-slate-50 shadow-inner flex items-center justify-center">
-                <img src="{{ asset('storage/pen-names/avatars/2MpFpLrAZyfpwECWISuTq3hWf2Ir3nTzvV8cBKcm.jpg') }}"
-                    alt="{{ $story->penName->name }}" class="w-full h-full object-cover">
+                <img src="{{ asset('storage/' . $story->penName->avatar) }}" alt="{{ $story->penName->name }}"
+                    class="w-full h-full object-cover">
             </div>
             <a href="{{ route('pen-name.show', $story->penName->slug) }}">
                 <span>{{ $story->penName->name }}</span>
