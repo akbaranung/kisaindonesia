@@ -23,9 +23,87 @@
         @if (session()->has('success_library'))
             <div
                 class="p-3.5 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between animate-fade-in">
-                <span>✅ {{ session('success_library') }}</span>
+                <span><i class="fa-regular fa-circle-check"></i> {{ session('success_library') }}</span>
                 <button wire:click="$refresh" class="text-emerald-500 hover:text-emerald-800">✕</button>
             </div>
+        @endif
+
+        {{-- SECTION: TERAKHIR DIBACA (CONTINUE READING) --}}
+        @if (count($continueReading) > 0)
+            <section class="py-4 px-3.5 w-full bg-white rounded-3xl border border-slate-100 shadow-2xs">
+                {{-- Header Section --}}
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h2 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock-rotate-left text-brand-600"></i> Lanjutkan Membaca
+                        </h2>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Kisah yang terakhir kamu buka</p>
+                    </div>
+                </div>
+
+                {{-- Slider / Horizontal Grid Container --}}
+                <div class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none snap-x snap-mandatory scroll-smooth">
+                    @foreach ($continueReading as $history)
+                        @php
+                            $chapter = $history->chapter;
+                            $story = $chapter?->story;
+                        @endphp
+
+                        @if ($chapter && $story)
+                            <div
+                                class="w-64 flex-shrink-0 snap-start bg-slate-50/70 rounded-2xl p-2.5 border border-slate-100 shadow-3xs flex gap-3 items-center relative group hover:border-brand-200 transition">
+                                {{-- Cover --}}
+                                <a href="{{ route('stories.chapter.read', ['story' => $story->slug, 'chapter' => $chapter->slug]) }}"
+                                    wire:navigate class="flex-shrink-0">
+                                    <div class="w-12 h-16 bg-slate-100 rounded-xl overflow-hidden relative">
+                                        @if ($story->cover_path)
+                                            <img src="{{ asset('storage/' . $story->cover_path) }}"
+                                                alt="{{ $story->title }}"
+                                                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                        @else
+                                            <div
+                                                class="w-full h-full flex items-center justify-center text-lg bg-amber-50 text-amber-500 font-black">
+                                                <i class="fa-solid fa-book"></i>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </a>
+
+                                {{-- Detail Info --}}
+                                <div class="flex flex-col flex-1 min-w-0 justify-between h-16">
+                                    <div>
+                                        <h3
+                                            class="text-xs font-bold text-slate-800 truncate leading-snug group-hover:text-brand-600 transition">
+                                            <a href="{{ route('stories.chapter.read', ['story' => $story->slug, 'chapter' => $chapter->slug]) }}"
+                                                wire:navigate>
+                                                {{ $story->title }}
+                                            </a>
+                                        </h3>
+
+                                        <p class="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+                                            Bab {{ $chapter->order_number ?? $chapter->chapter_number }}:
+                                            {{ $chapter->title }}
+                                        </p>
+                                    </div>
+
+                                    {{-- Action Button & Time --}}
+                                    <div class="flex items-center justify-between mt-1">
+                                        <span class="text-[9px] text-slate-400 font-medium">
+                                            {{ $history->updated_at->diffForHumans() }}
+                                        </span>
+
+                                        <a href="{{ route('stories.chapter.read', ['story' => $story->slug, 'chapter' => $chapter->slug]) }}"
+                                            wire:navigate
+                                            class="text-[10px] font-extrabold bg-brand-600 hover:bg-brand-700 text-white px-2.5 py-1 rounded-lg transition shadow-2xs">
+                                            Lanjut
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </section>
         @endif
 
         <div class="relative">
@@ -41,7 +119,7 @@
             @if (!empty($search))
                 <button wire:click="$set('search', '')"
                     class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
-                    ✕
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             @endif
         </div>
@@ -64,7 +142,7 @@
                             @else
                                 <div
                                     class="w-full h-full flex items-center justify-center text-2xl bg-amber-50 text-amber-500 font-black">
-                                    📚
+                                    <i class="fa-solid fa-book"></i>
                                 </div>
                             @endif
                         </a>
@@ -120,7 +198,7 @@
                 <div class="text-center py-12 bg-white rounded-3xl border border-slate-100 p-8 shadow-2xs">
                     <div
                         class="w-16 h-16 bg-amber-50 text-amber-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-4 border border-amber-100">
-                        🔖
+                        <i class="fa-solid fa-bookmark"></i>
                     </div>
                     <h3 class="text-base font-black text-slate-800">Perpustakaanmu Masih Kosong</h3>
                     <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">

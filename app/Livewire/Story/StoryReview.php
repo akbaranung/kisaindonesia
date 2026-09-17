@@ -59,8 +59,32 @@ class StoryReview extends Component
         session()->flash('success', 'Ulasan kamu berhasil disimpan, hatur nuhun Bro!');
     }
 
+    public function deleteReview()
+    {
+        if (!auth()->check()) {
+            return;
+        }
+
+        Rating::where('user_id', auth()->id())->where('story_id', $this->storyId)->delete();
+
+        $this->rating = 5;
+        $this->review = '';
+        $this->hasSubmitted = false;
+
+        $this->dispatch('review-updated');
+
+        session()->flash('success', 'Ulasan kamu berhasil dihapus, Bro!');
+    }
+
     public function render()
     {
-        return view('livewire.stories.story-review');
+        $reviews = Rating::with('user')
+            ->where('story_id', $this->storyId)
+            ->latest()
+            ->get();
+
+        return view('livewire.stories.story-review', [
+            'reviews' => $reviews
+        ]);
     }
 }

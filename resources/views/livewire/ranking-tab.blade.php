@@ -8,15 +8,15 @@
         </div>
 
         <!-- Navigasi Tab Gratis & Premium -->
-        <div class="flex space-x-4">
-            <button wire:click="setRankingTab('free')"
-                class="pb-3 text-xs font-semibold border-b-2 transition {{ $rankingTab === 'free' ? 'border-brand-400 text-brand-400' : 'border-transparent text-slate-400 hover:text-slate-200' }}">
+        <div class="grid grid-cols-2 text-center">
+            <div wire:click="setRankingTab('free')"
+                class="pb-3 text-sm font-bold border-b-2 transition {{ $rankingTab === 'free' ? 'border-brand-400 text-brand-400' : 'border-transparent text-slate-400 hover:text-slate-500' }}">
                 Gratis
-            </button>
-            <button wire:click="setRankingTab('premium')"
-                class="pb-3 text-xs font-semibold border-b-2 transition {{ $rankingTab === 'premium' ? 'border-brand-400 text-brand-400' : 'border-transparent text-slate-400 hover:text-slate-200' }}">
+            </div>
+            <div wire:click="setRankingTab('premium')"
+                class="pb-3 text-sm font-bold border-b-2 transition {{ $rankingTab === 'premium' ? 'border-brand-400 text-brand-400' : 'border-transparent text-slate-400 hover:text-slate-500' }}">
                 Premium
-            </button>
+            </div>
         </div>
     </div>
 

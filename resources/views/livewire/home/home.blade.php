@@ -38,86 +38,6 @@
 
     {{-- ================= SEKSYEN 3: KATEGORI & URUTAN LIST REAL-DATA ================= --}}
     <div class="p-2">
-        {{-- SECTION: TERAKHIR DIBACA (CONTINUE READING) --}}
-        @if (auth()->check() && count($continueReading) > 0)
-            <section class="py-4 px-3 w-full bg-brand-50/50 rounded-2xl border border-brand-100 my-4">
-                {{-- Header Section --}}
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <h2
-                            class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                            Lanjutkan Membaca
-                        </h2>
-                        <p class="text-[11px] text-slate-500">Kisah yang terakhir kamu buka</p>
-                    </div>
-                </div>
-
-                {{-- Slider / Horizontal Grid Container --}}
-                <div
-                    class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none snap-x snap-mandatory scroll-smooth">
-                    @foreach ($continueReading as $history)
-                        @php
-                            $chapter = $history->chapter;
-                            $story = $chapter?->story;
-                        @endphp
-
-                        @if ($chapter && $story)
-                            <div
-                                class="w-72 flex-shrink-0 snap-start bg-white rounded-xl p-2.5 border border-slate-100 shadow-2xs flex gap-3 items-center relative group hover:border-brand-200 transition">
-                                {{-- Cover --}}
-                                <a href="{{ route('stories.chapter.read', ['story' => $story->slug, 'chapter' => $chapter->slug]) }}"
-                                    wire:navigate class="flex-shrink-0">
-                                    <div class="w-12 h-16 bg-slate-100 rounded-lg overflow-hidden relative">
-                                        @if ($story->cover_path)
-                                            <img src="{{ asset('storage/' . $story->cover_path) }}"
-                                                alt="{{ $story->title }}"
-                                                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                                        @else
-                                            <div
-                                                class="w-full h-full flex items-center justify-center text-lg bg-amber-50 text-amber-500 font-black">
-                                                📚
-                                            </div>
-                                        @endif
-                                    </div>
-                                </a>
-
-                                {{-- Detail Info --}}
-                                <div class="flex flex-col flex-1 min-w-0 justify-between h-16">
-                                    <div>
-                                        <h3
-                                            class="text-xs font-bold text-slate-800 truncate leading-snug group-hover:text-brand-600 transition">
-                                            <a href="{{ route('stories.chapter.read', ['story' => $story->slug, 'chapter' => $chapter->slug]) }}"
-                                                wire:navigate>
-                                                {{ $story->title }}
-                                            </a>
-                                        </h3>
-
-                                        <p class="text-[11px] text-slate-500 font-medium truncate mt-0.5">
-                                            Bab {{ $chapter->order_number ?? $chapter->chapter_number }}:
-                                            {{ $chapter->title }}
-                                        </p>
-                                    </div>
-
-                                    {{-- Action Button & Time --}}
-                                    <div class="flex items-center justify-between mt-1">
-                                        <span class="text-[9px] text-slate-400 font-medium">
-                                            {{ $history->updated_at->diffForHumans() }}
-                                        </span>
-
-                                        <a href="{{ route('stories.chapter.read', ['story' => $story->slug, 'chapter' => $chapter->slug]) }}"
-                                            wire:navigate
-                                            class="text-[10px] font-extrabold bg-brand-600 hover:bg-brand-700 text-white px-2.5 py-1 rounded-lg transition shadow-2xs">
-                                            Lanjut
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
         <section class="space-y-4">
             <div class="flex items-center justify-between mb-3">
                 <div>
@@ -129,7 +49,7 @@
             </div>
 
             <!-- Grid Cerita Pilihan Editor -->
-            <div class="flex gap-4 overflow-x-auto pb-4 mx-1 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth">
+            <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2 space-y-3">
                 @foreach ($editorChoices as $story)
                     <div class="w-28 flex-shrink-0 snap-start transition">
                         {{-- Cover Image --}}
@@ -216,109 +136,6 @@
                 @endforeach
             </div>
         </section>
-
-        <section class="py-4 px-2 w-full">
-            {{-- Header Section --}}
-            <div class="flex items-center justify-between mb-3">
-                <div>
-                    <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider">
-                        Cerita Terbaru
-                    </h2>
-                    <p class="text-[11px] text-slate-400">Geser untuk melihat kisah favorit pilihan pembaca</p>
-                </div>
-                <a href="{{ route('stories.index') }}"
-                    class="text-xs font-bold text-brand-600 hover:text-brand-700 transition">
-                    Lihat Semua
-                </a>
-            </div>
-
-            <div class="flex gap-4 overflow-x-auto pb-4 mx-1 px-4 scrollbar-none snap-x snap-mandatory scroll-smooth">
-                @foreach ($stories as $story)
-                    <div class="w-28 flex-shrink-0 snap-start transition">
-                        {{-- Cover Image --}}
-                        <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
-                            <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
-                                @if ($story->cover_path)
-                                    <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
-                                        class="w-full h-full object-cover hover:scale-105 transition duration-300">
-                                @else
-                                    <div
-                                        class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 text-amber-500 font-black">
-                                        📚
-                                    </div>
-                                @endif
-                            </a>
-
-                            <div class="absolute inset-0 pointer-events-none">
-                                <div class="flex items-center space-x-1.5 p-2">
-                                    <span
-                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-black border border-white">
-                                        <i class="fa-regular fa-eye"></i>
-                                        {{ number_format_short($story->views_count ?? 0) }}
-                                    </span>
-                                    <div class="absolute right-2">
-                                        @if ($story->monetization_type === 'premium')
-                                            <span
-                                                class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-amber-500 text-white border border-amber-500 me-1">
-                                                <i class="fa-solid fa-crown"></i>
-                                            </span>
-                                        @endif
-                                        @if ($story->hasTypeChat())
-                                            <span
-                                                class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
-                                                <i class="fa-solid fa-comment-dots"></i>
-                                            </span>
-                                        @elseif(!$story->hasTypeChat() && $story->type === 'novel')
-                                            <span
-                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
-                                                <i class="fa-solid fa-pencil"></i>
-                                            </span>
-                                        @elseif($story->type === 'puisi')
-                                            <span
-                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
-                                                <i class="fa-solid fa-feather-pointed"></i>
-                                            </span>
-                                        @elseif($story->type === 'non_fiksi')
-                                            <span
-                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
-                                                <i class="fa-solid fa-magnifying-glass"></i>
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="absolute inset-0 pointer-events-none">
-                                <div class="absolute bottom-0 flex items-center space-x-1.5 p-2">
-                                    <div
-                                        class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
-                                        <div class="flex items-center gap-0.5 text-amber-500">
-                                            <span><i class="fa-solid fa-star"></i></span>
-                                            <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Detail Cerita --}}
-                        <div class="flex flex-col">
-                            <h3 class="text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
-                                <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
-                                    class="hover:text-brand-600 transition">
-                                    {{ $story->title }}
-                                </a>
-                            </h3>
-
-                            <span class="text-[10px] text-slate-400 font-medium line-clamp-1">
-                                <a
-                                    href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
-                            </span>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-
         <livewire:ranking-tab />
     </div>
 </div>

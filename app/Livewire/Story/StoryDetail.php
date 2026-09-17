@@ -6,12 +6,14 @@ use App\Models\ReadHistory;
 use Livewire\Component;
 use App\Models\Story;
 use App\Services\StoryViewService;
+use Illuminate\Support\Facades\Auth;
 
 class StoryDetail extends Component
 {
     public $story;
     public $chapters;
     public $lastReadChapter = null;
+    public $tab = '';
 
     protected $listeners = ['review-updated' => '$refresh'];
 
@@ -22,6 +24,7 @@ class StoryDetail extends Component
         }
 
         $this->story = $story;
+        $this->tab = 'synopsis';
 
         $this->chapters = $story->chapters()->where('status', 'published')->orderBy('order_number', 'asc')->get();
 
@@ -36,8 +39,28 @@ class StoryDetail extends Component
         }
     }
 
+    public function toggleLibrary()
+    {
+        if (!Auth::check()) {
+            return $this->redirect(route('login'), navigate: true);
+        }
+
+        Auth::user()->savedStories()->toggle($this->story->id);
+    }
+
+    public function setTab(string $type)
+    {
+        if (in_array($type, ['synopsis', 'chaptersList'])) {
+            $this->tab = $type;
+        }
+    }
+
     public function render()
     {
-        return view('livewire.stories.story-detail');
+        $isSaved = Auth::check() ? Auth::user()->savedStories()->where('story_id', $this->story->id)->exists() : false;
+
+        return view('livewire.stories.story-detail', [
+            'isSaved' => $isSaved
+        ]);
     }
 }

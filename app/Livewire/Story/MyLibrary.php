@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Story;
 
+use App\Models\ReadHistory;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
@@ -51,8 +52,18 @@ class MyLibrary extends Component
             });
         }
 
+        $continueReading = [];
+        if ($user) {
+            $continueReading = ReadHistory::with(['chapter.story.penName'])
+                ->where('user_id', $user->id)
+                ->latest('updated_at')
+                ->take(6)
+                ->get();
+        }
+
         return view('livewire.library.my-library', [
             'savedStories' => $query->latest('libraries.created_at')->paginate(8),
+            'continueReading' => $continueReading,
         ]);
     }
 }

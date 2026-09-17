@@ -42,16 +42,6 @@ class Home extends Component
             ->take(6)
             ->get();
 
-        $continueReading = [];
-
-        if (auth()->check()) {
-            $continueReading = ReadHistory::with(['chapter.story.penName'])
-                ->where('user_id', auth()->id())
-                ->latest('updated_at')
-                ->take(4)
-                ->get();
-        }
-
         $editorChoices = Story::with(['author', 'genre'])
             ->where('is_editor_choice', true)
             ->latest()
@@ -63,7 +53,6 @@ class Home extends Component
             'editorChoices' => $editorChoices,
             'popularStories' => $popularStories,
             'recentChapters' => $recentChapters,
-            'continueReading' => $continueReading,
             'user' => Auth::user()
         ]);
     }
