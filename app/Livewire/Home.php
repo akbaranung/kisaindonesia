@@ -50,7 +50,12 @@ class Home extends Component
 
         $latestStories = Story::with(['penName', 'genre'])
             ->where('status', 'published')
-            ->latest()
+            ->orderByDesc(
+                Chapter::select('created_at')
+                    ->whereColumn('story_id', 'stories.id')
+                    ->latest()
+                    ->limit(1)
+            )
             ->take(10)
             ->get();
 

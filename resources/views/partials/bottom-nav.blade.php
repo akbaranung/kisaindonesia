@@ -23,7 +23,7 @@
     {{-- Nav Kategori Baru --}}
     <a href="{{ route('categories.index') }}" wire:navigate
         class="flex flex-col items-center {{ request()->routeIs('categories.*') ? 'text-[#38CAC8] font-bold' : 'text-slate-400' }}">
-        <i class="fa-solid fa-shapes"></i>
+        <i class="fa-solid fa-border-all"></i>
         <span class="text-[10px] tracking-tight mt-1">Kategori</span>
     </a>
 
