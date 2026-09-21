@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class PenName extends Model
 {
@@ -42,5 +43,14 @@ class PenName extends Model
     public function stories()
     {
         return $this->hasMany(Story::class);
+    }
+
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 }

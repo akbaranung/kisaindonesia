@@ -61,7 +61,7 @@
         <div class="flex gap-2 items-center text-brand-600 font-bold">
             <div
                 class="w-8 h-8 rounded-full overflow-hidden bg-brand-100 flex-shrink-0 border-4 border-slate-50 shadow-inner flex items-center justify-center">
-                <img src="{{ asset('storage/' . $story->penName->avatar) }}" alt="{{ $story->penName->name }}"
+                <img src="{{ $story->penName->profile_photo_url }}" alt="{{ $story->penName->name }}"
                     class="w-full h-full object-cover">
             </div>
             <a href="{{ route('pen-name.show', $story->penName->slug) }}">
