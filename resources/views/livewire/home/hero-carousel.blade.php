@@ -1,9 +1,9 @@
 <div class="w-full py-1">
-    @if ($featuredStories->isNotEmpty())
+    @if ($promotedSubmissions->isNotEmpty())
         <!-- Container Carousel Khusus Mobile dengan Touch Swipe -->
         <div x-data="{
             activeSlide: 0,
-            slidesCount: {{ $featuredStories->count() }},
+            slidesCount: {{ $promotedSubmissions->count() }},
             timer: null,
             touchStartX: 0,
             touchEndX: 0,
@@ -39,7 +39,10 @@
 
             <!-- Carousel Slides (Fixed Height Container) -->
             <div class="relative w-full h-full">
-                @foreach ($featuredStories as $index => $hero)
+                @foreach ($promotedSubmissions as $index => $submission)
+                    @php
+                        $hero = $submission->story;
+                    @endphp
                     <div x-show="activeSlide === {{ $index }}" x-cloak
                         x-transition:enter="transition ease-out duration-300"
                         x-transition:enter-start="opacity-0 translate-x-4"
@@ -134,7 +137,7 @@
 
                             <!-- Indicator Dots (Minimalis) -->
                             <div class="flex space-x-1 items-center">
-                                @foreach ($featuredStories as $dotIndex => $dotHero)
+                                @foreach ($promotedSubmissions as $dotIndex => $dotHero)
                                     <button @click="activeSlide = {{ $dotIndex }}"
                                         :class="activeSlide === {{ $dotIndex }} ? 'bg-brand-500 w-4' : 'bg-slate-700 w-1.5'"
                                         class="h-1.5 rounded-full transition-all duration-300 focus:outline-none">
@@ -154,10 +157,6 @@
                 @endforeach
             </div>
 
-        </div>
-    @else
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 text-center text-xs text-slate-500">
-            Belum ada cerita pilihan.
         </div>
     @endif
 </div>

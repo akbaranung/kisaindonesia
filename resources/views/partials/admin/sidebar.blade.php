@@ -65,6 +65,15 @@
                     </li>
 
                     <li>
+                        <a href="{{ route('admin.banner-submissions') }}" wire:navigate
+                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all {{ request()->routeIs('admin.banner-submissions') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
+                            <span>
+                                <i class="fa-solid fa-book-open"></i>
+                            </span> Banner Submissions
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="{{ route('admin.premium-requests') }}" wire:navigate
                             class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs('admin.premium-requests') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
                             <!-- Icon Star / Premium -->

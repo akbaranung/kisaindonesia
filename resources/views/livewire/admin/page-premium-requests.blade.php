@@ -10,7 +10,7 @@
     <!-- Alert Flash Message -->
     @if (session()->has('message'))
         <div
-            class="mb-4 p-3 bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs rounded-xl flex items-center justify-between">
+            class="mb-4 p-3 bg-brand-950/80 border border-brand-800/80 text-brand-300 text-xs rounded-xl flex items-center justify-between">
             <span>✓ {{ session('message') }}</span>
         </div>
     @endif
@@ -23,26 +23,26 @@
             <!-- Search -->
             <div class="w-full sm:w-72">
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari judul cerita / penulis..."
-                    class="w-full px-3.5 py-2 bg-slate-800/60 border border-slate-700/80 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                    class="w-full px-3.5 py-2 bg-slate-800/60 border border-slate-700/80 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-brand-500">
             </div>
 
             <!-- Status Filter Tab -->
             <div
                 class="flex items-center gap-1.5 p-1 bg-slate-800/60 rounded-xl border border-slate-700/80 w-full sm:w-auto">
                 <button wire:click="$set('statusFilter', 'pending')"
-                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'pending' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'pending' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
                     Pending
                 </button>
                 <button wire:click="$set('statusFilter', 'approved')"
-                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'approved' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'approved' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
                     Disetujui
                 </button>
                 <button wire:click="$set('statusFilter', 'rejected')"
-                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'rejected' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'rejected' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
                     Ditolak
                 </button>
                 <button wire:click="$set('statusFilter', '')"
-                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === '' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === '' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
                     Semua
                 </button>
             </div>
@@ -90,7 +90,7 @@
                                     </span>
                                 @elseif($req->status === 'approved')
                                     <span
-                                        class="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold rounded-lg text-[10px]">
+                                        class="px-2.5 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-400 font-bold rounded-lg text-[10px]">
                                         DISETUJUI
                                     </span>
                                 @else
@@ -117,7 +117,7 @@
                                 @if ($req->status === 'pending')
                                     <button wire:click="approve({{ $req->id }})"
                                         wire:confirm="Setujui cerita ini menjadi Premium?"
-                                        class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition text-[11px]"
+                                        class="px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-lg transition text-[11px]"
                                         title="Setujui">
                                         ✓ Approve
                                     </button>
@@ -257,7 +257,7 @@
                         <div
                             class="p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 flex items-center justify-between">
                             <span class="text-slate-400">Diproses oleh Admin:</span>
-                            <span class="font-bold text-emerald-400">{{ $selectedRequest->processor->name }}
+                            <span class="font-bold text-brand-400">{{ $selectedRequest->processor->name }}
                                 ({{ $selectedRequest->processor->email }})</span>
                         </div>
                     @endif
@@ -279,7 +279,7 @@
                             class="px-4 py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold text-xs rounded-xl transition">✕
                             Reject</button>
                         <button type="button" wire:click="approve({{ $selectedRequest->id }})"
-                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition">✓
+                            class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition">✓
                             Approve & Monetize</button>
                     @endif
                 </div>

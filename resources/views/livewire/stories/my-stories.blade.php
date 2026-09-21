@@ -17,8 +17,9 @@
 
         @if (session()->has('success'))
             <div
-                class="mb-5 p-4 bg-brand-500 text-white text-xs font-bold rounded-2xl shadow-lg shadow-emerald-100 animate-fade-in">
-                {{ session('success') }}
+                class="p-3.5 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between animate-fade-in">
+                <span><i class="fa-regular fa-circle-check"></i> {{ session('success') }}</span>
+                <button wire:click="$refresh" class="text-emerald-500 hover:text-emerald-800">✕</button>
             </div>
         @endif
 
@@ -39,6 +40,13 @@
         </div>
 
         <div class="flex flex-col gap-4">
+            <a href="{{ route('promotions') }}"
+                class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 rounded-xl transition shadow-xs pointer">
+                <span>🫘</span> Promo Hero Banner Saya
+            </a>
+
+
+
             @forelse($myStories as $story)
                 @php
                     // Cek pengajuan terakhir untuk menentukan status tombol

@@ -98,4 +98,9 @@ class Story extends Model
     {
         return $this->chapters()->where('type', 'chat')->exists();
     }
+
+    public function carouselSubmissions()
+    {
+        return $this->hasMany(CarouselSubmission::class);
+    }
 }

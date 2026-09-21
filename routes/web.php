@@ -4,7 +4,7 @@ use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Duitku\DuitkuController;
 use App\Livewire\Admin\CoinPackageIndex;
 use App\Livewire\Admin\Dashboard;
-use App\Livewire\Admin\DuitkuSettings;
+use App\Livewire\Admin\ManageCarouselSubmissions;
 use App\Livewire\Admin\ManageGenres;
 use App\Livewire\Admin\ManagePremiumRequests;
 use App\Livewire\Admin\ManageUsers;
@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Livewire\Category\CategoryIndex;
 use App\Livewire\Category\CategoryDetail;
+use App\Livewire\MyPromotions;
 
 /*
 |--------------------------------------------------------------------------
@@ -130,6 +131,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/topup/process', [DuitkuController::class, 'createTopup'])->name('topup.process');
     Route::get('/topup/return', [DuitkuController::class, 'returnPage'])->name('topup.return');
     Route::get('/withdrawals', AuthorWithdrawalIndex::class)->name('withdrawals.index');
+    Route::get('/my-promotions', MyPromotions::class)->name('promotions');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -138,6 +140,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users', ManageUsers::class)->name('users');
     Route::get('/stories', StoryManager::class)->name('stories');
     Route::get('/premium-requests', ManagePremiumRequests::class)->name('premium-requests');
+    Route::get('/banner-submissions', ManageCarouselSubmissions::class)->name('banner-submissions');
 
     Route::get('/chapters/{id}/preview', function ($id) {
         $chapter = Chapter::with('story')->findOrFail($id);
