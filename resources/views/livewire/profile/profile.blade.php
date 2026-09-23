@@ -63,9 +63,9 @@
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Following</span>
                 </div>
                 <a href="{{ route('library') }}"
-                    class="flex flex-col items-center p-3 rounded-2xl bg-brand-50 border border-brand-100 transition hover:bg-white hover:shadow-2xs">
+                    class="flex flex-col items-center p-3 rounded-2xl bg-slate-50/80 border border-slate-100 transition hover:bg-white hover:shadow-2xs">
                     <span
-                        class="text-lg font-black text-brand-600">{{ number_format($user->savedStories->count(), 0, ',', '.') }}</span>
+                        class="text-lg font-black text-brand-600">{{ number_format($user->savedStories->where('status', 'published')->count(), 0, ',', '.') }}</span>
                     <span class="text-[9px] font-black text-brand-400 uppercase tracking-tighter">Library</span>
                 </a>
             </div>

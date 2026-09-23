@@ -93,7 +93,7 @@
 
             <div class="px-6">
                 <i class="fa-solid fa-book-open text-brand-600 me-2"></i>
-                {{ number_format_short($story->chapters->count()) }}
+                {{ number_format_short($story->chapters->where('status', 'published')->count()) }}
             </div>
         </div>
     </div>
