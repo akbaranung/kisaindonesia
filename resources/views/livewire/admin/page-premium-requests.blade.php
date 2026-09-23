@@ -116,15 +116,29 @@
 
                                 @if ($req->status === 'pending')
                                     <button wire:click="approve({{ $req->id }})"
-                                        wire:confirm="Setujui cerita ini menjadi Premium?"
+                                        wire:confirm="Setujui cerita ini menjadi Premium?" wire:loading.attr="disabled"
+                                        wire:target="approve({{ $req->id }})"
                                         class="px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-lg transition text-[11px]"
                                         title="Setujui">
-                                        ✓ Approve
+                                        <span wire:loading.remove wire:target="approve({{ $req->id }})">✓
+                                            Approve</span>
+                                        <span wire:loading wire:target="approve({{ $req->id }})"
+                                            class="flex items-center gap-2">
+                                            Loading...
+                                        </span>
+
                                     </button>
                                     <button wire:click="openRejectModal({{ $req->id }})"
+                                        wire:loading.attr="disabled" wire:target="openRejectModal({{ $req->id }})"
                                         class="px-2.5 py-1.5 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold rounded-lg transition text-[11px]"
                                         title="Tolak">
-                                        ✕ Reject
+                                        <span wire:loading.remove wire:target="openRejectModal({{ $req->id }})">✕
+                                            Reject</span>
+                                        <span wire:loading wire:target="openRejectModal({{ $req->id }})"
+                                            class="flex items-center gap-2">
+                                            Loading...
+                                        </span>
+
                                     </button>
                                 @endif
                             </td>
@@ -169,7 +183,8 @@
                         class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-800/40 rounded-xl border border-slate-800">
                         <div>
                             <span class="text-slate-500 font-semibold block mb-0.5">Judul Cerita:</span>
-                            <p class="font-bold text-amber-400 text-sm">{{ $selectedRequest->story->title ?? '-' }}</p>
+                            <p class="font-bold text-amber-400 text-sm">{{ $selectedRequest->story->title ?? '-' }}
+                            </p>
                         </div>
                         <div>
                             <span class="text-slate-500 font-semibold block mb-0.5">Rekening Pencairan:</span>
@@ -214,7 +229,8 @@
                                 <div
                                     class="flex items-center justify-between p-3 bg-slate-800/40 border {{ $isPremiumTarget ? 'border-amber-500/30' : 'border-slate-800' }} rounded-xl text-xs hover:bg-slate-800/70 transition">
                                     <div class="flex items-center gap-2">
-                                        <span class="font-bold text-slate-300">Bab {{ $chapter->order_number }}:</span>
+                                        <span class="font-bold text-slate-300">Bab
+                                            {{ $chapter->order_number }}:</span>
                                         <span class="font-medium text-slate-200">{{ $chapter->title }}</span>
                                     </div>
 
@@ -276,11 +292,24 @@
                         class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition">Tutup</button>
                     @if ($selectedRequest->status === 'pending')
                         <button type="button" wire:click="openRejectModal({{ $selectedRequest->id }})"
-                            class="px-4 py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold text-xs rounded-xl transition">✕
-                            Reject</button>
-                        <button type="button" wire:click="approve({{ $selectedRequest->id }})"
-                            class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition">✓
-                            Approve & Monetize</button>
+                            wire:target="openRejectModal({{ $selectedRequest->id }})"
+                            class="px-4 py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold text-xs rounded-xl transition">
+                            <span wire:loading.remove wire:target="openRejectModal({{ $selectedRequest->id }})">✕
+                                Reject</span>
+                            <span wire:loading wire:target="openRejectModal({{ $selectedRequest->id }})"
+                                class="flex items-center gap-2">
+                                Loading...
+                            </span>
+                            <button type="button" wire:click="approve({{ $selectedRequest->id }})"
+                                wire:target="approve({{ $selectedRequest->id }})"
+                                class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition">
+                                <span wire:loading.remove wire:target="approve({{ $selectedRequest->id }})">✓
+                                    Approve & Monetize</span>
+                                <span wire:loading wire:target="approve({{ $selectedRequest->id }})"
+                                    class="flex items-center gap-2">
+                                    Loading...
+                                </span>
+                            </button>
                     @endif
                 </div>
             </div>
