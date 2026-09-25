@@ -20,7 +20,7 @@ class HeroCarousel extends Component
             }
         ])
             ->active()
-            ->latest('starts_at')
+            ->inRandomOrder()
             ->get();
 
         return view('livewire.home.hero-carousel', [

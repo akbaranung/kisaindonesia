@@ -59,7 +59,7 @@ class Home extends Component
             ->get();
 
         return view('livewire.home.home', [
-            'stories' => $query->inRandomOrder()->take(5)->get(),
+            'stories' => $query->latest()->take(5)->get(),
             'editorChoices' => $editorChoices,
             'popularStories' => $popularStories,
             'recentChapters' => $recentChapters,

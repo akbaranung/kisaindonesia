@@ -82,7 +82,7 @@ class StoryManager extends Component
             })
             // Filter Pilihan Editor
             ->when($this->editorChoice, function ($query) {
-                $query->where('is_editor_choice', $this->editorChoice === '1');
+                $query->where('is_editor_choice', $this->editorChoice);
             })
             ->latest()
             ->paginate(10);
