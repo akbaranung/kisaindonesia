@@ -45,7 +45,6 @@ class Home extends Component
         $editorChoices = Story::with(['author', 'genre'])
             ->where('is_editor_choice', true)
             ->latest()
-            ->take(6)
             ->get();
 
         $latestStories = Story::with(['penName', 'genre'])
@@ -60,7 +59,7 @@ class Home extends Component
             ->get();
 
         return view('livewire.home.home', [
-            'stories' => $query->latest()->take(5)->get(),
+            'stories' => $query->inRandomOrder()->take(5)->get(),
             'editorChoices' => $editorChoices,
             'popularStories' => $popularStories,
             'recentChapters' => $recentChapters,
