@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Menu;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -24,7 +25,40 @@ class ManageUsers extends Component
 
     public $isModalOpen = false;
 
+    public $showAccessModal = false;
+    public $selectedUser = null;
+    public $selectedMenus = [];
+
     protected $paginationTheme = 'tailwind';
+
+    public function openAccessModal($userId)
+    {
+        $this->selectedUser = User::findOrFail($userId);
+
+        $this->selectedMenus = $this->selectedUser->menus()
+            ->pluck('menus.id')
+            ->map(fn($id) => (int) $id) // Memastikan semua elemen berformat Integer
+            ->toArray();
+        $this->showAccessModal = true;
+    }
+
+    public function closeAccessModal()
+    {
+        $this->showAccessModal = false;
+        $this->selectedUser = null;
+        $this->selectedMenus = [];
+    }
+
+    public function saveMenuAccess()
+    {
+        if (!$this->selectedUser) return;
+
+        // Sync relasi menu_user
+        $this->selectedUser->menus()->sync($this->selectedMenus);
+
+        $this->closeAccessModal();
+        session()->flash('message', 'Akses menu user berhasil diperbarui!');
+    }
 
     public function updatingSearch()
     {
@@ -165,7 +199,8 @@ class ManageUsers extends Component
         $users = $query->latest()->paginate(10);
 
         return view('livewire.admin.manage-users', [
-            'users' => $users
+            'users' => $users,
+            'allMenus' => Menu::orderBy('order', 'asc')->get(),
         ])->layout('layouts.admin');
     }
 }

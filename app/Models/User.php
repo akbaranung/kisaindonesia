@@ -147,4 +147,18 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(PenName::class)->where('is_default', true);
     }
+
+    public function menus()
+    {
+        return $this->belongsToMany(Menu::class, 'menu_user')->orderBy('order', 'asc');
+    }
+
+    public function hasMenuAccess(string $routeName): bool
+    {
+        if ($this->role === 'superadmin') {
+            return true;
+        };
+
+        return $this->menus->contains('route_name', $routeName);
+    }
 }

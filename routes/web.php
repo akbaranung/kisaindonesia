@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Duitku\DuitkuController;
+use App\Http\Middleware\CheckMenuAccess;
 use App\Livewire\Admin\CoinPackageIndex;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\ManageCarouselSubmissions;
@@ -134,7 +135,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-promotions', MyPromotions::class)->name('promotions');
 });
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin', CheckMenuAccess::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/genres', ManageGenres::class)->name('genres');
     Route::get('/users', ManageUsers::class)->name('users');

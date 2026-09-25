@@ -25,91 +25,26 @@
                 <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Menu Utama
                 </p>
                 <ul class="space-y-1">
-                    <li>
-                        <a href="{{ route('admin.dashboard') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs('admin.dashboard') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <i class="fa-solid fa-chart-pie"></i>
-                            Overview
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.users') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all {{ request()->routeIs('admin.users') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <i class="fa-solid fa-users"></i>
-                            Kelola User
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.genres') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs('admin.genres') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <i class="fa-solid fa-tags"></i>
-                            Kelola Genre
-                        </a>
-                    </li>
+                    @php
+                        $userMenus =
+                            auth()->user()->role === 'superadmin'
+                                ? \App\Models\Menu::orderBy('order', 'asc')->get()
+                                : auth()->user()->menus;
+                    @endphp
+                    @forelse ($userMenus as $menu)
+                        <li>
+                            <a href="{{ route($menu->route_name) }}" wire:navigate
+                                class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs($menu->route_name) ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
+                                @if ($menu->icon)
+                                    <i class="{{ $menu->icon }}"></i>
+                                @endif
+                                <span>{{ $menu->name }}</span>
+                            </a>
+                        </li>
 
-                    <li>
-                        <a href="{{ route('admin.coin-packages.index') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all {{ request()->routeIs('admin.coin-packages.index') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <i class="fa-solid fa-coins"></i>
-                            Paket Kisa Beans
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ route('admin.stories') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all {{ request()->routeIs('admin.stories') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <span>
-                                <i class="fa-solid fa-book-open"></i>
-                            </span> Kelola Cerita
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ route('admin.banner-submissions') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 transition-all {{ request()->routeIs('admin.banner-submissions') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <span>
-                                <i class="fa-solid fa-book-open"></i>
-                            </span> Banner Submissions
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ route('admin.premium-requests') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs('admin.premium-requests') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <!-- Icon Star / Premium -->
-                            <i class="fa-regular fa-star"></i>
-                            Pengajuan Premium
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ route('admin.transactions.index') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs('admin.transactions.index') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <!-- Icon Star / Premium -->
-                            <i class="fa-solid fa-wallet"></i>
-
-                            Transaksi
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ route('admin.withdrawals.index') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs('admin.withdrawals.index') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <!-- Icon Star / Premium -->
-                            <i class="fa-solid fa-money-bill-transfer"></i>
-
-                            Withdraw
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="{{ route('admin.settings') }}" wire:navigate
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs('admin.settings') ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
-                            <!-- Icon Star / Premium -->
-                            <i class="fa-solid fa-gear"></i>
-                            Settings
-                        </a>
-                    </li>
+                    @empty
+                        <div class="px-3 text-xs text-slate-500">Tidak ada akses menu.</div>
+                    @endforelse
                 </ul>
             </div>
         </nav>

@@ -152,12 +152,23 @@
                                     </svg>
                                 </button>
 
+                                <button wire:click="openAccessModal({{ $user->id }})"
+                                    class="px-2.5 py-1.5 bg-brand-600/10 border border-brand-500/30 hover:bg-brand-600/20 text-brand-400 font-semibold rounded-lg transition text-[11px] flex items-center gap-1"
+                                    title="Kelola Akses Menu">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                    </svg>
+                                    <span>Akses Menu</span>
+                                </button>
+
                                 <!-- Delete -->
                                 <button wire:click="delete({{ $user->id }})"
                                     wire:confirm="Apakah Anda yakin ingin menghapus user ini?"
                                     class="p-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800/60 text-rose-300 rounded-lg transition"
                                     title="Hapus User">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -257,6 +268,77 @@
                             class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl transition">Simpan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    @endif
+
+    @if ($showAccessModal && $selectedUser)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <div
+                class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl text-slate-200">
+
+                {{-- Header Modal --}}
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="font-bold text-base text-slate-100">Akses Menu User</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Pengaturan menu untuk: <span
+                                class="text-brand-400 font-semibold">{{ $selectedUser->name }}</span>
+                        </p>
+                    </div>
+                    <button wire:click="closeAccessModal" class="text-slate-400 hover:text-slate-200">
+                        ✕
+                    </button>
+                </div>
+
+                {{-- List Checkbox Menu --}}
+                <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    @forelse($allMenus as $menu)
+                        <label
+                            class="flex items-center justify-between p-3 bg-slate-800/50 hover:bg-slate-800 rounded-xl border border-slate-700/40 cursor-pointer transition">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" wire:model="selectedMenus" value="{{ $menu->id }}"
+                                    @checked(in_array($menu->id, $selectedMenus))
+                                    class="w-4 h-4 rounded border-slate-600 bg-slate-900 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer">
+                                <div>
+                                    <div class="font-semibold text-xs text-slate-200">{{ $menu->name }}</div>
+                                    <div class="text-[10px] text-slate-500 font-mono">{{ $menu->route_name }}</div>
+                                </div>
+                            </div>
+                        </label>
+                    @empty
+                        <div class="text-center py-4 text-xs text-slate-500">
+                            Belum ada data menu di sistem.
+                        </div>
+                    @endforelse
+                </div>
+
+                {{-- Footer Action Buttons --}}
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                    <button type="button" wire:click="closeAccessModal"
+                        class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition">
+                        Batal
+                    </button>
+
+                    <button type="button" wire:click="saveMenuAccess" wire:loading.attr="disabled"
+                        wire:target="saveMenuAccess"
+                        class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition disabled:opacity-50 flex items-center gap-1.5">
+
+                        <span wire:loading.remove wire:target="saveMenuAccess">Simpan Akses</span>
+
+                        <span wire:loading wire:target="saveMenuAccess" class="flex items-center gap-1.5">
+                            <svg class="animate-spin w-3 h-3 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            <span>Menyimpan...</span>
+                        </span>
+                    </button>
+                </div>
+
             </div>
         </div>
     @endif
