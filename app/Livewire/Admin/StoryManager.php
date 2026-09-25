@@ -14,7 +14,7 @@ class StoryManager extends Component
     public string $search = '';
     public string $category = '';
     public string $type = '';
-    public string $editorChoice = '';
+    public string $editorChoice = '0';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -81,8 +81,8 @@ class StoryManager extends Component
                 $query->where('monetization_type', $this->type === 'premium');
             })
             // Filter Pilihan Editor
-            ->when($this->editorChoice, function ($query) {
-                $query->where('is_editor_choice', $this->editorChoice);
+            ->when($this->editorChoice !== '', function ($query) {
+                $query->where('is_editor_choice', $this->editorChoice === '1');
             })
             ->latest()
             ->paginate(10);
