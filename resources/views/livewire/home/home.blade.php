@@ -53,9 +53,10 @@
             </div>
 
             <!-- Grid Cerita Pilihan Editor -->
-            <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2 space-y-3">
+            <div
+                class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2 space-y-3 place-items-center">
                 @foreach ($editorChoices as $story)
-                    <div class="w-28 flex-shrink-0 snap-start transition">
+                    <div class="w-30 flex-shrink-0 snap-start transition">
                         {{-- Cover Image --}}
                         <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
                             <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>

@@ -53,7 +53,7 @@
     </div>
 
     {{-- Story Grid Catalog --}}
-    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2 space-y-3">
+    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2 space-y-3 place-items-center">
         @forelse ($stories as $story)
             <div class="w-28 flex-shrink-0 snap-start transition">
                 {{-- Cover Image --}}
