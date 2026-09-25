@@ -44,7 +44,7 @@
                     Pengaturan Profil
                 </a>
                 <div class="border-t border-slate-800 my-1"></div>
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="GET" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-slate-800">
                         Logout
