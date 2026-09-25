@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Menu;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
