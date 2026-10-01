@@ -98,7 +98,7 @@ class TransactionManagement extends Component
 
         // Query transaksi dengan filter & pencarian
         $transactions = UserTransaction::with('user')
-            ->where('type', 'topup')
+            // ->where('type', 'topup')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('reference_code', 'like', '%' . $this->search . '%')

@@ -136,23 +136,26 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'admin', CheckMenuAccess::class])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
-    Route::get('/genres', ManageGenres::class)->name('genres');
-    Route::get('/users', ManageUsers::class)->name('users');
-    Route::get('/stories', StoryManager::class)->name('stories');
-    Route::get('/premium-requests', ManagePremiumRequests::class)->name('premium-requests');
-    Route::get('/banner-submissions', ManageCarouselSubmissions::class)->name('banner-submissions');
-
     Route::get('/chapters/{id}/preview', function ($id) {
         $chapter = Chapter::with('story')->findOrFail($id);
 
         return view('admin.chapters.preview', compact('chapter'));
     })->name('chapters.preview');
 
-    Route::get('/transactions', TransactionManagement::class)->name('transactions.index');
-    Route::get('/settings', SystemSettings::class)->name('settings');
-    Route::get('/coin-packages', CoinPackageIndex::class)->name('coin-packages.index');
-    Route::get('/withdrawals', WithdrawalIndex::class)->name('withdrawals.index');
+
+    Route::middleware([CheckMenuAccess::class])->group(function () {
+        Route::get('/dashboard', Dashboard::class)->name('dashboard');
+        Route::get('/genres', ManageGenres::class)->name('genres');
+        Route::get('/users', ManageUsers::class)->name('users');
+        Route::get('/stories', StoryManager::class)->name('stories');
+        Route::get('/premium-requests', ManagePremiumRequests::class)->name('premium-requests');
+        Route::get('/banner-submissions', ManageCarouselSubmissions::class)->name('banner-submissions');
+
+        Route::get('/transactions', TransactionManagement::class)->name('transactions.index');
+        Route::get('/settings', SystemSettings::class)->name('settings');
+        Route::get('/coin-packages', CoinPackageIndex::class)->name('coin-packages.index');
+        Route::get('/withdrawals', WithdrawalIndex::class)->name('withdrawals.index');
+    });
 });
 
 Route::get('auth/google', [SocialAuthController::class, 'redirectToGoogle']);

@@ -52,6 +52,7 @@
                         <th class="px-6 py-3">Merchant Ref / Tanggal</th>
                         <th class="px-6 py-3">Pengguna</th>
                         <th class="px-6 py-3">Metode</th>
+                        <th class="px-6 py-3">Type</th>
                         <th class="px-6 py-3">Beans / Nominal</th>
                         <th class="px-6 py-3">Status</th>
                         <th class="px-6 py-3 text-center">Aksi</th>
@@ -74,7 +75,19 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <p class="font-bold text-brand-600">+{{ number_format($tx->amount) }} Beans</p>
+                                <span class="uppercase font-semibold text-xs bg-gray-100 px-2 py-1 rounded">
+                                    {{ $tx->type }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                @php
+                                    $isPositive = in_array($tx->type, ['topup', 'earn']);
+                                @endphp
+                                <span
+                                    class="text-xs font-black {{ $isPositive ? 'text-brand-600' : 'text-rose-800' }}">
+                                    {{ $isPositive ? '+' : '-' }}{{ number_format($tx->amount) }} Beans
+                                </span>
+                                {{-- <p class="font-bold text-brand-600">+{{ number_format($tx->amount) }} Beans</p> --}}
                                 <p class="text-xs text-gray-500">Rp {{ number_format($tx->gross_amount) }}</p>
                             </td>
                             <td class="px-6 py-4">
@@ -149,6 +162,10 @@
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-gray-500">Status Transaksi</span>
                         <span class="font-semibold capitalize">{{ $selectedTransaction->status }}</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-500">Keterangan</span>
+                        <span class="font-semibold capitalize">{{ $selectedTransaction->description }}</span>
                     </div>
                 </div>
 

@@ -127,6 +127,7 @@ class ManageUsers extends Component
             'email' => $this->email,
             'role' => $this->role,
             'is_active' => $this->is_active,
+            'email_verified_at' => now()
         ];
 
         if (!empty($this->password)) {
