@@ -135,7 +135,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-promotions', MyPromotions::class)->name('promotions');
 });
 
-Route::middleware(['auth', 'admin', CheckMenuAccess::class])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/chapters/{id}/preview', function ($id) {
         $chapter = Chapter::with('story')->findOrFail($id);
 
