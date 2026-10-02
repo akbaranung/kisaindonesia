@@ -27,7 +27,8 @@ class MonetizeStatusUpdatedNotification extends Notification implements ShouldQu
         $subject = $isApproved ? 'Selamat! Monetisasi Disetujui' : 'Update Pengajuan Monetisasi';
         $mail = (new MailMessage)->subject($subject)->greeting('Halo, ' . $notifiable->name . '!');
         if ($isApproved) {
-            $mail->line('Pengajuan monetisasi akun anda telah **DISETUJUI**')
+            $mail->line('Pengajuan monetisasi anda telah **DISETUJUI**.')
+                ->line('**PENTING : ** Harap diperhatikan bahwa persetujuan monetisasi bersifat mengikat dan harus dilakukan sesuai dengan seluruh aturan serta regulasi internal KISA Indonesia yang berlaku.')
                 ->action('Buka Dashboard', route('my-stories'));
         } else {
             $mail->line('Pengajuan monetisasi Anda saat ini **BELUM DISETUJUI**.')

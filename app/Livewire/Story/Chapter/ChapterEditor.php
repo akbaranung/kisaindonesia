@@ -240,7 +240,7 @@ class ChapterEditor extends Component
             $avatarPath = $this->char_existing_avatar;
 
             if ($this->char_avatar_upload) {
-                if ($this->char_existing_avatar && Storage::disk('public')->exists($this->char_avatar)) {
+                if ($this->char_existing_avatar && Storage::disk('public')->exists($this->char_avatar_upload)) {
                     Storage::disk('public')->delete($this->char_existing_avatar);
                 }
 

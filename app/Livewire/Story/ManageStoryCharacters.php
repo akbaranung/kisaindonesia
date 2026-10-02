@@ -29,7 +29,7 @@ class ManageStoryCharacters extends Component
     {
         $this->validate([
             'name' => 'required|string|max:50',
-            'avatar' => 'nullable|image|max:2048',
+            'avatar' => 'nullable|image|max:500',
         ]);
 
         $avatarPath = $this->avatar ? $this->avatar->store('characters', 'public') : null;
