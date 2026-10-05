@@ -51,19 +51,31 @@
                 @endphp
                 <div wire:key="chap-{{ $chap->id }}"
                     class="p-3.5 border border-slate-100 rounded-xl flex items-center justify-between gap-3 hover:border-brand-500 shadow-sm transition">
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                            <span
-                                class="text-[10px] font-bold text-brand-500 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
-                                Bab {{ $chap->order_number }}
-                            </span>
-                            <span
-                                class="text-[9px] font-bold {{ $chap->status === 'published' ? 'text-brand-500' : 'text-slate-400' }}">
-                                ● {{ ucfirst($chap->status) }}
-                            </span>
+                    <div class="flex items-center gap-3 space-y-0">
+                        @if ($chap->cover_url)
+                            <img src="{{ $chap->cover_url }}" alt="Cover {{ $chap->title }}"
+                                class="w-12 h-14 rounded-lg object-cover border border-slate-200 shrink-0">
+                        @else
+                            <div class="w-12 h-14 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center shrink-0 text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                </svg>
+                            </div>
+                        @endif
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="text-[10px] font-bold text-brand-500 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
+                                    Bab {{ $chap->order_number }}
+                                </span>
+                                <span
+                                    class="text-[9px] font-bold {{ $chap->status === 'published' ? 'text-brand-500' : 'text-slate-400' }}">
+                                    ● {{ ucfirst($chap->status) }}
+                                </span>
+                            </div>
+                            <h3 class="text-xs font-bold text-slate-800 line-clamp-1">{{ $chap->title }}</h3>
+                            <p class="text-[10px] text-slate-400">{{ number_format($chap->word_count ?? 0) }} kata</p>
                         </div>
-                        <h3 class="text-xs font-bold text-slate-800 line-clamp-1">{{ $chap->title }}</h3>
-                        <p class="text-[10px] text-slate-400">{{ number_format($chap->word_count ?? 0) }} kata</p>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -120,6 +132,28 @@
                         <input type="text" wire:model="title" placeholder="Contoh: Bab 1 - Pertemuan"
                             class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500">
                         @error('title')
+                            <span class="text-[10px] text-rose-400 font-bold block mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Cover Chapter (Opsional)</label>
+                        <div class="flex items-center gap-3">
+                            <div class="w-14 h-16 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+                                @if ($cover_upload)
+                                    <img src="{{ $cover_upload->temporaryUrl() }}" class="w-full h-full object-cover">
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                    </svg>
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" wire:model="cover_upload" accept="image/*" class="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
+                                <p class="text-[10px] text-slate-500 mt-1">Format: JPG, PNG, WEBP (Maks 2MB)</p>
+                            </div>
+                        </div>
+                        @error('cover_upload')
                             <span class="text-[10px] text-rose-400 font-bold block mt-1">{{ $message }}</span>
                         @enderror
                     </div>

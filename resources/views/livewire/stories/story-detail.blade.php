@@ -1,4 +1,4 @@
-<div class="p-4">
+<div x-data="{ showCoverPreview: false }" class="p-4">
     {{-- 📱 TOP NAVIGATION BAR --}}
     <div
         class="p-4 border-b border-slate-50 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-xs z-50 mb-3">
@@ -23,16 +23,80 @@
     {{-- 📖 COVER & METADATA UTAMA CERITA --}}
     <div
         class="flex flex-col items-center text-center bg-slate-50/60 border-b border-slate-100/90 animate-fade-in py-2">
+
         <div
-            class="w-32 h-44 bg-slate-200 rounded-2xl overflow-hidden shadow-md mb-4 border border-slate-200/40 transform hover:scale-[1.02] transition-transform">
+            class="w-32 h-44 bg-slate-200 rounded-2xl overflow-hidden shadow-md mb-4 border border-slate-200/40 transform hover:scale-[1.02] transition-transform relative select-none">
             @if ($story->cover_path)
-                <img src="{{ asset('storage/' . $story->cover_path) }}" class="w-full h-full object-cover">
+                <img src="{{ asset('storage/' . $story->cover_path) }}" 
+                    @click="showCoverPreview = true"
+                    oncontextmenu="return false;" 
+                    ondragstart="return false;"
+                    class="w-full h-full object-cover cursor-pointer select-none">
+                <div @click="showCoverPreview = true" 
+                    oncontextmenu="return false;" 
+                    ondragstart="return false;" 
+                    class="absolute inset-0 z-10 cursor-pointer"></div>
             @else
                 <div class="w-full h-full flex flex-col items-center justify-center text-3xl bg-slate-100">
                     <span>📖</span>
                 </div>
             @endif
         </div>
+
+        @if ($story->cover_path)
+            <!-- MODAL PREVIEW COVER PROTECTED -->
+            <template x-teleport="body">
+                <div x-show="showCoverPreview" 
+                    x-cloak 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0" 
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150" 
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    @keydown.window.escape="showCoverPreview = false"
+                    @keydown.window.ctrl.s.prevent
+                    @keydown.window.ctrl.p.prevent
+                    oncontextmenu="return false;"
+                    ondragstart="return false;"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 print:hidden select-none">
+                    
+                    <div class="fixed inset-0" @click="showCoverPreview = false"></div>
+
+                    <div class="relative z-10 max-w-sm w-full flex flex-col items-center gap-3">
+                        <div class="w-full flex items-center justify-between text-slate-300 px-2">
+                            <span class="text-xs font-bold flex items-center gap-1.5 text-slate-400">
+                                <i class="fa-solid fa-shield-halved text-brand-400"></i> Preview Cover
+                            </span>
+                            <button type="button" @click="showCoverPreview = false" 
+                                class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold transition">
+                                ✕
+                            </button>
+                        </div>
+
+                        <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 max-h-[75vh] select-none">
+                            <img src="{{ asset('storage/' . $story->cover_path) }}" 
+                                alt="{{ $story->title }}"
+                                oncontextmenu="return false;"
+                                ondragstart="return false;"
+                                class="max-h-[75vh] w-auto object-contain select-none">
+                            
+                            <div class="absolute inset-0 z-20 pointer-events-auto flex items-center justify-center overflow-hidden"
+                                oncontextmenu="return false;"
+                                ondragstart="return false;">
+                                <div class="opacity-20 rotate-[-30deg] text-white font-extrabold text-xs tracking-widest text-center select-none pointer-events-none whitespace-nowrap">
+                                    KISA INDONESIA • PROTECTED PREVIEW
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] text-slate-400 font-medium text-center">
+                            🔒 Cover dilindungi hak cipta &amp; tidak dapat diunduh.
+                        </p>
+                    </div>
+                </div>
+            </template>
+        @endif
 
         {{-- Badge Jenis Cerita --}}
 
@@ -140,12 +204,18 @@
                     {{-- KUNCI UTAMA: Wajib pakai wire:navigate agar transisi pindah ke simulator baca berjalan instan --}}
                     <a href="{{ route('stories.chapter.read', [$story->slug, $ch->slug]) }}" wire:navigate
                         class="group flex items-center justify-between p-3.5 bg-white border border-slate-100 rounded-2xl hover:border-brand-500/40 hover:bg-brand-50/10 transition shadow-3xs">
-                        <div class="flex flex-col gap-0.5">
-                            <span
-                                class="text-[9px] text-slate-400 font-extrabold uppercase group-hover:text-brand-600 transition">BAB
-                                {{ $index + 1 }}</span>
-                            <span
-                                class="text-xs font-bold text-slate-800 group-hover:text-slate-900 transition">{{ $ch->title }}</span>
+                        <div class="flex items-center gap-3">
+                            @if ($ch->cover_url)
+                                <img src="{{ $ch->cover_url }}" alt="Cover {{ $ch->title }}"
+                                    class="w-10 h-12 rounded-xl object-cover border border-slate-100 shrink-0">
+                            @endif
+                            <div class="flex flex-col gap-0.5">
+                                <span
+                                    class="text-[9px] text-slate-400 font-extrabold uppercase group-hover:text-brand-600 transition">BAB
+                                    {{ $index + 1 }}</span>
+                                <span
+                                    class="text-xs font-bold text-slate-800 group-hover:text-slate-900 transition">{{ $ch->title }}</span>
+                            </div>
                         </div>
                         <div class="flex items-center gap-1">
                             <span

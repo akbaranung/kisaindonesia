@@ -12,13 +12,18 @@ use Illuminate\Support\Str;
 use Livewire\Component;
 
 
+use Livewire\WithFileUploads;
+
 class ManageStoryChapters extends Component
 {
+    use WithFileUploads;
+
     public Story $story;
     public $isCreateModalOpen = false;
     public $title = '';
     public $type = 'regular';
     public $status = 'draft';
+    public $cover_upload = null;
 
     public function mount(Story $story)
     {
@@ -31,12 +36,14 @@ class ManageStoryChapters extends Component
         $this->title = '';
         $this->status = 'draft';
         $this->type = strtolower($this->story->type === 'puisi' ? 'regular' : $this->type);
+        $this->cover_upload = null;
         $this->isCreateModalOpen = true;
     }
 
     public function closeCreateModal()
     {
         $this->isCreateModalOpen = false;
+        $this->cover_upload = null;
     }
 
     public function createAndRedirect()
@@ -46,18 +53,26 @@ class ManageStoryChapters extends Component
                 'title' => 'required|string|max:255',
                 'type' => 'required|in:regular,chat',
                 'status' => 'required|in:draft,published',
+                'cover_upload' => 'nullable|image|max:500',
             ],
             [
                 'title.required' => 'Judul bab wajib diisi!',
-                'type.required' => 'Tipe bab wajib dipilih!'
+                'type.required' => 'Tipe bab wajib dipilih!',
+                'cover_upload.image' => 'Cover bab harus berupa file gambar!',
+                'cover_upload.max' => 'Ukuran cover bab maksimal 500KB!'
             ]
         );
 
 
         $filePath = null;
+        $coverPath = null;
 
         try {
-            $chapter = DB::transaction(function () use (&$filePath) {
+            if ($this->cover_upload) {
+                $coverPath = $this->cover_upload->store("chapters/covers/story_{$this->story->id}", 'public');
+            }
+
+            $chapter = DB::transaction(function () use (&$filePath, $coverPath) {
                 $nextOrder = ($this->story->chapters()->max('order_number') ?? 0) + 1;
                 $folder = "chapters/story_{$this->story->id}";
                 $filePath = "{$folder}/chap_{$nextOrder}_" . time() . ".json";
@@ -95,6 +110,7 @@ class ManageStoryChapters extends Component
                     'title' => $this->title,
                     'slug' => $slug,
                     'file_path' => $filePath,
+                    'cover_path' => $coverPath,
                     'word_count' => 0,
                     'order_number' => $nextOrder,
                     'is_premium' => ($this->story->monetization_type === 'premium' && $nextOrder > 5),
@@ -114,6 +130,9 @@ class ManageStoryChapters extends Component
         } catch (\Throwable $th) {
             if ($filePath && Storage::disk('local')->exists($filePath)) {
                 Storage::disk('local')->delete($filePath);
+            }
+            if ($coverPath && Storage::disk('public')->exists($coverPath)) {
+                Storage::disk('public')->delete($coverPath);
             }
 
             Log::error(
@@ -156,6 +175,11 @@ class ManageStoryChapters extends Component
                 // Hapus file JSON fisik dari storage local
                 if ($chapter->file_path && Storage::disk('local')->exists($chapter->file_path)) {
                     Storage::disk('local')->delete($chapter->file_path);
+                }
+
+                // Hapus file cover fisik dari storage public jika ada
+                if ($chapter->cover_path && Storage::disk('public')->exists($chapter->cover_path)) {
+                    Storage::disk('public')->delete($chapter->cover_path);
                 }
 
                 // Hapus record bab

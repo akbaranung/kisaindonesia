@@ -48,6 +48,10 @@ class ChapterEditor extends Component
     public string $regularContent = '';
     public $orderNumber;
 
+    // Cover Bab
+    public $chapter_cover_upload = null;
+    public $chapter_existing_cover = null;
+
     // Kelola karakter cerita
     public bool $isCharacterModalOpen = false;
     public $editingCharacterId = null;
@@ -68,6 +72,7 @@ class ChapterEditor extends Component
         $this->slug = $chapter->slug;
         $this->type = $chapter->type;
         $this->orderNumber = $chapter->order_number ?? $this->story->chapters()->max('order_number') + 1;
+        $this->chapter_existing_cover = $chapter->cover_path;
 
         // ambil isi file json dari model lewat acessor content
         $contentData = $chapter->parseJsonData();
@@ -94,9 +99,9 @@ class ChapterEditor extends Component
             $rules['message'] = 'required|string|max:1000';
         } elseif ($this->message_type === 'image') {
             if ($this->editingIndex === null && !$this->image_upload && empty($this->exisiting_image_url)) {
-                $rules['image_upload'] = 'required|image|max:2048';
+                $rules['image_upload'] = 'required|image|max:500';
             } else {
-                $rules['image_upload'] = 'nullable|image|max:2048';
+                $rules['image_upload'] = 'nullable|image|max:500';
             }
         } elseif ($this->message_type === 'call') {
             $rules['call_type'] = 'required|in:incoming,outgoing,missed';
@@ -229,11 +234,11 @@ class ChapterEditor extends Component
         $this->validate([
             'char_name' => 'required|string|max:50',
             'char_position' => 'required|in:left,right',
-            'char_avatar_upload' => 'nullable|image|max:2048',
+            'char_avatar_upload' => 'nullable|image|max:500',
         ], [
             'char_name.required' => 'Nama karakter wajib diisi!',
             'char_avatar_upload.image' => 'Avatar harus berupa file gambar!',
-            'char_avatar_upload.max' => 'Ukuran foto maksimal 2MB'
+            'char_avatar_upload.max' => 'Ukuran foto maksimal 500KB'
         ]);
 
         try {
@@ -297,7 +302,8 @@ class ChapterEditor extends Component
         $rules = [
             'title' => 'required|string|max:255',
             'status' => 'required|in:draft,published',
-            'type' => 'required|in:regular,chat'
+            'type' => 'required|in:regular,chat',
+            'chapter_cover_upload' => 'nullable|image|max:500',
         ];
 
         $messages = [
@@ -307,7 +313,9 @@ class ChapterEditor extends Component
             'regularContent.required' => 'Isi content chapter tidak boleh kosong!',
             'regualrContent.min' => 'Konten chapter minimal 5 karakter!',
             'bubbles.required' => 'Tambahkan minimal 1 pesan chat!',
-            'bubbles.min' => 'Tambahkan minimal 1 pesan chat!'
+            'bubbles.min' => 'Tambahkan minimal 1 pesan chat!',
+            'chapter_cover_upload.image' => 'Cover bab harus berupa file gambar!',
+            'chapter_cover_upload.max' => 'Ukuran file cover bab maksimal 500KB!'
         ];
 
         if (in_array($this->type, ['regular', 'puisi'])) {
@@ -317,11 +325,12 @@ class ChapterEditor extends Component
         }
 
         $validator = Validator::make([
-            'title'          => $this->title,
-            'status'         => $this->status,
-            'type'           => $this->type,
-            'regularContent' => $this->regularContent,
-            'bubbles'        => $this->bubbles,
+            'title'                => $this->title,
+            'status'               => $this->status,
+            'type'                 => $this->type,
+            'regularContent'       => $this->regularContent,
+            'bubbles'              => $this->bubbles,
+            'chapter_cover_upload' => $this->chapter_cover_upload,
         ], $rules, $messages);
 
         if ($validator->fails()) {
@@ -359,6 +368,17 @@ class ChapterEditor extends Component
         }
 
         try {
+            // Upload / update cover bab jika ada file baru
+            $coverPath = $this->chapter_existing_cover;
+            if ($this->chapter_cover_upload) {
+                if ($this->chapter_existing_cover && Storage::disk('public')->exists($this->chapter_existing_cover)) {
+                    Storage::disk('public')->delete($this->chapter_existing_cover);
+                }
+                $coverPath = $this->chapter_cover_upload->store("chapters/covers/story_{$this->story->id}", 'public');
+                $this->chapter_existing_cover = $coverPath;
+                $this->chapter_cover_upload = null;
+            }
+
             foreach ($this->bubbles as $index => &$bubble) {
                 if (($bubble['message_type'] ?? '') === 'image') {
                     // Jika ada file temporary yang diunggah
@@ -404,10 +424,11 @@ class ChapterEditor extends Component
             $this->chapter->update([
                 'title'      => trim($this->title),
                 'word_count' => $this->calculateWordCount(),
-                'slug'         => $slug,
-                'status'       => $this->status,
+                'slug'       => $slug,
+                'status'     => $this->status,
                 'is_premium' => $isPremium,
-                'bean_price' => $this->calculateKisaBean()
+                'bean_price' => $this->calculateKisaBean(),
+                'cover_path' => $coverPath,
             ]);
 
             // Simpan Ke File JSON
@@ -489,6 +510,17 @@ class ChapterEditor extends Component
             }
         }
         return 0;
+    }
+
+    public function removeChapterCover()
+    {
+        if ($this->chapter_existing_cover && Storage::disk('public')->exists($this->chapter_existing_cover)) {
+            Storage::disk('public')->delete($this->chapter_existing_cover);
+        }
+        $this->chapter_existing_cover = null;
+        $this->chapter_cover_upload = null;
+        $this->chapter->update(['cover_path' => null]);
+        $this->dispatch('show-toast', type: 'success', message: 'Cover bab berhasil dihapus!');
     }
 
     public function removeImagePreview()

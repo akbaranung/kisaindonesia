@@ -115,8 +115,48 @@
         </div>
 
 
-        <!-- Input Judul Bab -->
-        <div class="max-w-xl mx-auto">
+        <!-- Input Judul & Cover Bab -->
+        <div class="max-w-xl mx-auto space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-slate-900/80 border border-slate-800 rounded-2xl">
+                <div
+                    class="relative w-14 h-16 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden shrink-0 flex items-center justify-center">
+                    @if ($chapter_cover_upload)
+                        <img src="{{ $chapter_cover_upload->temporaryUrl() }}" class="w-full h-full object-cover">
+                    @elseif ($chapter_existing_cover)
+                        <img src="{{ Storage::url($chapter_existing_cover) }}" class="w-full h-full object-cover">
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-6 h-6 text-slate-600">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
+                    @endif
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Cover Bab
+                        (Opsional)</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <label
+                            class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-[11px] rounded-lg cursor-pointer transition border border-slate-700/60 shrink-0">
+                            <span>
+                                <i class="fa-solid fa-camera"></i>
+                                {{ $chapter_cover_upload || $chapter_existing_cover ? 'Ganti Cover' : 'Upload Cover' }}</span>
+                            <input type="file" wire:model="chapter_cover_upload" accept="image/*" class="hidden">
+                        </label>
+                        @if ($chapter_cover_upload || $chapter_existing_cover)
+                            <button type="button" wire:click="removeChapterCover" wire:confirm="Hapus cover bab ini?"
+                                class="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold text-[11px] rounded-lg transition border border-rose-500/20 shrink-0">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @error('chapter_cover_upload')
+                <span class="text-[10px] text-rose-400 font-bold block mt-1">{{ $message }}</span>
+            @enderror
+
             <input type="text" wire:model.live="title" placeholder="Judul Bab Cerita..."
                 class="w-full bg-transparent text-lg font-extrabold text-slate-100 placeholder-slate-600 focus:outline-none border-b border-slate-800 pb-2 focus:border-brand-500 transition">
             @error('title')

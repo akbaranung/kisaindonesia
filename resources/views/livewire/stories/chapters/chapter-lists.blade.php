@@ -23,10 +23,15 @@
         @forelse($story->chapters as $index => $chapter)
             <div
                 class="group bg-white border border-slate-100 rounded-2xl p-4 shadow-2xs hover:border-emerald-200 transition-all flex items-center gap-4">
-                <div
-                    class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition">
-                    {{ $index + 1 }}
-                </div>
+                @if ($chapter->cover_url)
+                    <img src="{{ $chapter->cover_url }}" alt="Cover {{ $chapter->title }}"
+                        class="w-10 h-12 rounded-xl object-cover border border-slate-100 shrink-0">
+                @else
+                    <div
+                        class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-xs font-black text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition shrink-0">
+                        {{ $index + 1 }}
+                    </div>
+                @endif
                 <div class="flex-1 cursor-pointer" wire:click="viewChapter({{ $chapter->id }})">
                     <h4 class="text-sm font-bold text-slate-800">{{ $chapter->title }}</h4>
                     <div class="flex items-center gap-2 mt-1">

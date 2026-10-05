@@ -21,8 +21,17 @@ class Chapter extends Model
         'is_premium',
         'word_count',
         'bean_price',
-        'file_path'
+        'file_path',
+        'cover_path'
     ];
+
+    public function getCoverUrlAttribute(): ?string
+    {
+        if ($this->cover_path) {
+            return Storage::disk('public')->url($this->cover_path);
+        }
+        return null;
+    }
 
     public function story()
     {
