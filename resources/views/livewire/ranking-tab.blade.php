@@ -59,7 +59,7 @@
                             {{ $story->title }}
                         </h3>
                         <p class="text-[11px] text-slate-400 truncate mt-0.5">
-                            {{ '@' . $story->author->name ?? 'Anonim' }}
+                            {{ '@' . $story->penName->name ?? 'Anonim' }}
                         </p>
                         <span
                             class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-black border border-white">

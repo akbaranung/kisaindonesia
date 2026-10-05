@@ -53,7 +53,8 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2 space-y-3">
+                <div
+                    class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 pb-2 space-y-3 justify-items-center">
                     @foreach ($editorChoices as $story)
                         <div class="w-28 flex-shrink-0 snap-start transition">
                             {{-- Cover Image --}}
@@ -171,7 +172,7 @@
                 </h3>
             </div>
 
-            <div class="grid grid-cols-3 sm:grid-cols-3 gap-3">
+            <div class="grid grid-cols-3 sm:grid-cols-3 gap-3 justify-items-center">
                 @forelse ($stories as $story)
                     <div class="w-28 flex-shrink-0 snap-start transition">
                         {{-- Cover Image --}}
