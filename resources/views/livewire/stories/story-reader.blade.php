@@ -378,7 +378,7 @@
 
                                                         <div
                                                             class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 max-h-[75vh] select-none">
-                                                            <img src="{{ $avatar }}" alt="{{ $charname }}"
+                                                            <img src="{{ $avatar }}" alt="{{ $charName }}"
                                                                 oncontextmenu="return false;"
                                                                 ondragstart="return false;"
                                                                 class="max-h-[75vh] w-auto object-contain select-none">
