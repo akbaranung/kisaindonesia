@@ -1,6 +1,11 @@
 <div x-data="{
     copied: false,
     showPicturePreview: false,
+    previewImageUrl: '',
+    openPreview(url) {
+        this.previewImageUrl = url;
+        this.showPicturePreview = true;
+    },
     shareChapter() {
         const shareData = {
             title: '{{ addslashes($story->title) }} - Bab {{ $chapter->order_number }}',
@@ -31,11 +36,56 @@
         <span>Tautan bab berhasil disalin!</span>
     </div>
 
+    {{-- Modal Preview Avatar Single Instance --}}
+    <template x-teleport="body">
+        <div x-show="showPicturePreview" x-cloak x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" @keydown.window.escape="showPicturePreview = false"
+            @keydown.window.ctrl.s.prevent @keydown.window.ctrl.p.prevent oncontextmenu="return false;"
+            ondragstart="return false;"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 print:hidden select-none">
+
+            <div class="fixed inset-0" @click="showPicturePreview = false"></div>
+
+            <div class="relative z-10 max-w-sm w-full flex flex-col items-center gap-3">
+                <div class="w-full flex items-center justify-between text-slate-300 px-2">
+                    <span class="text-xs font-bold flex items-center gap-1.5 text-slate-400">
+                        <i class="fa-solid fa-shield-halved text-brand-400"></i>
+                        Preview Image
+                    </span>
+                    <button type="button" @click="showPicturePreview = false"
+                        class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold transition">
+                        ✕
+                    </button>
+                </div>
+
+                <div
+                    class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 max-h-[75vh] select-none">
+                    <img :src="previewImageUrl" alt="Avatar Preview" oncontextmenu="return false;"
+                        ondragstart="return false;" class="max-h-[75vh] w-auto object-contain select-none">
+
+                    <div class="absolute inset-0 z-20 pointer-events-auto flex items-center justify-center overflow-hidden"
+                        oncontextmenu="return false;" ondragstart="return false;">
+                        <div
+                            class="opacity-20 rotate-[-30deg] text-white font-extrabold text-xs tracking-widest text-center select-none pointer-events-none whitespace-nowrap">
+                            KISA INDONESIA • PROTECTED PREVIEW
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-[10px] text-slate-400 font-medium text-center">
+                    🔒 Image dilindungi hak cipta &amp; tidak dapat diunduh.
+                </p>
+            </div>
+        </div>
+    </template>
+
     {{-- ════════════════════════════════════════════════════════════════ --}}
     {{-- 1. HEADER BACA CERITA --}}
     {{-- ════════════════════════════════════════════════════════════════ --}}
     <header
-        class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 py-3.5 flex items-center justify-between gap-2.5">
+        class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 py-3.5 flex items-center justify-between gap-2.5 px-4">
         <a href="/stories/{{ $story->slug }}" wire:navigate
             class="p-2 -ml-2 text-slate-500 hover:text-slate-800 transition rounded-xl hover:bg-slate-100">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +100,6 @@
         </div>
 
         <div class="flex items-center gap-1.5">
-            {{-- Tombol Bagikan / Share --}}
             <button @click="shareChapter()" title="Bagikan Bab Ini"
                 class="p-2 text-slate-500 hover:text-brand-600 transition rounded-xl hover:bg-brand-50 active:scale-90">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +108,6 @@
                 </svg>
             </button>
 
-            {{-- Indikator Koin User --}}
             @auth
                 <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-100/80 px-2.5 py-1 rounded-full">
                     <span class="text-xs">🫘</span>
@@ -77,7 +125,7 @@
     <main class="flex-1 flex flex-col w-full">
 
         @if ($isLocked)
-            {{-- 🔒 TAMPILAN PAYWALL (TERKUNCI) --}}
+            {{-- 🔒 TAMPILAN PAYWALL --}}
             <div
                 class="flex-1 flex flex-col items-center justify-center p-8 text-center my-auto min-h-[65vh] animate-fade-in">
                 <div
@@ -98,7 +146,6 @@
                     <span>Masa akses bab berlaku <strong>{{ $expiryDays }} Hari</strong></span>
                 </div>
 
-                {{-- Alert Error Saldo Kurang --}}
                 @if (session()->has('error'))
                     <div
                         class="p-3 my-4 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-100 rounded-2xl max-w-[280px]">
@@ -106,7 +153,6 @@
                     </div>
                 @endif
 
-                {{-- Tombol Buka Bab --}}
                 <button wire:click="confirmUnlock"
                     class="mt-6 p-4 px-8 bg-slate-900 hover:bg-amber-500 text-white font-black text-xs rounded-2xl shadow-md transition-all transform active:scale-95 flex items-center gap-2">
                     <span>Buka Bab • {{ $chapter->bean_price > 0 ? $chapter->bean_price : 5 }} KISA Bean</span>
@@ -117,7 +163,6 @@
                         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
                         <div
                             class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-xl border border-slate-100 transform transition-all scale-100">
-
                             <div
                                 class="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 border border-amber-100">
                                 🫘
@@ -136,7 +181,6 @@
                                 <span>Akses bab berlaku <strong>{{ $expiryDays }} Hari</strong> setelah dibuka</span>
                             </div>
 
-                            {{-- Ringkasan Saldo --}}
                             <div
                                 class="mb-4 p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs font-semibold">
                                 <span class="text-slate-400">Saldo Kamu:</span>
@@ -144,7 +188,6 @@
                                     Beans</span>
                             </div>
 
-                            {{-- Tombol Aksi --}}
                             <div class="flex items-center gap-2 mt-5">
                                 <button wire:click="cancelUnlock"
                                     class="flex-1 p-3 text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
@@ -155,7 +198,6 @@
                                     Ya, Buka
                                 </button>
                             </div>
-
                         </div>
                     </div>
                 @endif
@@ -165,26 +207,15 @@
                 </a>
             </div>
         @else
-            {{-- ✅ KONTEN TERBUKA (GRATIS / SUDAH DIBELI) --}}
-
+            {{-- ✅ KONTEN TERBUKA --}}
             @if ($chapter->type === 'regular')
-                {{-- 📖 KONTEN REGULAR (QUILL WYSIWYG NOVEL) --}}
-                <div class="p-2 pb-5 flex-1 flex flex-col w-full bg-white">
-
-                    {{-- Styling Teks Cerita --}}
+                {{-- 📖 KONTEN REGULAR --}}
+                <div class="p-4 pb-5 flex-1 flex flex-col w-full bg-white">
                     <div
-                        class="prose prose-slate max-w-none text-slate-800
-                                leading-relaxed md:leading-loose
-                                prose-p:my-5 
-                                prose-headings:text-slate-900 prose-headings:font-black
-                                prose-strong:font-black prose-strong:text-slate-900
-                                prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 text-[12px] text-justify">
-
+                        class="prose prose-slate max-w-none text-slate-800 leading-relaxed md:leading-loose prose-p:my-5 prose-headings:text-slate-900 prose-headings:font-black prose-strong:font-black prose-strong:text-slate-900 prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 text-[12px] text-justify">
                         {!! $regularContent !!}
-
                     </div>
 
-                    {{-- Navigasi Bab Sebelumnya / Selanjutnya --}}
                     <div class="flex items-center justify-between mt-12 pt-6 border-t border-slate-100">
                         @if ($prevSlug)
                             <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}" wire:navigate
@@ -205,7 +236,7 @@
                     <livewire:story.chapter.chapter-comments :chapter="$chapter" />
                 </div>
             @else
-                {{-- 💬 KONTEN CHAT FIC (TAP-TO-REVEAL WITH ALPINE.JS) --}}
+                {{-- 💬 KONTEN CHAT FIC --}}
                 @php
                     $chatBgUrl = $chapter->cover_path
                         ? (\Illuminate\Support\Str::startsWith($chapter->cover_path, ['http://', 'https://'])
@@ -219,32 +250,53 @@
                         visibleCount: @entangle('visibleCount'),
                         totalRows: {{ $totalRows }},
                         isTyping: false,
+                        typingTimer: null,
+                        init() {
+                            this.resetTypingTimer();
+                        },
+                        resetTypingTimer() {
+                            this.isTyping = false;
+                            clearTimeout(this.typingTimer);
+                            if (this.visibleCount < this.totalRows) {
+                                this.typingTimer = setTimeout(() => {
+                                    this.isTyping = true;
+                                    this.$nextTick(() => {
+                                        const container = this.$refs.chatScrollArea;
+                                        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+                                    });
+                                }, 10000); // 10 detik diam
+                            }
+                        },
+                        scrollToBottom() {
+                            this.$nextTick(() => {
+                                const container = this.$refs.chatScrollArea;
+                                if (container) {
+                                    // Menggunakan requestAnimationFrame agar meyakinkan elemen DOM baru sudah sepenuhnya ter-render
+                                    requestAnimationFrame(() => {
+                                        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+                                    });
+                                }
+                            });
+                        },
                         triggerNextChat() {
-                            if (this.visibleCount < this.totalRows && !this.isTyping) {
-                                this.isTyping = true;
+                            if (this.visibleCount < this.totalRows) {
+                                this.visibleCount++;
+                                $wire.updateChatProgress(this.visibleCount);
+                                this.resetTypingTimer();
                     
                                 const container = this.$refs.chatScrollArea;
                                 this.$nextTick(() => {
-                                    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+                                    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
                                 });
-                    
-                                setTimeout(() => {
-                                    this.visibleCount++;
-                                    this.isTyping = false;
-                                    $wire.updateChatProgress(this.visibleCount);
-                                    this.$nextTick(() => {
-                                        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
-                                    });
-                                }, 400);
                             }
                         }
                     }" @click="triggerNextChat()" x-ref="chatScrollArea"
                         style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
-                        class="px-1 py-2 md:p-6 flex flex-col w-full cursor-pointer h-[100vh] overflow-y-auto rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white' : '' }} bg-slate-500 bg-blend-multiply">
+                        class="px-3 py-4 md:p-6 flex flex-col w-full cursor-pointer h-[100vh] overflow-y-auto rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white' : '' }} bg-slate-500 bg-blend-multiply">
 
                         <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
 
-                            <div class="flex items-center justify-center my-2">
+                            <div class="flex items-center justify-center my-2" x-show="visibleCount < totalRows">
                                 <span
                                     class="px-3 py-1 bg-brand-100/90 backdrop-blur-xs border border-brand-200/60 text-brand-800 text-[10px] font-extrabold rounded-full animate-pulse shadow-2xs">
                                     👇 Ketuk di mana saja untuk lanjut membaca
@@ -289,7 +341,6 @@
                                         <div class="flex items-center justify-center my-2">
                                             <div
                                                 class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xs {{ $isMissed ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-slate-900 border-slate-800 text-white' }}">
-
                                                 @if ($isMissed)
                                                     <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none"
                                                         stroke="currentColor" viewBox="0 0 24 24">
@@ -323,82 +374,20 @@
                                                             Panggilan Masuk
                                                         @endif
                                                     </span>
-
                                                     @if (!empty($row['duration']))
                                                         <span
                                                             class="opacity-60 text-[11px] font-medium">({{ $row['duration'] }})</span>
                                                     @endif
                                                 </div>
-
                                             </div>
                                         </div>
                                     @elseif($type === 'image')
                                         <div
                                             class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
                                             <img src="{{ $avatar }}"
-                                                class="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0"
-                                                @click="showPicturePreview = true" oncontextmenu="return false;"
-                                                ondragstart="return false;">
-                                            <div @click="showPicturePreview = true" oncontextmenu="return false;"
-                                                ondragstart="return false;"
-                                                class="absolute inset-0 z-10 cursor-pointer"></div>
-
-
-                                            <template x-teleport="body">
-                                                <div x-show="showPicturePreview" x-cloak
-                                                    x-transition:enter="transition ease-out duration-200"
-                                                    x-transition:enter-start="opacity-0"
-                                                    x-transition:enter-end="opacity-100"
-                                                    x-transition:leave="transition ease-in duration-150"
-                                                    x-transition:leave-start="opacity-100"
-                                                    x-transition:leave-end="opacity-0"
-                                                    @keydown.window.escape="showPicturePreview = false"
-                                                    @keydown.window.ctrl.s.prevent @keydown.window.ctrl.p.prevent
-                                                    oncontextmenu="return false;" ondragstart="return false;"
-                                                    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 print:hidden select-none">
-
-                                                    <div class="fixed inset-0" @click="showPicturePreview = false">
-                                                    </div>
-
-                                                    <div
-                                                        class="relative z-10 max-w-sm w-full flex flex-col items-center gap-3">
-                                                        <div
-                                                            class="w-full flex items-center justify-between text-slate-300 px-2">
-                                                            <span
-                                                                class="text-xs font-bold flex items-center gap-1.5 text-slate-400">
-                                                                <i
-                                                                    class="fa-solid fa-shield-halved text-brand-400"></i>
-                                                                Preview Cover
-                                                            </span>
-                                                            <button type="button" @click="showPicturePreview = false"
-                                                                class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold transition">
-                                                                ✕
-                                                            </button>
-                                                        </div>
-
-                                                        <div
-                                                            class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 max-h-[75vh] select-none">
-                                                            <img src="{{ $avatar }}" alt="{{ $charName }}"
-                                                                oncontextmenu="return false;"
-                                                                ondragstart="return false;"
-                                                                class="max-h-[75vh] w-auto object-contain select-none">
-
-                                                            <div class="absolute inset-0 z-20 pointer-events-auto flex items-center justify-center overflow-hidden"
-                                                                oncontextmenu="return false;"
-                                                                ondragstart="return false;">
-                                                                <div
-                                                                    class="opacity-20 rotate-[-30deg] text-white font-extrabold text-xs tracking-widest text-center select-none pointer-events-none whitespace-nowrap">
-                                                                    KISA INDONESIA • PROTECTED PREVIEW
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <p class="text-[10px] text-slate-400 font-medium text-center">
-                                                            🔒 Cover dilindungi hak cipta &amp; tidak dapat diunduh.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </template>
+                                                class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0 cursor-pointer hover:opacity-80 transition"
+                                                @click.stop="openPreview('{{ $avatar }}')"
+                                                oncontextmenu="return false;" ondragstart="return false;">
 
                                             <div
                                                 class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
@@ -410,8 +399,8 @@
                                                     @php
                                                         $rawImg =
                                                             $row['image_url'] ?? ($row['existing_image_url'] ?? '');
-                                                        if (!empty($rawImg)) {
-                                                            $imgSrc = \Illuminate\Support\Str::startsWith($rawImg, [
+                                                        $imgSrc = !empty($rawImg)
+                                                            ? (\Illuminate\Support\Str::startsWith($rawImg, [
                                                                 'http://',
                                                                 'https://',
                                                             ])
@@ -421,15 +410,13 @@
                                                                     'storage/',
                                                                 )
                                                                     ? asset($rawImg)
-                                                                    : asset('storage/' . $rawImg));
-                                                        } else {
-                                                            $imgSrc = null;
-                                                        }
+                                                                    : asset('storage/' . $rawImg)))
+                                                            : null;
                                                     @endphp
                                                     @if ($imgSrc)
                                                         <img src="{{ $imgSrc }}" alt="Chat Image"
                                                             class="rounded-xl w-full max-w-[240px] sm:max-w-xs max-h-[320px] object-cover cursor-pointer hover:opacity-95 transition"
-                                                            onclick="window.open(this.src, '_blank')">
+                                                            @click.stop="openPreview('{{ $imgSrc }}')">
                                                     @endif
                                                     @if (!empty($row['message']) || !empty($row['caption']))
                                                         <p
@@ -441,10 +428,13 @@
                                             </div>
                                         </div>
                                     @else
+                                        {{-- Tipe Chat Biasa --}}
                                         <div
                                             class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
                                             <img src="{{ $avatar }}"
-                                                class="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0">
+                                                class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0 cursor-pointer hover:opacity-80 transition"
+                                                @click.stop="openPreview('{{ $avatar }}')"
+                                                oncontextmenu="return false;" ondragstart="return false;">
 
                                             <div
                                                 class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
@@ -462,7 +452,7 @@
                                 </div>
                             @endforeach
 
-                            {{-- Indikator Mengetik --}}
+                            {{-- Indikator Mengetik (Hanya Tampil Jika Diam 10 Detik) --}}
                             <div x-show="isTyping" x-cloak
                                 class="flex items-center gap-1.5 px-3 py-2 bg-slate-100/90 backdrop-blur-xs rounded-full w-max text-slate-400 my-1 animate-pulse border border-slate-200/60">
                                 <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
@@ -475,9 +465,12 @@
                         </div>
                     </div>
 
-
-                    {{-- 2. AREA KOMENTAR (DI LUAR BACKGROUND, BERDIRI SENDIRI DENGAN TAMPILAN BERSIH/PUTIH) --}}
-                    <div class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs">
+                    {{-- AREA KOMENTAR & NAVIGASI BAB (Muncul saat semua chat telah terbuka) --}}
+                    <div x-show="visibleCount >= totalRows" x-cloak
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 translate-y-4"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs">
                         <div class="flex items-center justify-between gap-3">
                             @if ($prevSlug)
                                 <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}" wire:navigate
