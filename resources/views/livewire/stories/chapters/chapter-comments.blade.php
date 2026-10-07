@@ -1,4 +1,4 @@
-<div class="w-full mt-12 pt-8 border-t border-slate-100 max-w-2xl mx-auto px-3">
+<div class="w-full mt-12 border-t border-slate-100 max-w-2xl mx-auto px-3">
     <h3 class="text-lg font-bold text-slate-800 mb-6">
         Komentar
     </h3>

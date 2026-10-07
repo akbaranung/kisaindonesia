@@ -1,6 +1,6 @@
 <div class="mb-20">
     <section
-        class="sticky flex items-center justify-between p-4 bg-white border-b border-slate-50 top-0 left-0 right-0 z-50">
+        class="sticky flex items-center justify-between p-2 bg-white border-b border-slate-50 top-0 left-0 right-0 z-50">
         <div class="flex flex-col">
             <img src="images/logo-2.png" alt="logo" class="w-20">
         </div>

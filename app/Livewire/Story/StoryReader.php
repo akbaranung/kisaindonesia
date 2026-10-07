@@ -59,7 +59,7 @@ class StoryReader extends Component
                         ->where('chapter_id', $chapter->id)
                         ->where(function ($q) {
                             $q->whereNull('expires_at')
-                              ->orWhere('expires_at', '>', now());
+                                ->orWhere('expires_at', '>', now());
                         })
                         ->exists();
 
@@ -213,9 +213,11 @@ class StoryReader extends Component
             ReadHistory::updateOrCreate(
                 [
                     'user_id' => auth()->id(),
-                    'story_id' => $this->story->id
+                    'story_id' => $this->story->id,
+                    'chapter_id' => $this->chapter->id
                 ],
                 [
+                    'story_id' => $this->story->id,
                     'chapter_id' => $this->chapter->id,
                     'visible_chat_count' => $this->visibleCount
                 ]
