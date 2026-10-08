@@ -2,10 +2,26 @@
     copied: false,
     showPicturePreview: false,
     previewImageUrl: '',
+    visibleCount: @entangle('visibleCount'),
+    totalRows: {{ (int) $totalRows }},
+    isTyping: false,
+    typingTimer: null,
+    showComments: false,
+
+    init() {
+        this.checkIfFinished();
+        this.resetTypingTimer();
+
+        this.$watch('visibleCount', value => {
+            this.checkIfFinished();
+        });
+    },
+
     openPreview(url) {
         this.previewImageUrl = url;
         this.showPicturePreview = true;
     },
+
     shareChapter() {
         const shareData = {
             title: '{{ addslashes($story->title) }} - Bab {{ $chapter->order_number }}',
@@ -20,11 +36,54 @@
             this.copied = true;
             setTimeout(() => this.copied = false, 2500);
         }
+    },
+
+    checkIfFinished() {
+        if (Number(this.visibleCount) >= Number(this.totalRows)) {
+            this.showComments = true;
+            this.isTyping = false;
+            clearTimeout(this.typingTimer);
+        } else {
+            this.showComments = false;
+        }
+    },
+
+    resetTypingTimer() {
+        this.isTyping = false;
+        clearTimeout(this.typingTimer);
+        if (!this.showComments) {
+            this.typingTimer = setTimeout(() => {
+                this.isTyping = true;
+                this.scrollToBottom();
+            }, 10000); // 10 detik diam
+        }
+    },
+
+    scrollToBottom() {
+        this.$nextTick(() => {
+            const container = this.$refs.chatScrollArea;
+            if (container) {
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    },
+
+    triggerNextChat() {
+        if (!this.showComments) {
+            this.visibleCount = Number(this.visibleCount) + 1;
+            $wire.updateChatProgress(this.visibleCount);
+            this.checkIfFinished();
+            this.resetTypingTimer();
+            this.scrollToBottom();
+        }
     }
 }"
     class="w-full min-h-screen bg-slate-50 flex flex-col justify-between max-w-2xl mx-auto border-x border-slate-100 shadow-xs relative">
 
-    {{-- Notification Toast saat Salin Tautan (Desktop Fallback) --}}
+    {{-- Notification Toast saat Salin Tautan --}}
     <div x-show="copied" x-cloak x-transition:enter="transition ease-out duration-300 transform"
         x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-200 transform"
@@ -36,7 +95,7 @@
         <span>Tautan bab berhasil disalin!</span>
     </div>
 
-    {{-- Modal Preview Avatar Single Instance --}}
+    {{-- Modal Preview Avatar / Gambar --}}
     <template x-teleport="body">
         <div x-show="showPicturePreview" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
@@ -81,9 +140,7 @@
         </div>
     </template>
 
-    {{-- ════════════════════════════════════════════════════════════════ --}}
-    {{-- 1. HEADER BACA CERITA --}}
-    {{-- ════════════════════════════════════════════════════════════════ --}}
+    {{-- HEADER BACA CERITA --}}
     <header
         class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 py-3.5 flex items-center justify-between gap-2.5 px-4">
         <a href="/stories/{{ $story->slug }}" wire:navigate
@@ -119,13 +176,11 @@
         </div>
     </header>
 
-    {{-- ════════════════════════════════════════════════════════════════ --}}
-    {{-- 2. KONTEN UTAMA BACA / GEMBOK PAYWALL --}}
-    {{-- ════════════════════════════════════════════════════════════════ --}}
+    {{-- KONTEN UTAMA --}}
     <main class="flex-1 flex flex-col w-full">
 
         @if ($isLocked)
-            {{-- 🔒 TAMPILAN PAYWALL --}}
+            {{-- TAMPILAN GEMBOK PAYWALL --}}
             <div
                 class="flex-1 flex flex-col items-center justify-center p-8 text-center my-auto min-h-[65vh] animate-fade-in">
                 <div
@@ -207,9 +262,9 @@
                 </a>
             </div>
         @else
-            {{-- ✅ KONTEN TERBUKA --}}
+            {{-- KONTEN TERBUKA --}}
             @if ($chapter->type === 'regular')
-                {{-- 📖 KONTEN REGULAR --}}
+                {{-- KONTEN REGULAR --}}
                 <div class="p-4 pb-5 flex-1 flex flex-col w-full bg-white">
                     <div
                         class="prose prose-slate max-w-none text-slate-800 leading-relaxed md:leading-loose prose-p:my-5 prose-headings:text-slate-900 prose-headings:font-black prose-strong:font-black prose-strong:text-slate-900 prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 text-[12px] text-justify">
@@ -236,7 +291,7 @@
                     <livewire:story.chapter.chapter-comments :chapter="$chapter" />
                 </div>
             @else
-                {{-- 💬 KONTEN CHAT FIC --}}
+                {{-- KONTEN CHAT FIC --}}
                 @php
                     $chatBgUrl = $chapter->cover_path
                         ? (\Illuminate\Support\Str::startsWith($chapter->cover_path, ['http://', 'https://'])
@@ -246,217 +301,212 @@
                 @endphp
 
                 <div class="flex-1 flex flex-col w-full gap-4">
-                    <div x-data="{
-                        visibleCount: @entangle('visibleCount'),
-                        totalRows: {{ (int) $totalRows }},
-                        isTyping: false,
-                        typingTimer: null,
-                        showComments: false,
-                    
-                        init() {
-                            // Cek status awal saat halaman di-load
-                            this.checkIfFinished();
-                            this.resetTypingTimer();
-                    
-                            // Watch perubahan visibleCount dari Livewire
-                            this.$watch('visibleCount', value => {
-                                this.checkIfFinished();
-                            });
-                        },
-                    
-                        checkIfFinished() {
-                            if (Number(this.visibleCount) >= Number(this.totalRows)) {
-                                this.showComments = true;
-                                this.isTyping = false;
-                                clearTimeout(this.typingTimer);
-                            } else {
-                                this.showComments = false;
-                            }
-                        },
-                    
-                        resetTypingTimer() {
-                            this.isTyping = false;
-                            clearTimeout(this.typingTimer);
-                            if (!this.showComments) {
-                                this.typingTimer = setTimeout(() => {
-                                    this.isTyping = true;
-                                    this.scrollToBottom();
-                                }, 10000); // 10 detik diam
-                            }
-                        },
-                    
-                        scrollToBottom() {
-                            this.$nextTick(() => {
-                                const container = this.$refs.chatScrollArea;
-                                if (container) {
-                                    requestAnimationFrame(() => {
-                                        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-                                    });
-                                }
-                            });
-                        },
-                    
-                        triggerNextChat() {
-                            if (!this.showComments) {
-                                this.visibleCount = Number(this.visibleCount) + 1;
-                                $wire.updateChatProgress(this.visibleCount);
-                                this.checkIfFinished();
-                                this.resetTypingTimer();
-                                this.scrollToBottom();
-                            }
-                        }
-                    }"
-                        class="w-full min-h-screen bg-slate-50 flex flex-col justify-between max-w-2xl mx-auto border-x border-slate-100 shadow-xs relative">
 
-                        {{-- KONTEN UTAMA --}}
-                        <main class="flex-1 flex flex-col w-full">
-                            @if ($isLocked)
-                                {{-- Paywall Section --}}
-                            @else
-                                @if ($chapter->type === 'regular')
-                                    {{-- Regular Content --}}
-                                @else
-                                    {{-- 💬 KONTEN CHAT FIC --}}
+                    <div class="relative w-full">
+                        <div @click="triggerNextChat()" @scroll="checkScroll($event)" x-ref="chatScrollArea"
+                            style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
+                            class="px-3 py-4 md:p-6 mb-20 flex flex-col w-full cursor-pointer h-[100vh] overflow-y-auto rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white' : '' }} bg-slate-500 bg-blend-multiply">
+
+                            <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
+
+                                {{-- Petunjuk Tap --}}
+                                <div class="flex items-center justify-center my-2" x-show="!showComments">
+                                    <span
+                                        class="px-3 py-1 bg-brand-100/90 backdrop-blur-xs border border-brand-200/60 text-brand-800 text-[10px] font-extrabold rounded-full animate-pulse shadow-2xs">
+                                        👇 Ketuk di mana saja untuk lanjut membaca
+                                    </span>
+                                </div>
+
+                                {{-- Loop Baris Chat --}}
+                                @foreach ($chatRows as $index => $row)
                                     @php
-                                        $chatBgUrl = $chapter->cover_path
-                                            ? (\Illuminate\Support\Str::startsWith($chapter->cover_path, [
-                                                'http://',
-                                                'https://',
-                                            ])
-                                                ? $chapter->cover_path
-                                                : asset('storage/' . $chapter->cover_path))
+                                        $type = $row['message_type'] ?? 'chat';
+                                        $char = !empty($row['character_id'])
+                                            ? $story->characters->firstWhere('id', $row['character_id'])
                                             : null;
+                                        $charName = $char ? $char->name : 'Unknown';
+                                        $isRight = ($char->default_position ?? 'left') === 'right';
+                                        $avatar =
+                                            $char && $char->avatar_path
+                                                ? asset('storage/' . $char->avatar_path)
+                                                : 'https://ui-avatars.com/api/?name=' .
+                                                    urlencode($charName) .
+                                                    '&background=random';
                                     @endphp
 
-                                    <div class="flex-1 flex flex-col w-full gap-4">
+                                    <div x-show="{{ $index }} < Number(visibleCount)"
+                                        x-transition:enter="transition ease-out duration-100 transform"
+                                        x-transition:enter-start="opacity-0 scale-95"
+                                        x-transition:enter-end="opacity-100 scale-100" class="w-full relative">
 
-                                        {{-- Area Chat Utama (Event Click Memajukan Chat) --}}
-                                        <div @click="triggerNextChat()" x-ref="chatScrollArea"
-                                            style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
-                                            class="px-3 py-4 md:p-6 mb-20 flex flex-col w-full cursor-pointer h-[100vh] overflow-y-auto rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white' : '' }} bg-slate-500 bg-blend-multiply">
+                                        @if ($type === 'center_text')
+                                            <div
+                                                class="my-3 px-4 py-2 bg-slate-200/80 backdrop-blur-xs rounded-2xl text-center max-w-[90%] mx-auto shadow-2xs border border-slate-300/40">
+                                                <p class="text-xs font-semibold italic text-slate-700 leading-relaxed">
+                                                    {{ $row['message'] ?? ($row['center_text'] ?? '') }}
+                                                </p>
+                                            </div>
+                                        @elseif($type === 'call')
+                                            @php
+                                                $isMissed = ($row['call_type'] ?? '') === 'missed';
+                                                $isOutgoing = ($row['call_type'] ?? '') === 'outgoing';
+                                            @endphp
 
-                                            <div class="flex flex-col gap-3 flex-1 w-full relative z-10"
-                                                id="chat-container">
+                                            <div class="flex items-center justify-center my-2">
+                                                <div
+                                                    class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xs {{ $isMissed ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-slate-900 border-slate-800 text-white' }}">
+                                                    @if ($isMissed)
+                                                        <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2.5"
+                                                                d="M16 8l-8 8m0-8l8 8M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                        </svg>
+                                                    @elseif($isOutgoing)
+                                                        <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2.5"
+                                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                        </svg>
+                                                    @else
+                                                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2.5"
+                                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                        </svg>
+                                                    @endif
 
-                                                {{-- Petunjuk Tap --}}
-                                                <div class="flex items-center justify-center my-2"
-                                                    x-show="!showComments">
-                                                    <span
-                                                        class="px-3 py-1 bg-brand-100/90 backdrop-blur-xs border border-brand-200/60 text-brand-800 text-[10px] font-extrabold rounded-full animate-pulse shadow-2xs">
-                                                        👇 Ketuk di mana saja untuk lanjut membaca
-                                                    </span>
-                                                </div>
-
-                                                {{-- Loop Baris Chat --}}
-                                                @foreach ($chatRows as $index => $row)
-                                                    @php
-                                                        $type = $row['message_type'] ?? 'chat';
-                                                        $char = !empty($row['character_id'])
-                                                            ? $story->characters->firstWhere('id', $row['character_id'])
-                                                            : null;
-                                                        $charName = $char ? $char->name : 'Unknown';
-                                                        $isRight = ($char->default_position ?? 'left') === 'right';
-                                                        $avatar =
-                                                            $char && $char->avatar_path
-                                                                ? asset('storage/' . $char->avatar_path)
-                                                                : 'https://ui-avatars.com/api/?name=' .
-                                                                    urlencode($charName) .
-                                                                    '&background=random';
-                                                    @endphp
-
-                                                    <div x-show="{{ $index }} < Number(visibleCount)"
-                                                        x-transition:enter="transition ease-out duration-200 transform"
-                                                        x-transition:enter-start="opacity-0 translate-y-2 scale-95"
-                                                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                                        class="w-full relative">
-
-                                                        @if ($type === 'center_text')
-                                                            <div
-                                                                class="my-3 px-4 py-2 bg-slate-200/80 backdrop-blur-xs rounded-2xl text-center max-w-[90%] mx-auto shadow-2xs border border-slate-300/40">
-                                                                <p
-                                                                    class="text-xs font-semibold italic text-slate-700 leading-relaxed">
-                                                                    {{ $row['message'] ?? ($row['center_text'] ?? '') }}
-                                                                </p>
-                                                            </div>
-                                                        @elseif($type === 'call')
-                                                            {{-- Tipe Call --}}
-                                                            <div class="flex items-center justify-center my-2">
-                                                                <div
-                                                                    class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xs bg-slate-900 border-slate-800 text-white">
-                                                                    <span>Panggilan Chat</span>
-                                                                </div>
-                                                            </div>
-                                                        @else
-                                                            {{-- Tipe Chat & Image --}}
-                                                            <div
-                                                                class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                                                <img src="{{ $avatar }}"
-                                                                    class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0">
-                                                                <div
-                                                                    class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
-                                                                    <span
-                                                                        class="text-[10px] {{ $chatBgUrl ? 'text-slate-200 drop-shadow-xs' : 'text-slate-400' }} px-0.5 mb-0.5">{{ $charName }}</span>
-                                                                    <div
-                                                                        class="px-3.5 py-2 rounded-2xl text-xs font-semibold leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60' }}">
-                                                                        {{ $row['message'] ?? '' }}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span>
+                                                            @if ($isMissed)
+                                                                Panggilan Tak Terjawab
+                                                            @elseif($isOutgoing)
+                                                                Panggilan Keluar
+                                                            @else
+                                                                Panggilan Masuk
+                                                            @endif
+                                                        </span>
+                                                        @if (!empty($row['duration']))
+                                                            <span
+                                                                class="opacity-60 text-[11px] font-medium">({{ $row['duration'] }})</span>
                                                         @endif
-
                                                     </div>
-                                                @endforeach
-
-                                                {{-- Indikator Mengetik --}}
-                                                <div x-show="isTyping && !showComments" x-cloak
-                                                    class="flex items-center gap-1.5 px-3 py-2 bg-slate-100/90 backdrop-blur-xs rounded-full w-max text-slate-400 my-1 animate-pulse border border-slate-200/60">
-                                                    <span
-                                                        class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
-                                                    <span
-                                                        class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                                                    <span
-                                                        class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
                                                 </div>
-
                                             </div>
-                                        </div>
+                                        @elseif($type === 'image')
+                                            <div
+                                                class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                                <img src="{{ $avatar }}"
+                                                    class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0 cursor-pointer hover:opacity-80 transition"
+                                                    @click.stop="openPreview('{{ $avatar }}')"
+                                                    oncontextmenu="return false;" ondragstart="return false;">
 
-                                        {{-- AREA KOMENTAR & NAVIGASI BAB --}}
-                                        {{-- Dikunci dengan showComments + @click.stop agar tap di sini tidak memicu triggerNextChat --}}
-                                        <div x-show="showComments" x-cloak @click.stop
-                                            x-transition:enter="transition ease-out duration-300"
-                                            x-transition:enter-start="opacity-0 translate-y-4"
-                                            x-transition:enter-end="opacity-100 translate-y-0"
-                                            class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs mt-4">
+                                                <div
+                                                    class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
+                                                    <span
+                                                        class="text-[10px] {{ $chatBgUrl ? 'text-slate-200 drop-shadow-xs' : 'text-slate-400' }} px-0.5 mb-0.5">{{ $charName }}</span>
 
-                                            <div class="flex items-center justify-between gap-3">
-                                                @if ($prevSlug)
-                                                    <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}"
-                                                        wire:navigate
-                                                        class="p-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
-                                                        Bab Sebelumnya
-                                                    </a>
-                                                @else
-                                                    <div></div>
-                                                @endif
-
-                                                @if ($nextSlug)
-                                                    <a href="{{ route('stories.chapter.read', [$story->slug, $nextSlug]) }}"
-                                                        wire:navigate
-                                                        class="p-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition">
-                                                        Bab Berikutnya
-                                                    </a>
-                                                @endif
+                                                    <div
+                                                        class="p-1.5 rounded-2xl text-xs font-semibold leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60' }}">
+                                                        @php
+                                                            $rawImg =
+                                                                $row['image_url'] ?? ($row['existing_image_url'] ?? '');
+                                                            $imgSrc = !empty($rawImg)
+                                                                ? (\Illuminate\Support\Str::startsWith($rawImg, [
+                                                                    'http://',
+                                                                    'https://',
+                                                                ])
+                                                                    ? $rawImg
+                                                                    : (\Illuminate\Support\Str::startsWith(
+                                                                        $rawImg,
+                                                                        'storage/',
+                                                                    )
+                                                                        ? asset($rawImg)
+                                                                        : asset('storage/' . $rawImg)))
+                                                                : null;
+                                                        @endphp
+                                                        @if ($imgSrc)
+                                                            <img src="{{ $imgSrc }}" alt="Chat Image"
+                                                                class="rounded-xl w-full max-w-[240px] sm:max-w-xs max-h-[320px] object-cover cursor-pointer hover:opacity-95 transition"
+                                                                @click.stop="openPreview('{{ $imgSrc }}')">
+                                                        @endif
+                                                        @if (!empty($row['message']) || !empty($row['caption']))
+                                                            <p
+                                                                class="text-xs font-semibold px-2 py-1 mt-1 {{ $isRight ? 'text-slate-950' : 'text-slate-800' }}">
+                                                                {{ $row['message'] ?? $row['caption'] }}
+                                                            </p>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
+                                        @else
+                                            {{-- Tipe Chat Biasa --}}
+                                            <div
+                                                class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                                <img src="{{ $avatar }}"
+                                                    class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0 cursor-pointer hover:opacity-80 transition"
+                                                    @click.stop="openPreview('{{ $avatar }}')"
+                                                    oncontextmenu="return false;" ondragstart="return false;">
 
-                                            <livewire:story.chapter.chapter-comments :chapter="$chapter" />
-                                        </div>
+                                                <div
+                                                    class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
+                                                    <span
+                                                        class="text-[10px] {{ $chatBgUrl ? 'text-slate-200 drop-shadow-xs' : 'text-slate-400' }} px-0.5 mb-0.5">{{ $charName }}</span>
+
+                                                    <div
+                                                        class="px-3.5 py-2 rounded-2xl text-xs font-semibold leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60' }}">
+                                                        {{ $row['message'] ?? '' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
 
                                     </div>
-                                @endif
-                            @endif
-                        </main>
+                                @endforeach
+
+                                {{-- Indikator Mengetik --}}
+                                <div x-show="isTyping && !showComments" x-cloak
+                                    class="flex items-center gap-1.5 px-3 py-2 bg-slate-100/90 backdrop-blur-xs rounded-full w-max text-slate-400 my-1 animate-pulse border border-slate-200/60">
+                                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+                                    <span
+                                        class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                                    <span
+                                        class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                                </div>
+
+                            </div>
+                        </div>
                     </div>
+
+                    <div x-show="showComments" x-cloak @click.stop
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 translate-y-4"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs mt-4 mb-20">
+
+                        <div class="flex items-center justify-between gap-3">
+                            @if ($prevSlug)
+                                <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}" wire:navigate
+                                    class="p-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">
+                                    Bab Sebelumnya
+                                </a>
+                            @else
+                                <div></div>
+                            @endif
+
+                            @if ($nextSlug)
+                                <a href="{{ route('stories.chapter.read', [$story->slug, $nextSlug]) }}" wire:navigate
+                                    class="p-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition">
+                                    Bab Berikutnya
+                                </a>
+                            @endif
+                        </div>
+
+                        <livewire:story.chapter.chapter-comments :chapter="$chapter" />
+                    </div>
+
                 </div>
             @endif
 
