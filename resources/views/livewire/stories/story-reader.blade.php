@@ -59,15 +59,22 @@
         }
     },
 
-    scrollToBottom() {
+    scrollToBottom(behavior = 'smooth') {
         this.$nextTick(() => {
             const container = this.$refs.chatScrollArea;
-            if (container) {
-                container.scrollTo({
-                    top: container.scrollHeight,
-                    behavior: 'smooth'
+            if (!container) return;
+
+            // Tunggu Alpine menyelesaikan transisi/render pesan sebelum menghitung posisi.
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    // Sisakan ruang untuk bottom navigation agar pesan terakhir tidak tertutup.
+                    const bottomNavSpace = 64;
+                    container.scrollTo({
+                        top: container.scrollHeight - container.clientHeight + bottomNavSpace,
+                        behavior
+                    });
                 });
-            }
+            });
         });
     },
 
@@ -305,7 +312,7 @@
                     <div class="relative w-full">
                         <div @click="triggerNextChat()" @scroll="checkScroll($event)" x-ref="chatScrollArea"
                             style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
-                            class="px-3 py-4 md:p-6 mb-20 flex flex-col w-full cursor-pointer h-[100vh] overflow-y-auto rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white' : '' }} bg-slate-500 bg-blend-multiply">
+                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-9rem)] min-h-[50vh] max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-contain scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white' : '' }} bg-slate-500 bg-blend-multiply">
 
                             <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
 
@@ -480,11 +487,7 @@
                         </div>
                     </div>
 
-                    <div x-show="showComments" x-cloak @click.stop
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 translate-y-4"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs mt-4 mb-20">
+                    <div class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs mb-20">
 
                         <div class="flex items-center justify-between gap-3">
                             @if ($prevSlug)
