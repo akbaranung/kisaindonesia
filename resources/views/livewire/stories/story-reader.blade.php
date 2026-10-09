@@ -614,8 +614,8 @@
                         </div>
                     </div>
 
-                    <div class="relative mt-10">
-                        <button @click.stop="scrollToComments()" x-show="showComments" x-cloak
+                    <div class="relative mt-3">
+                        <button @click.stop="scrollToComments()" x-cloak
                             x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 scale-90 translate-y-2"
                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -635,7 +635,7 @@
 
 
                     {{-- Area Komentar & Navigasi Bab --}}
-                    <div x-ref="commentSection" x-show="showComments" x-cloak @click.stop
+                    <div x-ref="commentSection" x-cloak @click.stop
                         class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs mb-20">
 
                         <div class="flex items-center justify-between gap-3">
