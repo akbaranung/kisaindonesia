@@ -2,18 +2,66 @@
     copied: false,
     showPicturePreview: false,
     previewImageUrl: '',
+    fontSize: localStorage.getItem('reader_font_size') || 'text-xs',
     visibleCount: @entangle('visibleCount'),
     totalRows: {{ (int) $totalRows }},
     isTyping: false,
     typingTimer: null,
     showComments: false,
+    showResetModal: false,
 
     init() {
+        // Cek jika seluruh chat sudah terbuka dari awal saat halaman dimuat
+        if (Number(this.visibleCount) >= Number(this.totalRows) && Number(this.totalRows) > 0) {
+            this.showResetModal = true;
+        }
+
         this.checkIfFinished();
         this.resetTypingTimer();
 
+        // Simpan ukuran font secara otomatis
+        this.$watch('fontSize', value => {
+            localStorage.setItem('reader_font_size', value);
+        });
+
+        // Pantau progres visibleCount
         this.$watch('visibleCount', value => {
             this.checkIfFinished();
+        });
+    },
+
+    // 🔄 FUNCTION BACA ULANG DARI AWAL
+    restartReading() {
+        this.showResetModal = false;
+        this.visibleCount = 1;
+        $wire.updateChatProgress(1);
+        this.checkIfFinished();
+        this.resetTypingTimer();
+
+        // Scroll balik ke paling atas container chat
+        this.$nextTick(() => {
+            const container = this.$refs.chatScrollArea;
+            if (container) {
+                container.scrollTop = 0;
+            }
+        });
+    },
+
+    // 📖 FUNCTION LANJUTKAN BACA / TAMPILKAN SEMUA
+    continueReading() {
+        this.showResetModal = false;
+        this.scrollToBottom();
+    },
+
+    // 💬 FUNCTION SCROLL LANGSUNG KE SECTION KOMENTAR
+    scrollToComments() {
+        this.$nextTick(() => {
+            const commentEl = this.$refs.commentSection;
+            if (commentEl) {
+                commentEl.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                this.scrollToBottom();
+            }
         });
     },
 
@@ -55,7 +103,7 @@
             this.typingTimer = setTimeout(() => {
                 this.isTyping = true;
                 this.scrollToBottom();
-            }, 10000); // 10 detik diam
+            }, 10000); // Indikator mengetik aktif setelah 10 detik diam
         }
     },
 
@@ -64,10 +112,8 @@
             const container = this.$refs.chatScrollArea;
             if (!container) return;
 
-            // Tunggu Alpine menyelesaikan transisi/render pesan sebelum menghitung posisi.
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    // Sisakan ruang untuk bottom navigation agar pesan terakhir tidak tertutup.
                     const bottomNavSpace = 64;
                     container.scrollTo({
                         top: container.scrollHeight - container.clientHeight + bottomNavSpace,
@@ -101,6 +147,40 @@
         </svg>
         <span>Tautan bab berhasil disalin!</span>
     </div>
+
+    {{-- MODAL DIALOG BACA ULANG CHAT --}}
+    <template x-teleport="body">
+        <div x-show="showResetModal" x-cloak x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs select-none">
+
+            <div
+                class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-2xl border border-slate-100 transform transition-all scale-100">
+                <div
+                    class="w-14 h-14 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 border border-brand-100">
+                    <i class="fa-regular fa-comment"></i>
+                </div>
+
+                <h3 class="text-base font-black text-slate-900">Bab Sudah Selesai</h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Kamu sudah menyelesaikan bab ini. Apakah ingin membaca ulang dari awal?
+                </p>
+
+                <div class="flex flex-col gap-2 mt-6">
+                    <button @click="restartReading()"
+                        class="w-full p-3 text-xs font-black text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-xs transition transform active:scale-95">
+                        <i class="fa-solid fa-rotate"></i> Baca Ulang dari Awal
+                    </button>
+                    <button @click="continueReading()"
+                        class="w-full p-3 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+                        Lihat Seluruh Chat & Komentar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 
     {{-- Modal Preview Avatar / Gambar --}}
     <template x-teleport="body">
@@ -164,6 +244,49 @@
         </div>
 
         <div class="flex items-center gap-1.5">
+            {{-- Dropdown Pengaturan Ukuran Font --}}
+            <div x-data="{ openFont: false }" class="relative">
+                <button @click="openFont = !openFont" title="Ukuran Font"
+                    class="p-2 text-slate-500 hover:text-slate-800 transition rounded-xl hover:bg-slate-100 flex items-center gap-0.5">
+                    <span class="text-[10px] font-bold">A</span><span class="text-sm font-black">A</span>
+                </button>
+
+                <div x-show="openFont" @click.outside="openFont = false" x-cloak
+                    x-transition:enter="transition ease-out duration-150 transform"
+                    x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    class="absolute right-0 mt-2 w-36 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-40 flex flex-col gap-1">
+
+                    <button @click="fontSize = 'text-xs'; openFont = false"
+                        :class="fontSize === 'text-xs' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'"
+                        class="px-3 py-1.5 text-[11px] font-bold rounded-xl transition text-left flex items-center justify-between">
+                        <span>Kecil</span>
+                        <span class="text-[10px] opacity-70">12px</span>
+                    </button>
+
+                    <button @click="fontSize = 'text-sm'; openFont = false"
+                        :class="fontSize === 'text-sm' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'"
+                        class="px-3 py-1.5 text-xs font-bold rounded-xl transition text-left flex items-center justify-between">
+                        <span>Sedang</span>
+                        <span class="text-[10px] opacity-70">14px</span>
+                    </button>
+
+                    <button @click="fontSize = 'text-base'; openFont = false"
+                        :class="fontSize === 'text-base' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'"
+                        class="px-3 py-1.5 text-sm font-bold rounded-xl transition text-left flex items-center justify-between">
+                        <span>Besar</span>
+                        <span class="text-[10px] opacity-70">16px</span>
+                    </button>
+
+                    <button @click="fontSize = 'text-lg'; openFont = false"
+                        :class="fontSize === 'text-lg' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'"
+                        class="px-3 py-1.5 text-base font-bold rounded-xl transition text-left flex items-center justify-between">
+                        <span>Sangat Besar</span>
+                        <span class="text-[10px] opacity-70">18px</span>
+                    </button>
+                </div>
+            </div>
+
             <button @click="shareChapter()" title="Bagikan Bab Ini"
                 class="p-2 text-slate-500 hover:text-brand-600 transition rounded-xl hover:bg-brand-50 active:scale-90">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +321,8 @@
                 <h2 class="text-base font-black text-slate-800 uppercase tracking-wide">Bab Ini Terkunci Premium</h2>
                 <p class="text-sm text-slate-500 font-medium max-w-[280px] mt-2 leading-relaxed">
                     Buka bab ini menggunakan <span
-                        class="text-amber-600 font-bold">{{ $chapter->bean_price > 0 ? $chapter->bean_price : 5 }} KISA
+                        class="text-amber-600 font-bold">{{ $chapter->bean_price > 0 ? $chapter->bean_price : 5 }}
+                        KISA
                         Bean</span> untuk melanjutkan membaca.
                 </p>
 
@@ -232,7 +356,8 @@
 
                             <h3 class="text-base font-black text-slate-900">Konfirmasi Penukaran</h3>
                             <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                                Kamu akan menggunakan <span class="font-bold text-amber-600">{{ $chapter->bean_price }}
+                                Kamu akan menggunakan <span
+                                    class="font-bold text-amber-600">{{ $chapter->bean_price }}
                                     KISA Bean</span> untuk membuka <span class="font-bold text-slate-800">Bab
                                     {{ $chapter->order_number }}</span>.
                             </p>
@@ -273,8 +398,8 @@
             @if ($chapter->type === 'regular')
                 {{-- KONTEN REGULAR --}}
                 <div class="p-4 pb-5 flex-1 flex flex-col w-full bg-white">
-                    <div
-                        class="prose prose-slate max-w-none text-slate-800 leading-relaxed md:leading-loose prose-p:my-5 prose-headings:text-slate-900 prose-headings:font-black prose-strong:font-black prose-strong:text-slate-900 prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 text-[12px] text-justify">
+                    <div :class="fontSize"
+                        class="prose prose-slate max-w-none text-slate-800 leading-relaxed md:leading-loose prose-p:my-5 prose-headings:text-slate-900 prose-headings:font-black prose-strong:font-black prose-strong:text-slate-900 prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 text-justify transition-all duration-150">
                         {!! $regularContent !!}
                     </div>
 
@@ -310,7 +435,7 @@
                 <div class="flex-1 flex flex-col w-full gap-4">
 
                     <div class="relative w-full">
-                        <div @click="triggerNextChat()" @scroll="checkScroll($event)" x-ref="chatScrollArea"
+                        <div @click="triggerNextChat()" x-ref="chatScrollArea"
                             style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
                             class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-9rem)] min-h-[50vh] max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-contain scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white' : '' }} bg-slate-500 bg-blend-multiply">
 
@@ -349,7 +474,8 @@
                                         @if ($type === 'center_text')
                                             <div
                                                 class="my-3 px-4 py-2 bg-slate-200/80 backdrop-blur-xs rounded-2xl text-center max-w-[90%] mx-auto shadow-2xs border border-slate-300/40">
-                                                <p class="text-xs font-semibold italic text-slate-700 leading-relaxed">
+                                                <p :class="fontSize"
+                                                    class="font-semibold italic text-slate-700 leading-relaxed transition-all duration-150">
                                                     {{ $row['message'] ?? ($row['center_text'] ?? '') }}
                                                 </p>
                                             </div>
@@ -385,7 +511,8 @@
                                                         </svg>
                                                     @endif
 
-                                                    <div class="flex items-center gap-1.5">
+                                                    <div :class="fontSize"
+                                                        class="flex items-center gap-1.5 transition-all duration-150">
                                                         <span>
                                                             @if ($isMissed)
                                                                 Panggilan Tak Terjawab
@@ -416,7 +543,7 @@
                                                         class="text-[10px] {{ $chatBgUrl ? 'text-slate-200 drop-shadow-xs' : 'text-slate-400' }} px-0.5 mb-0.5">{{ $charName }}</span>
 
                                                     <div
-                                                        class="p-1.5 rounded-2xl text-xs font-semibold leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60' }}">
+                                                        class="p-1.5 rounded-2xl font-semibold leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60' }}">
                                                         @php
                                                             $rawImg =
                                                                 $row['image_url'] ?? ($row['existing_image_url'] ?? '');
@@ -440,8 +567,8 @@
                                                                 @click.stop="openPreview('{{ $imgSrc }}')">
                                                         @endif
                                                         @if (!empty($row['message']) || !empty($row['caption']))
-                                                            <p
-                                                                class="text-xs font-semibold px-2 py-1 mt-1 {{ $isRight ? 'text-slate-950' : 'text-slate-800' }}">
+                                                            <p :class="fontSize"
+                                                                class="font-semibold px-2 py-1 mt-1 transition-all duration-150 {{ $isRight ? 'text-slate-950' : 'text-slate-800' }}">
                                                                 {{ $row['message'] ?? $row['caption'] }}
                                                             </p>
                                                         @endif
@@ -462,8 +589,8 @@
                                                     <span
                                                         class="text-[10px] {{ $chatBgUrl ? 'text-slate-200 drop-shadow-xs' : 'text-slate-400' }} px-0.5 mb-0.5">{{ $charName }}</span>
 
-                                                    <div
-                                                        class="px-3.5 py-2 rounded-2xl text-xs font-semibold leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60' }}">
+                                                    <div :class="fontSize"
+                                                        class="px-3.5 py-2 rounded-2xl font-semibold leading-relaxed shadow-2xs break-words transition-all duration-150 {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-slate-100 text-slate-800 rounded-bl-xs border border-slate-200/60' }}">
                                                         {{ $row['message'] ?? '' }}
                                                     </div>
                                                 </div>
@@ -487,7 +614,29 @@
                         </div>
                     </div>
 
-                    <div class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs mb-20">
+                    <div class="relative mt-10">
+                        <button @click.stop="scrollToComments()" x-show="showComments" x-cloak
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-90 translate-y-2"
+                            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 scale-90 translate-y-2" title="Lompat ke Komentar"
+                            class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2.5 bg-slate-900/90 hover:bg-slate-900 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
+                            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <span>Lihat Komentar</span>
+                        </button>
+                    </div>
+
+
+
+                    {{-- Area Komentar & Navigasi Bab --}}
+                    <div x-ref="commentSection" x-show="showComments" x-cloak @click.stop
+                        class="p-2 bg-white rounded-2xl border border-slate-100 shadow-2xs mb-20">
 
                         <div class="flex items-center justify-between gap-3">
                             @if ($prevSlug)
