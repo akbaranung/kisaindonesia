@@ -16,17 +16,63 @@
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
 
+    {{-- Script untuk Mencegah Flash / Kedipan saat halaman dimuat berdasarkan localStorage --}}
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
 
 <body
-    class="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen flex flex-col justify-between max-w-md mx-auto">
+    class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased font-sans min-h-screen flex flex-col justify-between max-w-md mx-auto transition-colors duration-200">
     {{ $slot }}
     @livewireScripts
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
-</body>
 
+    {{-- Fungsi Global untuk Toggle Theme / Mode Gelap & Terang --}}
+    <script>
+        function toggleThemeAndUpdateUI() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+            updateThemeUI();
+        }
+
+        function updateThemeUI() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const iconLabel = document.getElementById('theme-icon-label');
+            const switchBtn = document.getElementById('theme-switch-btn');
+
+            if (iconLabel) {
+                if (isDark) {
+                    iconLabel.classList.remove('fa-moon', 'text-slate-400');
+                    iconLabel.classList.add('fa-sun', 'text-amber-400');
+                } else {
+                    iconLabel.classList.remove('fa-sun', 'text-amber-400');
+                    iconLabel.classList.add('fa-moon', 'text-slate-400');
+                }
+            }
+
+            if (switchBtn) {
+                switchBtn.setAttribute('aria-checked', isDark);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateThemeUI();
+        });
+    </script>
+</body>
 
 </html>

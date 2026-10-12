@@ -127,7 +127,7 @@
         <!-- Input Judul & Cover Bab -->
         <div class="max-w-xl mx-auto space-y-3">
             <div
-                class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs">
+                class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs">
                 <div
                     class="relative w-14 h-16 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden shrink-0 flex items-center justify-center">
                     @if ($chapter_cover_upload)
@@ -262,7 +262,7 @@
                                 <img src="{{ $avatar }}"
                                     class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
                                 <div
-                                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs shadow-sm text-slate-800 dark:text-slate-100">
+                                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-sm text-slate-800 dark:text-slate-100">
                                     @if (($b['call_type'] ?? '') === 'missed')
                                         <span
                                             class="text-rose-500 dark:text-rose-400 font-bold flex items-center gap-1">📵
@@ -287,7 +287,7 @@
                     @elseif (($b['message_type'] ?? '') === 'center_text')
                         <div class="flex flex-col items-center justify-center my-4 group">
                             <div
-                                class="px-3 py-1 bg-slate-100/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-full text-[11px] text-slate-600 dark:text-slate-400 font-medium italic text-center max-w-[85%] shadow-sm">
+                                class="px-3 py-1 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-full text-[11px] text-slate-600 dark:text-slate-400 font-medium italic text-center max-w-[85%] shadow-sm">
                                 {{ $b['message'] ?? '' }}
                             </div>
                         </div>
@@ -323,7 +323,6 @@
                             panel bawah!</p>
                     </div>
                 @endforelse
-                {{-- </div> --}}
 
             </div>
             <!-- TAMPILAN CANVAS REGULER / NOVEL / PUISI -->
@@ -386,7 +385,7 @@
                         });
                     }
                 }" x-init="initQuill()" wire:ignore
-                    class="bg-white dark:bg-slate-950 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                    class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
                     <div x-ref="editor" id="editor" class="text-slate-800 dark:text-slate-200 min-h-[350px]">
                     </div>
                 </div>
@@ -477,9 +476,9 @@
 
             @if ($message_type === 'image' && ($image_upload || $existing_image_url))
                 <div
-                    class="relative inline-block mb-2 p-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl group">
+                    class="relative inline-block mb-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl group">
                     <div
-                        class="relative w-24 h-24 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                        class="relative w-24 h-24 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                         @if ($image_upload)
                             <img src="{{ $image_upload->temporaryUrl() }}" class="w-full h-full object-cover">
                         @elseif($existing_image_url)
@@ -503,7 +502,7 @@
 
                     <!-- Tombol Plus (+) untuk Buka Popup Tipe Pesan -->
                     <button type="button" @click="showTypePicker = true"
-                        class="p-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl shrink-0 transition flex items-center justify-center active:scale-95"
+                        class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl shrink-0 transition flex items-center justify-center active:scale-95"
                         title="Pilih Tipe Pesan">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
@@ -514,13 +513,13 @@
                     <!-- A. Tipe Pesan TEKS -->
                     @if ($message_type === 'text')
                         <input type="text" wire:model="message" placeholder="Ketik pesan chat..."
-                            class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
+                            class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
 
                         <!-- B. Tipe Pesan GAMBAR -->
                     @elseif($message_type === 'image')
                         <div class="flex-1 flex items-center gap-1.5 min-w-0">
                             <label
-                                class="px-2.5 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:border-brand-500 transition shrink-0 flex items-center gap-1">
+                                class="px-2.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:border-brand-500 transition shrink-0 flex items-center gap-1">
                                 <span>📷</span>
                                 <span class="text-[11px] truncate max-w-[80px] sm:max-w-none">
                                     {{ $image_upload ? 'Terpilih' : 'Pilih' }}
@@ -528,25 +527,25 @@
                                 <input type="file" wire:model="image_upload" accept="image/*" class="hidden">
                             </label>
                             <input type="text" wire:model="message" placeholder="Caption (opsional)..."
-                                class="flex-1 min-w-0 px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
+                                class="flex-1 min-w-0 px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
                         </div>
 
                         <!-- C. Tipe Pesan PANGGILAN -->
                     @elseif($message_type === 'call')
                         <div class="flex-1 grid grid-cols-2 gap-1.5 min-w-0">
                             <select wire:model="call_type"
-                                class="px-2 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-500 truncate">
+                                class="px-2 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-500 truncate">
                                 <option value="incoming">📲 Masuk</option>
                                 <option value="outgoing">📞 Keluar</option>
                                 <option value="missed">📵 Tak Terjawab</option>
                             </select>
                             <input type="text" wire:model="call_duration" placeholder="Durasi (02:45)"
-                                class="px-2.5 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
+                                class="px-2.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
                         </div>
                     @elseif($message_type === 'center_text')
                         <input type="text" wire:model="message"
                             placeholder="Tulis narasi / keterangan waktu (cth: 'Keesokan Harinya')..."
-                            class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-brand-600 dark:text-brand-300 italic focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
+                            class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-brand-600 dark:text-brand-300 italic focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
                     @endif
 
                     <!-- Tombol Kirim / Update -->
@@ -599,7 +598,8 @@
 
                     <div
                         class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-                        <h3 class="text-xs font-bold text-slate-800 dark:text-slate-300">Pilih Tipe Pesan</h3>
+                        <h3 class="text-xs font-bold text-slate-800 dark:text-slate-300">Pilih Tipe Pesan
+                        </h3>
                         <button type="button" @click="showTypePicker = false"
                             class="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-base font-bold">
                             &times;
@@ -609,7 +609,7 @@
                     <div class="grid grid-cols-3 gap-2">
                         <button type="button" wire:click="$set('message_type', 'text')"
                             @click="showTypePicker = false"
-                            class="flex flex-col items-center gap-2 p-3 rounded-xl border transition text-center {{ $message_type === 'text' ? 'bg-slate-100 dark:bg-slate-800 border-brand-500 text-brand-600 dark:text-brand-400' : 'bg-slate-50 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700' }}">
+                            class="flex flex-col items-center gap-2 p-3 rounded-xl border transition text-center {{ $message_type === 'text' ? 'bg-slate-100 dark:bg-slate-800 border-brand-500 text-brand-600 dark:text-brand-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700' }}">
                             <span class="text-xl"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -621,7 +621,7 @@
 
                         <button type="button" wire:click="$set('message_type', 'image')"
                             @click="showTypePicker = false"
-                            class="flex flex-col items-center gap-2 p-3 rounded-xl border transition text-center {{ $message_type === 'image' ? 'bg-slate-100 dark:bg-slate-800 border-brand-500 text-brand-600 dark:text-brand-400' : 'bg-slate-50 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700' }}">
+                            class="flex flex-col items-center gap-2 p-3 rounded-xl border transition text-center {{ $message_type === 'image' ? 'bg-slate-100 dark:bg-slate-800 border-brand-500 text-brand-600 dark:text-brand-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700' }}">
                             <span class="text-xl"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -636,7 +636,7 @@
 
                         <button type="button" wire:click="$set('message_type', 'call')"
                             @click="showTypePicker = false"
-                            class="flex flex-col items-center gap-2 p-3 rounded-xl border transition text-center {{ $message_type === 'call' ? 'bg-slate-100 dark:bg-slate-800 border-brand-500 text-brand-600 dark:text-brand-400' : 'bg-slate-50 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700' }}">
+                            class="flex flex-col items-center gap-2 p-3 rounded-xl border transition text-center {{ $message_type === 'call' ? 'bg-slate-100 dark:bg-slate-800 border-brand-500 text-brand-600 dark:text-brand-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700' }}">
                             <span class="text-xl"><svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -648,7 +648,7 @@
 
                         <button type="button" wire:click="$set('message_type', 'center_text')"
                             @click="showTypePicker = false"
-                            class="flex flex-col items-center gap-2 p-3 rounded-xl border transition text-center {{ $message_type === 'center_text' ? 'bg-slate-100 dark:bg-slate-800 border-brand-500 text-brand-600 dark:text-brand-400' : 'bg-slate-50 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700' }}">
+                            class="flex flex-col items-center gap-2 p-3 rounded-xl border transition text-center {{ $message_type === 'center_text' ? 'bg-slate-100 dark:bg-slate-800 border-brand-500 text-brand-600 dark:text-brand-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700' }}">
                             <span class="text-xl">📢</span>
                             <span class="text-[11px] font-bold">Teks Tengah</span>
                         </button>
