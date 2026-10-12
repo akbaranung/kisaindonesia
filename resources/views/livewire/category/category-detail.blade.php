@@ -1,28 +1,35 @@
-<div class="w-full min-h-screen bg-slate-50 max-w-2xl mx-auto border-x border-slate-100 pb-28">
+<div class="w-full min-h-screen bg-slate-50 dark:bg-slate-950 max-w-2xl mx-auto border-x border-slate-100 dark:border-slate-800 pb-28 transition-colors duration-200">
     {{-- 📱 TOP NAVIGATION BAR --}}
     <header
-        class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-100 px-4 py-3.5 flex items-center justify-between gap-3">
+        class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-4 py-3.5 flex items-center justify-between gap-3 transition-colors">
         <div class="flex items-center gap-3">
             <a href="{{ route('categories.index') }}" wire:navigate
-                class="p-1.5 text-slate-500 hover:text-slate-800 transition rounded-xl hover:bg-slate-100">
+                class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                 </svg>
             </a>
             <div class="flex items-center gap-2">
                 <div>
-                    <h1 class="font-black text-base text-slate-900 tracking-tight">{{ $parentCategory->name }}</h1>
-                    <p class="text-[10px] text-slate-400 font-medium">{{ $totalStories }} Cerita Ditemukan</p>
+                    <h1 class="font-black text-base text-slate-900 dark:text-slate-100 tracking-tight">{{ $parentCategory->name }}</h1>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{{ $totalStories }} Cerita Ditemukan</p>
                 </div>
             </div>
         </div>
+
+        {{-- Tombol Toggle Dark/Light Mode --}}
+        <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark Mode"
+            class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-moon hidden dark:block text-amber-300 text-sm"></i>
+            <i class="fa-solid fa-sun block dark:hidden text-amber-500 text-sm"></i>
+        </button>
     </header>
 
     <main class="space-y-6">
 
         {{-- 🔍 SEARCH BAR --}}
         <div class="p-4 relative">
-            <div class="absolute inset-y-0 left-4 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <div class="absolute inset-y-0 left-4 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -30,11 +37,11 @@
             </div>
             <input type="text" wire:model.live.debounce.300ms="search"
                 placeholder="Cari judul cerita atau penulis di {{ $parentCategory->name }}..."
-                class="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-2xs">
+                class="w-full pl-10 pr-10 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-hidden focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition shadow-2xs">
 
             @if (!empty($search))
                 <button wire:click="$set('search', '')"
-                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             @endif
@@ -42,14 +49,14 @@
 
         {{-- 🌟 SEKSYEN PILIHAN EDITOR (Hanya jika ada) --}}
         @if ($editorChoices->count() > 0 && empty($search) && empty($selectedSubCategory))
-            <section class="space-y-3 bg-brand-50/40 p-4 rounded-3xl border border-brand-100/70">
+            <section class="space-y-3 bg-brand-50/40 dark:bg-slate-900/50 p-4 rounded-3xl border border-brand-100/70 dark:border-slate-800">
                 <div class="flex items-center justify-between">
                     <div>
                         <h2
-                            class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
                             Pilihan Editor {{ $parentCategory->name }}
                         </h2>
-                        <p class="text-[10px] text-slate-400 mt-0.5">Kisah unggulan rekomendasi tim editor</p>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Kisah unggulan rekomendasi tim editor</p>
                     </div>
                 </div>
 
@@ -58,7 +65,7 @@
                     @foreach ($editorChoices as $story)
                         <div class="w-28 flex-shrink-0 snap-start transition">
                             {{-- Cover Image --}}
-                            <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
+                            <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
                                 <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
                                     @if ($story->cover_path)
                                         <img src="{{ asset('storage/' . $story->cover_path) }}"
@@ -66,7 +73,7 @@
                                             class="w-full h-full object-cover hover:scale-105 transition duration-300">
                                     @else
                                         <div
-                                            class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 text-amber-500 font-black">
+                                            class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 dark:bg-slate-800 text-amber-500 font-black">
                                             📚
                                         </div>
                                     @endif
@@ -75,7 +82,7 @@
                                 <div class="absolute inset-0 pointer-events-none">
                                     <div class="flex items-center space-x-1.5 p-2">
                                         <span
-                                            class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-black border border-white">
+                                            class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                             <i class="fa-regular fa-eye"></i>
                                             {{ number_format_short($story->views_count ?? 0) }}
                                         </span>
@@ -88,22 +95,22 @@
                                             @endif
                                             @if ($story->hasTypeChat())
                                                 <span
-                                                    class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                    class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                                     <i class="fa-solid fa-comment-dots"></i>
                                                 </span>
                                             @elseif(!$story->hasTypeChat() && $story->type === 'novel')
                                                 <span
-                                                    class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                    class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                                     <i class="fa-solid fa-pencil"></i>
                                                 </span>
                                             @elseif($story->type === 'puisi')
                                                 <span
-                                                    class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                    class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                                     <i class="fa-solid fa-feather-pointed"></i>
                                                 </span>
                                             @elseif($story->type === 'non_fiksi')
                                                 <span
-                                                    class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                    class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                                     <i class="fa-solid fa-magnifying-glass"></i>
                                                 </span>
                                             @endif
@@ -114,11 +121,11 @@
                                 <div class="absolute inset-0 pointer-events-none">
                                     <div class="absolute bottom-0 flex items-center space-x-1.5 p-2">
                                         <div
-                                            class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
+                                            class="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
                                             <div class="flex items-center gap-0.5 text-amber-500">
                                                 <span><i class="fa-solid fa-star"></i></span>
                                                 <span
-                                                    class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
+                                                    class="text-slate-700 dark:text-slate-200">{{ $story->average_rating ?? '0.0' }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -127,16 +134,16 @@
 
                             {{-- Detail Cerita --}}
                             <div class="flex flex-col">
-                                <h3 class="text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
+                                <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug">
                                     <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
-                                        class="hover:text-brand-600 transition">
+                                        class="hover:text-brand-600 dark:hover:text-brand-400 transition">
                                         {{ $story->title }}
                                     </a>
                                 </h3>
 
-                                <span class="text-[10px] text-slate-400 font-medium line-clamp-1">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
                                     <a
-                                        href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
+                                        href="{{ route('pen-name.show', [$story->penName->slug]) }}" class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                                 </span>
                             </div>
                         </div>
@@ -148,15 +155,15 @@
         {{-- 🏷️ FILTER SUB-KATEGORI --}}
         @if ($subCategories->count() > 0)
             <div class="p-4 space-y-2">
-                <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-wider">Filter Sub-Kategori</h3>
+                <h3 class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Filter Sub-Kategori</h3>
                 <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                     <button wire:click="selectSubCategory('')"
-                        class="px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 border {{ empty($selectedSubCategory) ? 'bg-slate-900 text-white border-slate-900 shadow-2xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100' }}">
+                        class="px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 border {{ empty($selectedSubCategory) ? 'bg-slate-900 dark:bg-brand-600 text-white border-slate-900 dark:border-brand-600 shadow-2xs' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                         Semua Sub-Kategori
                     </button>
                     @foreach ($subCategories as $sub)
                         <button wire:click="selectSubCategory({{ $sub->id }})"
-                            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 border {{ (string) $selectedSubCategory === (string) $sub->id ? 'bg-brand-600 text-white border-brand-600 shadow-2xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100' }}">
+                            class="px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 border {{ (string) $selectedSubCategory === (string) $sub->id ? 'bg-brand-600 text-white border-brand-600 shadow-2xs' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                             {{ $sub->name }}
                         </button>
                     @endforeach
@@ -167,7 +174,7 @@
         {{-- 📚 DAFTAR CERITA --}}
         <div class="px-4 space-y-3">
             <div class="flex items-center justify-between">
-                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider">
+                <h3 class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider">
                     Daftar Cerita ({{ $totalStories }})
                 </h3>
             </div>
@@ -176,14 +183,14 @@
                 @forelse ($stories as $story)
                     <div class="w-28 flex-shrink-0 snap-start transition">
                         {{-- Cover Image --}}
-                        <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
+                        <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
                             <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
                                 @if ($story->cover_path)
                                     <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
                                         class="w-full h-full object-cover hover:scale-105 transition duration-300">
                                 @else
                                     <div
-                                        class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 text-amber-500 font-black">
+                                        class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 dark:bg-slate-800 text-amber-500 font-black">
                                         📚
                                     </div>
                                 @endif
@@ -192,7 +199,7 @@
                             <div class="absolute inset-0 pointer-events-none">
                                 <div class="flex items-center space-x-1.5 p-2">
                                     <span
-                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-black border border-white">
+                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                         <i class="fa-regular fa-eye"></i>
                                         {{ number_format_short($story->views_count ?? 0) }}
                                     </span>
@@ -205,22 +212,22 @@
                                         @endif
                                         @if ($story->hasTypeChat())
                                             <span
-                                                class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                                 <i class="fa-solid fa-comment-dots"></i>
                                             </span>
                                         @elseif(!$story->hasTypeChat() && $story->type === 'novel')
                                             <span
-                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                                 <i class="fa-solid fa-pencil"></i>
                                             </span>
                                         @elseif($story->type === 'puisi')
                                             <span
-                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                                 <i class="fa-solid fa-feather-pointed"></i>
                                             </span>
                                         @elseif($story->type === 'non_fiksi')
                                             <span
-                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                                class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                                 <i class="fa-solid fa-magnifying-glass"></i>
                                             </span>
                                         @endif
@@ -231,10 +238,11 @@
                             <div class="absolute inset-0 pointer-events-none">
                                 <div class="absolute bottom-0 flex items-center space-x-1.5 p-2">
                                     <div
-                                        class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
+                                        class="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
                                         <div class="flex items-center gap-0.5 text-amber-500">
                                             <span><i class="fa-solid fa-star"></i></span>
-                                            <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
+                                            <span
+                                                class="text-slate-700 dark:text-slate-200">{{ $story->average_rating ?? '0.0' }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -243,28 +251,28 @@
 
                         {{-- Detail Cerita --}}
                         <div class="flex flex-col">
-                            <h3 class="text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
+                            <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug">
                                 <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
-                                    class="hover:text-brand-600 transition">
+                                    class="hover:text-brand-600 dark:hover:text-brand-400 transition">
                                     {{ $story->title }}
                                 </a>
                             </h3>
 
-                            <span class="text-[10px] text-slate-400 font-medium line-clamp-1">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
                                 <a
-                                    href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
+                                    href="{{ route('pen-name.show', [$story->penName->slug]) }}" class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                             </span>
                         </div>
                     </div>
                 @empty
                     <div
-                        class="col-span-full text-center py-12 bg-white rounded-3xl border border-dashed border-slate-200 p-6">
+                        class="col-span-full text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-6">
                         <div
-                            class="w-14 h-14 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3">
+                            class="w-14 h-14 bg-amber-50 dark:bg-amber-950/60 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 border border-amber-100 dark:border-amber-800/60">
                             <i class="fa-solid fa-book-open"></i>
                         </div>
-                        <h4 class="text-sm font-black text-slate-800">Belum Ada Cerita Ditemukan</h4>
-                        <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">Belum Ada Cerita Ditemukan</h4>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
                             Tidak ada cerita yang cocok dengan kata kunci atau filter sub-kategori terpilih.
                         </p>
                         @if (!empty($search) || !empty($selectedSubCategory))
@@ -281,7 +289,7 @@
             @if ($totalStories > count($stories))
                 <div class="mt-6 text-center">
                     <button wire:click="loadMore"
-                        class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition">
+                        class="px-6 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-2xl transition">
                         Muat Lebih Banyak Cerita
                     </button>
                 </div>

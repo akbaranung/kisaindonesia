@@ -22,7 +22,7 @@
                     class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 px-1">Alamat
                     Email</label>
                 <input type="email" wire:model="email" placeholder="nama@email.com"
-                    class="w-full px-4 py-3.5 bg-white border @error('email') border-rose-500 @else border-slate-200 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-400 focus:ring-1 focus:ring-brand-400 shadow-2xs">
+                    class="w-full px-4 py-3.5 bg-white border @error('email') border-rose-500 @else border-slate-200 dark:border-slate-700 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-400 focus:ring-1 focus:ring-brand-400 shadow-2xs dark:bg-slate-900">
                 @error('email')
                     <span class="text-xs text-rose-500 mt-1 block px-1">{{ $message }}</span>
                 @enderror
@@ -32,7 +32,7 @@
                 <label for="password"
                     class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 px-1">Password</label>
                 <input type="password" wire:model="password" placeholder="••••••••"
-                    class="w-full px-4 py-3.5 bg-white border @error('password') border-rose-500 @else border-slate-200 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-400 focus:ring-1 focus:ring-brand-400 shadow-2xs">
+                    class="w-full px-4 py-3.5 bg-white border @error('password') border-rose-500 @else border-slate-200 dark:border-slate-700 @enderror rounded-2xl text-sm focus:outline-hidden focus:border-brand-400 focus:ring-1 focus:ring-brand-400 shadow-2xs dark:bg-slate-900">
                 @error('password')
                     <span class="text-xs text-rose-500 mt-1 block px-1">{{ $message }}</span>
                 @enderror
@@ -52,6 +52,7 @@
                 class="w-full bg-brand-500 hover:bg-brand-400 text-white font-bold text-sm py-4 rounded-2xl transition shadow-xs mt-2">
                 <span wire:loading.remove>Masuk ke Akun</span>
                 <span wire:loading class="flex items-center gap-2">
+                    <i class="fa-solid fa-spinner animate-spin"></i>
                     Memverifikasi...
                 </span>
             </button>
@@ -64,7 +65,7 @@
         </div>
 
         <a href="{{ url('auth/google') }}"
-            class="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-sm py-3.5 rounded-2xl transition shadow-2xs flex items-center justify-center gap-2.5">
+            class="w-full bg-white hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-sm py-3.5 rounded-2xl transition shadow-2xs flex items-center justify-center gap-2.5 dark:bg-slate-900">
             <svg class="w-4 h-4" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
                 <g transform="matrix(1, 0, 0, 1, 0, 0)">
                     <path

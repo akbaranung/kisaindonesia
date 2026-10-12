@@ -1,50 +1,60 @@
 <div class="w-full max-w-6xl mx-auto px-4 py-6 mb-20">
     {{-- Header --}}
-    <div class="flex flex-col gap-1 mb-6">
-        <h1 class="text-2xl font-black text-slate-800">Jelajahi Semua Cerita</h1>
-        <p class="text-xs text-slate-500">Temukan ribuan cerita menarik dari berbagai genre dan penulis pilihan.</p>
+    <div class="flex items-center justify-between gap-4 mb-6">
+        <div class="flex flex-col gap-1">
+            <h1 class="text-2xl font-black text-slate-800 dark:text-slate-100">Jelajahi Semua Cerita</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Temukan ribuan cerita menarik dari berbagai genre dan
+                penulis pilihan.</p>
+        </div>
+        <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark Mode"
+            class="p-2.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-sun block dark:hidden text-amber-500 text-sm"></i>
+            <i class="fa-solid fa-moon hidden dark:block text-amber-300 text-sm"></i>
+        </button>
     </div>
 
     {{-- Filter & Search Bar --}}
-    <div class="flex flex-col p-2 gap-3 bg-white rounded-2xl border border-slate-100 shadow-2xs mb-6">
+    <div
+        class="flex flex-col p-2.5 gap-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-6">
         <div class="relative w-full">
             <input type="text" wire:model.live.debounce.1000ms="search" placeholder="Cari judul atau penulis..."
-                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
         </div>
 
         {{-- Category Horizontal Filter --}}
         <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button wire:click="$set('selectedCategory', '')"
-                class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition {{ empty($selectedCategory) ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition {{ empty($selectedCategory) ? 'bg-slate-900 dark:bg-brand-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
                 Semua Genre
             </button>
             @foreach ($categories as $cat)
                 <button wire:click="$set('selectedCategory', '{{ $cat->id }}')"
-                    class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition {{ $selectedCategory == $cat->id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                    class="px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition {{ $selectedCategory == $cat->id ? 'bg-slate-900 dark:bg-brand-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' }}">
                     {{ $cat->name }}
                 </button>
             @endforeach
         </div>
 
         {{-- Monetization & Sorting --}}
-        <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+        <div
+            class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs">
             <div class="flex items-center gap-1">
                 <button wire:click="$set('selectedMonetization', '')"
-                    class="px-2.5 py-1 rounded-lg font-bold transition {{ empty($selectedMonetization) ? 'bg-slate-200 text-slate-900' : 'text-slate-400 hover:text-slate-700' }}">
+                    class="px-2.5 py-1 rounded-lg font-bold transition {{ empty($selectedMonetization) ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200' }}">
                     Semua
                 </button>
                 <button wire:click="$set('selectedMonetization', 'free')"
-                    class="px-2.5 py-1 rounded-lg font-bold transition {{ $selectedMonetization === 'free' ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'text-slate-400 hover:text-slate-700' }}">
+                    class="px-2.5 py-1 rounded-lg font-bold transition {{ $selectedMonetization === 'free' ? 'bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800/60' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200' }}">
                     Gratis
                 </button>
                 <button wire:click="$set('selectedMonetization', 'premium')"
-                    class="px-2.5 py-1 rounded-lg font-bold transition {{ $selectedMonetization === 'premium' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'text-slate-400 hover:text-slate-700' }}">
+                    class="px-2.5 py-1 rounded-lg font-bold transition {{ $selectedMonetization === 'premium' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60' : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200' }}">
                     Premium
                 </button>
             </div>
 
             <select wire:model.live="sortBy"
-                class="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-700 focus:outline-none">
+                class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none">
                 <option value="latest">Terbaru</option>
                 <option value="popular">Terpopuler</option>
                 <option value="title">Judul (A-Z)</option>
@@ -57,14 +67,14 @@
         @forelse ($stories as $story)
             <div class="w-28 flex-shrink-0 snap-start transition">
                 {{-- Cover Image --}}
-                <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative mb-2">
+                <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
                     <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
                         @if ($story->cover_path)
                             <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
                                 class="w-full h-full object-cover hover:scale-105 transition duration-300">
                         @else
                             <div
-                                class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 text-amber-500 font-black">
+                                class="w-full h-full flex items-center justify-center text-3xl bg-amber-50 dark:bg-amber-950/30 text-amber-500 font-black">
                                 📚
                             </div>
                         @endif
@@ -73,7 +83,7 @@
                     <div class="absolute inset-0 pointer-events-none">
                         <div class="flex items-center space-x-1.5 p-2">
                             <span
-                                class="px-0.5 py-0.5 rounded-md text-[8px] font-bold bg-white text-black border border-white">
+                                class="px-0.5 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                 <i class="fa-regular fa-eye"></i>
                                 {{ number_format_short($story->views_count ?? 0) }}
                             </span>
@@ -86,22 +96,22 @@
                                 @endif
                                 @if ($story->hasTypeChat())
                                     <span
-                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-500 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                         <i class="fa-solid fa-comment-dots"></i>
                                     </span>
                                 @elseif(!$story->hasTypeChat() && $story->type === 'novel')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-500 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                         <i class="fa-solid fa-pencil"></i>
                                     </span>
                                 @elseif($story->type === 'puisi')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-500 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                         <i class="fa-solid fa-feather-pointed"></i>
                                     </span>
                                 @elseif($story->type === 'non_fiksi')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white text-brand-500 border border-white">
+                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-500 border border-white/60 dark:border-slate-700/60 shadow-xs">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </span>
                                 @endif
@@ -109,10 +119,11 @@
                             <div class="absolute inset-0 pointer-events-none">
                                 <div class="absolute bottom-0 flex items-center space-x-1.5 p-2">
                                     <div
-                                        class="flex items-center justify-between text-[10px] font-bold text-slate-500 mt-1">
+                                        class="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
                                         <div class="flex items-center gap-0.5 text-amber-500">
                                             <span><i class="fa-solid fa-star"></i></span>
-                                            <span class="text-slate-700">{{ $story->average_rating ?? '0.0' }}</span>
+                                            <span
+                                                class="text-slate-700 dark:text-slate-200">{{ $story->average_rating ?? '0.0' }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -123,26 +134,28 @@
 
                 {{-- Detail Cerita --}}
                 <div class="flex flex-col">
-                    <h3 class="text-xs font-bold text-slate-800 line-clamp-2 leading-snug">
+                    <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug">
                         <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
-                            class="hover:text-brand-600 transition">
+                            class="hover:text-brand-600 dark:hover:text-brand-400 transition">
                             {{ $story->title }}
                         </a>
                     </h3>
 
-                    <span class="text-[10px] text-slate-400 font-medium line-clamp-1">
-                        <a
-                            href="{{ route('pen-name.show', [$story->penName->slug]) }}">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
+                        <a href="{{ route('pen-name.show', [$story->penName->slug]) }}"
+                            class="hover:underline hover:text-slate-600 dark:hover:text-slate-300 transition">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                     </span>
                 </div>
             </div>
         @empty
-            <div class="col-span-full text-center py-12 bg-white rounded-3xl border border-slate-100 p-6">
+            <div
+                class="col-span-full text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-6">
                 <div class="text-4xl mb-3">🔍</div>
-                <h3 class="text-sm font-black text-slate-800">Cerita Tidak Ditemukan</h3>
-                <p class="text-xs text-slate-400 mt-1">Coba kata kunci lain atau bersihkan filter pencarianmu.</p>
+                <h3 class="text-sm font-black text-slate-800 dark:text-slate-100">Cerita Tidak Ditemukan</h3>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Coba kata kunci lain atau bersihkan filter
+                    pencarianmu.</p>
                 <button wire:click="resetFilters"
-                    class="mt-4 px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-200 transition">
+                    class="mt-4 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition">
                     Reset Semua Filter
                 </button>
             </div>
@@ -153,7 +166,7 @@
         <div class="mt-8 flex flex-col items-center justify-center gap-2">
             {{-- Tombol Load More Manual --}}
             <button wire:click="loadMore" wire:loading.attr="disabled"
-                class="px-6 py-2.5 bg-slate-900 hover:bg-brand-600 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-2 disabled:opacity-50">
+                class="px-6 py-2.5 bg-slate-900 dark:bg-brand-600 hover:bg-brand-600 dark:hover:bg-brand-500 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-2 disabled:opacity-50">
                 <span wire:loading.remove wire:target="loadMore">Muat Lebih Banyak</span>
                 <span wire:loading wire:target="loadMore" class="flex items-center gap-2">
                     <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -169,12 +182,12 @@
             {{-- Opsional: Pemicu Infinite Scroll Otomatis saat di-scroll ke bawah (Livewire 3) --}}
             <div wire:intersect="loadMore" class="h-2 w-full"></div>
 
-            <span class="text-[11px] text-slate-400 font-medium mt-1">
+            <span class="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-1">
                 Menampilkan {{ $stories->count() }} dari {{ $totalStories }} cerita
             </span>
         </div>
     @elseif ($stories->count() > 0)
-        <div class="mt-8 text-center text-xs text-slate-400 font-medium">
+        <div class="mt-8 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
             Semua cerita telah ditampilkan
         </div>
     @endif
@@ -187,7 +200,7 @@
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 scale-90"
             @click="window.scrollTo({ top: 0, behavior: 'smooth' })" type="button" aria-label="Kembali ke atas"
-            class="flex items-center justify-center w-11 h-11 bg-slate-900/90 hover:bg-brand-600 text-white rounded-full shadow-lg backdrop-blur-xs transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none">
+            class="flex items-center justify-center w-11 h-11 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-brand-600 dark:hover:bg-brand-500 text-white rounded-full shadow-lg backdrop-blur-xs border border-slate-700/20 dark:border-slate-700 transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none">
             <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
             </svg>

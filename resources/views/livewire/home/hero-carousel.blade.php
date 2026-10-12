@@ -35,7 +35,7 @@
             }
         }" x-init="startAutoplay()" @touchstart="handleTouchStart($event)"
             @touchend="handleTouchEnd($event)"
-            class="relative bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800/80 text-white select-none h-[230px]">
+            class="relative bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800/80 dark:border-slate-800 text-white select-none h-[230px]">
 
             <!-- Carousel Slides (Fixed Height Container) -->
             <div class="relative w-full h-full">
@@ -57,7 +57,7 @@
                             style="background-image: url('{{ asset('storage/' . $hero->cover_path) }}');">
                         </div>
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/30 pointer-events-none">
+                            class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/40 pointer-events-none">
                         </div>
 
                         <!-- Content Layout Compact -->
@@ -67,30 +67,30 @@
                             <div class="flex items-center space-x-1.5">
                                 @if ($hero->monetization_type === 'premium')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-amber-300 border border-amber-500">
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-white border border-amber-500 shadow-xs">
                                         <i class="fa-solid fa-crown"></i>
                                     </span>
                                 @endif
 
                                 @if ($hero->hasTypeChat())
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500">
-                                        <i class="fa-regular fa-comment-dots"></i>
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500 shadow-xs">
+                                        <i class="fa-regular fa-comment-dots"></i> CHAT
                                     </span>
                                 @elseif(!$hero->hasTypeChat() && $hero->type === 'novel')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500">
-                                        <i class="fa-solid fa-pencil"></i>
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500 shadow-xs">
+                                        <i class="fa-solid fa-pencil"></i> NOVEL
                                     </span>
                                 @elseif($hero->type === 'puisi')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500">
-                                        <i class="fa-solid fa-feather"></i>
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500 shadow-xs">
+                                        <i class="fa-solid fa-feather"></i> PUISI
                                     </span>
                                 @elseif($hero->type === 'non_fiksi')
                                     <span
-                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500">
-                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-500 text-white border border-brand-500 shadow-xs">
+                                        <i class="fa-solid fa-magnifying-glass"></i> NON FIKSI
                                     </span>
                                 @endif
                             </div>
@@ -106,19 +106,19 @@
                                 <div class="flex items-center space-x-1 overflow-hidden">
 
                                     <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-bold mb-2">
-                                        <span class="text-brand-400 font-semibold truncate max-w-[120px]">
-                                            {{ '@' . $hero->penName->name ?? 'anonim' }}
+                                        <span class="text-brand-300 font-semibold truncate max-w-[120px]">
+                                            {{ '@' . ($hero->penName?->name ?? 'anonim') }}
                                         </span>
-                                        <span class="text-slate-300">•</span>
+                                        <span class="text-slate-400">•</span>
                                         {{-- Genre Utama (Parent Genre) --}}
-                                        <span class="text-brand-600">
+                                        <span class="text-brand-400">
                                             {{ $hero->genre?->parent?->name ?? ($hero->genre?->name ?? 'Tanpa Genre') }}
                                         </span>
 
                                         {{-- Sub-Genre (Hanya tampil jika ada/terisi) --}}
                                         @if ($hero->genre?->parent_id)
-                                            <span class="text-slate-300">•</span>
-                                            <span class="text-brand-600">
+                                            <span class="text-slate-400">•</span>
+                                            <span class="text-brand-400">
                                                 {{ $hero->genre->name }}
                                             </span>
                                         @endif

@@ -1,40 +1,40 @@
 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
     <!-- Icon Lonceng & Badge Counter -->
-    <button @click="open = !open" class="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <button @click="open = !open" class="relative p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition focus:outline-none" aria-label="Notifikasi">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
 
         @if ($unreadCount > 0)
             <span
-                class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-amber-400 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                class="absolute top-1 right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-black leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-rose-500 rounded-full shadow-xs">
                 {{ $unreadCount > 99 ? '99+' : $unreadCount }}
             </span>
         @endif
     </button>
 
     <!-- Dropdown Menu Notifikasi -->
-    <div x-show="open" x-transition:enter="transition ease-out duration-100"
-        x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100"
-        x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100"
-        x-transition:leave-end="transform opacity-0 scale-95"
-        class="absolute right-0 z-50 w-80 mt-2 bg-white rounded-md shadow-lg border border-gray-100 overflow-hidden"
+    <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150"
+        x-transition:enter-start="transform opacity-0 scale-95 -translate-y-1" x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-100" x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+        x-transition:leave-end="transform opacity-0 scale-95 -translate-y-1"
+        class="absolute right-0 z-50 w-80 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors"
         style="display: none;">
 
         <!-- Header Dropdown -->
-        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
-            <span class="text-sm font-semibold text-gray-700">Notifikasi</span>
+        <div class="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-850 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800">
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Notifikasi</span>
             @if ($unreadCount > 0)
                 <button wire:click="markAllAsRead"
-                    class="text-xs text-brand-600 hover:text-brand-800 font-medium focus:outline-none">
+                    class="text-[11px] text-brand-600 dark:text-brand-400 hover:underline font-semibold focus:outline-none">
                     Tandai Semua Dibaca
                 </button>
             @endif
         </div>
 
         <!-- Daftar Notifikasi -->
-        <div class="max-h-80 overflow-y-auto divide-y divide-gray-100">
+        <div class="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
             @forelse($notifications as $notification)
                 @php
                     $data = $notification->data;
@@ -43,11 +43,11 @@
                 @endphp
 
                 <div wire:click="markAsRead('{{ $notification->id }}')"
-                    class="p-3 text-sm cursor-pointer transition hover:bg-gray-50 flex items-start space-x-3 {{ $isUnread ? 'bg-brand-50/50' : 'text-gray-600' }}">
+                    class="p-3.5 text-sm cursor-pointer transition hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-start space-x-3 {{ $isUnread ? 'bg-brand-50/40 dark:bg-brand-950/20' : '' }}">
 
                     <!-- Icon Dinamis Berdasarkan Tipe -->
                     <div
-                        class="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center shrink-0 mt-0.5">
+                        class="w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 border border-transparent dark:border-brand-800/40 flex items-center justify-center shrink-0 mt-0.5">
                         @if ($type === 'follow')
                             <!-- Icon Follow User -->
                             <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
@@ -78,24 +78,24 @@
                     </div>
 
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-gray-800 font-semibold truncate">
+                        <p class="text-xs text-slate-800 dark:text-slate-100 font-bold truncate">
                             {{ $data['title'] ?? 'Notifikasi' }}
                         </p>
-                        <p class="text-xs text-gray-600 line-clamp-2 mt-0.5">
+                        <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mt-0.5 leading-relaxed">
                             {{ $data['message'] ?? 'Ada notifikasi baru.' }}
                         </p>
-                        <span class="text-[10px] text-gray-400 mt-1 block">
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block font-medium">
                             {{ $notification->created_at->diffForHumans() }}
                         </span>
                     </div>
 
                     <!-- Indicator Belum Dibaca -->
                     @if ($isUnread)
-                        <span class="w-2 h-2 bg-brand-600 rounded-full shrink-0 mt-1.5"></span>
+                        <span class="w-2 h-2 bg-brand-600 dark:bg-brand-400 rounded-full shrink-0 mt-1.5"></span>
                     @endif
                 </div>
             @empty
-                <div class="p-6 text-center text-xs text-gray-400">
+                <div class="p-6 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
                     Belum ada notifikasi
                 </div>
             @endforelse

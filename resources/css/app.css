@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Fallback jaminan visibilitas icon mode gelap/terang */
+html.dark .dark\:hidden {
+    display: none !important;
+}
+html.dark .dark\:block {
+    display: block !important;
+}
+html:not(.dark) .dark\:block {
+    display: none !important;
+}
+html:not(.dark) .dark\:hidden {
+    display: block !important;
+}
+
 @theme {
     --color-brand-50: #f0fdfd;
     --color-brand-100: #ccfbf1;
@@ -12,12 +28,18 @@
 }
 
 .unselectable {
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none;   /* Safari */
-    -khtml-user-select: none;    /* Konqueror HTML */
-    -moz-user-select: none;      /* Firefox */
-    -ms-user-select: none;       /* Internet Explorer/Edge */
-    user-select: none;          /* Non-prefixed version */
+    -webkit-touch-callout: none;
+    /* iOS Safari */
+    -webkit-user-select: none;
+    /* Safari */
+    -khtml-user-select: none;
+    /* Konqueror HTML */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* Internet Explorer/Edge */
+    user-select: none;
+    /* Non-prefixed version */
 }
 
 /* Sembunyikan konten jika halaman diprint / dicetak ke PDF */

@@ -16,9 +16,16 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
 
 
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
 
-<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col justify-between max-w-md mx-auto">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between max-w-md mx-auto transition-colors duration-200">
     {{ $slot }}
     @include('partials.bottom-nav')
 
@@ -103,6 +110,46 @@
                     }
                 });
             });
+        });
+    </script>
+    <script>
+        function getTheme() {
+            return localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        }
+
+        function syncThemeState() {
+            const currentTheme = getTheme();
+            if (currentTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        function setTheme(mode) {
+            if (mode === 'dark') {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            } else if (mode === 'light') {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                localStorage.removeItem('theme');
+                syncThemeState();
+            }
+            window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: mode } }));
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const next = isDark ? 'light' : 'dark';
+            setTheme(next);
+            return next;
+        }
+
+        // Livewire v3 SPA Navigation support (wire:navigate)
+        document.addEventListener('livewire:navigated', () => {
+            syncThemeState();
         });
     </script>
     @stack('scripts')

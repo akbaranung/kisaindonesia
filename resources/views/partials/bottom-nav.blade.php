@@ -1,11 +1,11 @@
 <div
-    class="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto bg-white border-t border-slate-200/80 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] px-2 h-14">
+    class="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_25px_rgba(0,0,0,0.3)] px-2 h-14 transition-colors duration-200">
     <div class="flex items-center justify-around h-full relative">
         @php $isHome = request()->is('/'); @endphp
         <a href="{{ url('/') }}" wire:navigate
             class="flex flex-col items-center justify-end h-full py-1.5 flex-1 relative group">
             <div
-                class="relative flex items-center justify-center shrink-0 transition-all duration-300 ease-out {{ $isHome ? '-translate-y-3 w-10 h-10 bg-[#38CAC8] text-white' : 'w-9 h-9 text-slate-400 group-hover:text-slate-600' }} rounded-full">
+                class="relative flex items-center justify-center shrink-0 transition-all duration-300 ease-out {{ $isHome ? '-translate-y-3 w-10 h-10 bg-[#38CAC8] text-white shadow-md shadow-[#38CAC8]/30' : 'w-9 h-9 text-slate-400 dark:text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200' }} rounded-full">
                 <i
                     class="fa-solid fa-house text-base transition-transform duration-300 {{ $isHome ? 'scale-110' : '' }}"></i>
             </div>

@@ -129,7 +129,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-slate-500">
+                            <td colspan="8" class="px-4 py-8 text-center text-slate-500">
                                 Belum ada permintaan pencairan dana.
                             </td>
                         </tr>
@@ -211,17 +211,17 @@
                     <div class="flex justify-between">
                         <span class="text-slate-400">Nominal:</span>
                         <span class="font-bold text-brand-400">Rp
-                            {{ number_format($item->gross_amount, 0, ',', '.') . ' (' . number_format($item->kisa_amount) . ' Kisa)' }}</span>
+                            {{ number_format($selectedRequest->gross_amount, 0, ',', '.') . ' (' . number_format($selectedRequest->kisa_amount) . ' Kisa)' }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-400">Admin:</span>
                         <span class="font-bold text-rose-400">Rp
-                            {{ number_format($item->admin_fee, 0, ',', '.') }}</span>
+                            {{ number_format($selectedRequest->admin_fee, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-400">Net Amount:</span>
                         <span class="font-bold text-brand-400">Rp
-                            {{ number_format($item->net_amount, 0, ',', '.') }}</span>
+                            {{ number_format($selectedRequest->net_amount, 0, ',', '.') }}</span>
                     </div>
                 </div>
 
