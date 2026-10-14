@@ -633,7 +633,7 @@
                         </div>
                     </div>
 
-                    <div class="relative mt-[2.5rem]">
+                    <div class="relative mt-[3rem]">
                         <button @click.stop="scrollToComments()" x-cloak title="Lompat ke Komentar"
                             class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2.5 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-900 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 dark:border-slate-600/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
                             <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor"
