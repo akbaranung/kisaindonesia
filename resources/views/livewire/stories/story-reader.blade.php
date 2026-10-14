@@ -221,7 +221,7 @@
     </template>
 
     {{-- HEADER BACA CERITA (Sticky di bagian paling atas) --}}
-    <header style="display:none;"
+    <header
         class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 py-3.5 flex items-center justify-between gap-2 px-3 sm:px-4 transition-colors shadow-2xs">
         <a href="/stories/{{ $story->slug }}" wire:navigate
             class="p-2 -ml-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
@@ -455,7 +455,7 @@
                     <div class="relative w-full">
                         <div @click="triggerNextChat()" x-ref="chatScrollArea"
                             style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
-                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-2rem)] min-h-[450px] overflow-y-auto overscroll-contain touch-pan-y scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
+                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-11rem)] min-h-[450px] overflow-y-auto overscroll-contain touch-pan-y scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
 
                             <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
 
@@ -633,9 +633,9 @@
                         </div>
                     </div>
 
-                    {{-- <div class="mt-3">
+                    <div class="relative mt-10">
                         <button @click.stop="scrollToComments()" x-cloak title="Lompat ke Komentar"
-                            class="px-4 py-2.5 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-900 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 dark:border-slate-600/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
+                            class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2.5 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-900 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 dark:border-slate-600/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
                             <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -643,10 +643,10 @@
                             </svg>
                             <span>Lihat Komentar</span>
                         </button>
-                    </div> --}}
+                    </div>
 
                     {{-- Area Komentar & Navigasi Bab --}}
-                    {{-- <div x-ref="commentSection" x-cloak @click.stop
+                    <div x-ref="commentSection" x-cloak @click.stop
                         class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 transition-colors">
 
                         <div class="flex items-center justify-between gap-3">
@@ -668,7 +668,7 @@
                         </div>
 
                         <livewire:story.chapter.chapter-comments :chapter="$chapter" />
-                    </div> --}}
+                    </div>
 
                 </div>
             @endif
