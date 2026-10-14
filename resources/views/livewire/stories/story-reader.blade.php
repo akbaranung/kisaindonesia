@@ -318,7 +318,7 @@
     </header>
 
     {{-- KONTEN UTAMA --}}
-    <main class="flex-1 flex flex-col w-full p-3 sm:p-4 gap-4">
+    <main class="flex-1 flex flex-col w-full gap-4">
 
         @if ($isLocked)
             {{-- TAMPILAN GEMBOK PAYWALL --}}
@@ -633,15 +633,9 @@
                         </div>
                     </div>
 
-                    <div class="relative mt-3">
-                        <button @click.stop="scrollToComments()" x-cloak
-                            x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 scale-90 translate-y-2"
-                            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                            x-transition:leave-end="opacity-0 scale-90 translate-y-2" title="Lompat ke Komentar"
-                            class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2.5 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-900 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 dark:border-slate-600/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
+                    {{-- <div class="mt-3">
+                        <button @click.stop="scrollToComments()" x-cloak title="Lompat ke Komentar"
+                            class="px-4 py-2.5 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-900 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 dark:border-slate-600/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
                             <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -649,7 +643,7 @@
                             </svg>
                             <span>Lihat Komentar</span>
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- Area Komentar & Navigasi Bab --}}
                     <div x-ref="commentSection" x-cloak @click.stop
