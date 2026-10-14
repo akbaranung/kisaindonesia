@@ -238,8 +238,10 @@
         </a>
 
         <div class="flex-1 min-w-0 text-center">
-            <h1 class="text-xs font-black text-slate-900 dark:text-slate-100 truncate tracking-tight">{{ $story->title }}</h1>
-            <p class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 truncate mt-0.5">Bab {{ $chapter->order_number }}:
+            <h1 class="text-xs font-black text-slate-900 dark:text-slate-100 truncate tracking-tight">
+                {{ $story->title }}</h1>
+            <p class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 truncate mt-0.5">Bab
+                {{ $chapter->order_number }}:
                 {{ $chapter->title }}</p>
         </div>
 
@@ -265,28 +267,32 @@
                     class="absolute right-0 mt-2 w-36 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-1.5 z-40 flex flex-col gap-1">
 
                     <button @click="fontSize = 'text-xs'; openFont = false"
-                        :class="fontSize === 'text-xs' ? 'bg-slate-900 dark:bg-brand-600 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                        :class="fontSize === 'text-xs' ? 'bg-slate-900 dark:bg-brand-600 text-white' :
+                            'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'"
                         class="px-3 py-1.5 text-[11px] font-bold rounded-xl transition text-left flex items-center justify-between">
                         <span>Kecil</span>
                         <span class="text-[10px] opacity-70">12px</span>
                     </button>
 
                     <button @click="fontSize = 'text-sm'; openFont = false"
-                        :class="fontSize === 'text-sm' ? 'bg-slate-900 dark:bg-brand-600 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                        :class="fontSize === 'text-sm' ? 'bg-slate-900 dark:bg-brand-600 text-white' :
+                            'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'"
                         class="px-3 py-1.5 text-xs font-bold rounded-xl transition text-left flex items-center justify-between">
                         <span>Sedang</span>
                         <span class="text-[10px] opacity-70">14px</span>
                     </button>
 
                     <button @click="fontSize = 'text-base'; openFont = false"
-                        :class="fontSize === 'text-base' ? 'bg-slate-900 dark:bg-brand-600 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                        :class="fontSize === 'text-base' ? 'bg-slate-900 dark:bg-brand-600 text-white' :
+                            'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'"
                         class="px-3 py-1.5 text-sm font-bold rounded-xl transition text-left flex items-center justify-between">
                         <span>Besar</span>
                         <span class="text-[10px] opacity-70">16px</span>
                     </button>
 
                     <button @click="fontSize = 'text-lg'; openFont = false"
-                        :class="fontSize === 'text-lg' ? 'bg-slate-900 dark:bg-brand-600 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                        :class="fontSize === 'text-lg' ? 'bg-slate-900 dark:bg-brand-600 text-white' :
+                            'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'"
                         class="px-3 py-1.5 text-base font-bold rounded-xl transition text-left flex items-center justify-between">
                         <span>Sangat Besar</span>
                         <span class="text-[10px] opacity-70">18px</span>
@@ -303,12 +309,15 @@
             </button>
 
             @auth
-                <div class="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/60 border border-amber-100/80 dark:border-amber-800/60 px-2.5 py-1 rounded-full">
+                <div
+                    class="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/60 border border-amber-100/80 dark:border-amber-800/60 px-2.5 py-1 rounded-full">
                     <span class="text-xs">🫘</span>
-                    <span class="text-xs font-black text-amber-700 dark:text-amber-300">{{ auth()->user()->kisa_bean_balance ?? 0 }}</span>
+                    <span
+                        class="text-xs font-black text-amber-700 dark:text-amber-300">{{ auth()->user()->kisa_bean_balance ?? 0 }}</span>
                 </div>
             @else
-                <a href="/login" wire:navigate class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline">Masuk</a>
+                <a href="/login" wire:navigate
+                    class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline">Masuk</a>
             @endauth
         </div>
     </header>
@@ -325,7 +334,8 @@
                     🫘
                 </div>
 
-                <h2 class="text-base font-black text-slate-800 dark:text-slate-100 uppercase tracking-wide">Bab Ini Terkunci Premium</h2>
+                <h2 class="text-base font-black text-slate-800 dark:text-slate-100 uppercase tracking-wide">Bab Ini
+                    Terkunci Premium</h2>
                 <p class="text-sm text-slate-500 dark:text-slate-400 font-medium max-w-[280px] mt-2 leading-relaxed">
                     Buka bab ini menggunakan <span
                         class="text-amber-600 dark:text-amber-400 font-bold">{{ $chapter->bean_price > 0 ? $chapter->bean_price : 5 }}
@@ -361,11 +371,13 @@
                                 🫘
                             </div>
 
-                            <h3 class="text-base font-black text-slate-900 dark:text-slate-100">Konfirmasi Penukaran</h3>
+                            <h3 class="text-base font-black text-slate-900 dark:text-slate-100">Konfirmasi Penukaran
+                            </h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
                                 Kamu akan menggunakan <span
                                     class="font-bold text-amber-600 dark:text-amber-400">{{ $chapter->bean_price }}
-                                    KISA Bean</span> untuk membuka <span class="font-bold text-slate-800 dark:text-slate-200">Bab
+                                    KISA Bean</span> untuk membuka <span
+                                    class="font-bold text-slate-800 dark:text-slate-200">Bab
                                     {{ $chapter->order_number }}</span>.
                             </p>
 
@@ -378,7 +390,8 @@
                             <div
                                 class="mb-4 p-3 bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-semibold">
                                 <span class="text-slate-400 dark:text-slate-400">Saldo Kamu:</span>
-                                <span class="text-slate-800 dark:text-slate-100 font-bold">🫘 {{ auth()->user()->kisa_bean_balance ?? 0 }}
+                                <span class="text-slate-800 dark:text-slate-100 font-bold">🫘
+                                    {{ auth()->user()->kisa_bean_balance ?? 0 }}
                                     Beans</span>
                             </div>
 
@@ -396,7 +409,8 @@
                     </div>
                 @endif
 
-                <a href="/topup" wire:navigate class="text-xs text-amber-600 dark:text-amber-400 hover:underline font-bold mt-4">
+                <a href="/topup" wire:navigate
+                    class="text-xs text-amber-600 dark:text-amber-400 hover:underline font-bold mt-4">
                     🛒 Isi Ulang KISA Bean Sekarang
                 </a>
             </div>
@@ -410,7 +424,8 @@
                         {!! $regularContent !!}
                     </div>
 
-                    <div class="flex items-center justify-between mt-12 pt-6 border-t border-slate-100 dark:border-slate-800">
+                    <div
+                        class="flex items-center justify-between mt-12 pt-6 border-t border-slate-100 dark:border-slate-800">
                         @if ($prevSlug)
                             <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}" wire:navigate
                                 class="p-3 px-5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition">
@@ -444,7 +459,7 @@
                     <div class="relative w-full">
                         <div @click="triggerNextChat()" x-ref="chatScrollArea"
                             style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
-                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-9rem)] min-h-[50vh] max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-contain scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
+                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-9rem)] min-h-[50vh] max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-y-contain touch-pan-y scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
 
                             <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
 
@@ -497,7 +512,7 @@
                                                     class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border text-xs font-bold shadow-2xs {{ $isMissed ? 'bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300' : 'bg-slate-900 dark:bg-slate-800 border-slate-800 dark:border-slate-700 text-white' }}">
                                                     @if ($isMissed)
                                                         <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none"
-                                                             stroke="currentColor" viewBox="0 0 24 24">
+                                                            stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="2.5"
                                                                 d="M16 8l-8 8m0-8l8 8M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -610,7 +625,8 @@
                                 {{-- Indikator Mengetik --}}
                                 <div x-show="isTyping && !showComments" x-cloak
                                     class="flex items-center gap-1.5 px-3 py-2 bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xs rounded-full w-max text-slate-400 dark:text-slate-400 my-1 animate-pulse border border-slate-200/60 dark:border-slate-700/60">
-                                    <span class="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce"></span>
+                                    <span
+                                        class="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce"></span>
                                     <span
                                         class="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce [animation-delay:0.2s]"></span>
                                     <span

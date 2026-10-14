@@ -105,7 +105,7 @@
     <!-- ========================================== -->
     <!-- 2. MAIN CANVAS AREA (SCROLLABLE)           -->
     <!-- ========================================== -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div class="flex-1 overflow-y-auto overscroll-y-contain touch-pan-y p-4 space-y-4">
         <!-- Flash Messages -->
         <div class="max-w-xl mx-auto space-y-2">
             @if (session()->has('message'))
