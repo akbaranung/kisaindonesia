@@ -221,7 +221,7 @@
     </template>
 
     {{-- HEADER BACA CERITA (Sticky di bagian paling atas) --}}
-    <header
+    <header style="display:none;"
         class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 py-3.5 flex items-center justify-between gap-2 px-3 sm:px-4 transition-colors shadow-2xs">
         <a href="/stories/{{ $story->slug }}" wire:navigate
             class="p-2 -ml-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
@@ -455,7 +455,7 @@
                     <div class="relative w-full">
                         <div @click="triggerNextChat()" x-ref="chatScrollArea"
                             style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
-                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-7rem)] min-h-[450px] overflow-y-auto overscroll-contain touch-pan-y scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
+                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-2rem)] min-h-[450px] overflow-y-auto overscroll-contain touch-pan-y scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
 
                             <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
 
