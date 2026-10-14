@@ -1,5 +1,5 @@
 <div
-    class="h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased overflow-hidden transition-colors duration-200">
+    class="fixed inset-0 z-40 flex w-full flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased overflow-hidden transition-colors duration-200">
     <header
         class="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between shrink-0 z-20">
         <div class="flex items-center gap-3">
@@ -396,7 +396,7 @@
 
     @if ($type === 'chat')
         <div x-data="{ showTypePicker: false }"
-            class="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+            class="shrink-0 p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
 
             @if ($message_type !== 'center_text')
                 <!-- 1. QUICK LIVE MANAGEMENT KARAKTER BAR -->
@@ -869,33 +869,6 @@
                 icon: data.type || 'error',
                 title: data.message
             });
-        });
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        let touchstartY = 0;
-
-        // Mencegah pull-to-refresh global pada body/html
-        window.addEventListener('touchstart', (e) => {
-            touchstartY = e.touches[0].clientY;
-        }, {
-            passive: true
-        });
-
-        window.addEventListener('touchmove', (e) => {
-            const touchY = e.touches[0].clientY;
-            const touchYDelta = touchY - touchstartY;
-
-            // Jika discroll ke bawah di posisi paling atas halaman
-            if (window.scrollY === 0 && touchYDelta > 0) {
-                // Cek apakah target bukan di dalam area scroll chat/editor
-                const scrollableContainer = e.target.closest('.overflow-y-auto');
-                if (!scrollableContainer || scrollableContainer.scrollTop === 0) {
-                    e.preventDefault();
-                }
-            }
-        }, {
-            passive: false
         });
     });
 </script>

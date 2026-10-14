@@ -134,7 +134,7 @@
         }
     }
 }"
-    class="w-full min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-between max-w-2xl mx-auto border-x border-slate-100 dark:border-slate-800 shadow-xs relative transition-colors duration-200">
+    class="fixed inset-0 z-40 bg-slate-50 dark:bg-slate-950 flex flex-col justify-between max-w-2xl w-full mx-auto border-x border-slate-100 dark:border-slate-800 shadow-xs relative transition-colors duration-200 overflow-hidden">
 
     {{-- Notification Toast saat Salin Tautan --}}
     <div x-show="copied" x-cloak x-transition:enter="transition ease-out duration-300 transform"
