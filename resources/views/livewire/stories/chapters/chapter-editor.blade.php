@@ -871,4 +871,31 @@
             });
         });
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        let touchstartY = 0;
+
+        // Mencegah pull-to-refresh global pada body/html
+        window.addEventListener('touchstart', (e) => {
+            touchstartY = e.touches[0].clientY;
+        }, {
+            passive: true
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const touchYDelta = touchY - touchstartY;
+
+            // Jika discroll ke bawah di posisi paling atas halaman
+            if (window.scrollY === 0 && touchYDelta > 0) {
+                // Cek apakah target bukan di dalam area scroll chat/editor
+                const scrollableContainer = e.target.closest('.overflow-y-auto');
+                if (!scrollableContainer || scrollableContainer.scrollTop === 0) {
+                    e.preventDefault();
+                }
+            }
+        }, {
+            passive: false
+        });
+    });
 </script>
