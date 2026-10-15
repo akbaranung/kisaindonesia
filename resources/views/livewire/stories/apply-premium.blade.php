@@ -181,7 +181,7 @@
         @elseif($selectedStory && $isEligible)
             {{-- FORM REKENING (MOBILE STYLE) --}}
             <div
-                class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5">
+                class="bg-white dark:bg-slate-900 p-4 mb-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5">
                 @if ($existingRequest && $existingRequest->status === 'rejected')
                     <div
                         class="p-3 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-xl text-[11px] space-y-1">
@@ -248,10 +248,9 @@
                 {{-- Catatan --}}
                 <div>
                     <label
-                        class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Catatan
-                        untuk Admin
-                        (Opsional)</label>
-                    <textarea wire:model="authorNotes" rows="2" placeholder="Catatan khusus terkait cerita..."
+                        class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Sinopsis
+                        / Outline General</label>
+                    <textarea wire:model="authorNotes" rows="2" placeholder="Sinopsis atau gambaran umum cerita..."
                         class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium"></textarea>
                 </div>
             </div>
@@ -276,7 +275,7 @@
     {{-- FLOATING BOTTOM BAR (MOBILE ACTION BUTTON) --}}
     @if ($selectedStory && $isEligible && (!$existingRequest || $existingRequest->status !== 'pending'))
         <div
-            class="fixed bottom-0 inset-x-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-3 z-30 max-w-md mx-auto">
+            class="fixed bottom-15 mt-3 inset-x-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-3 z-30 max-w-md mx-auto">
             <button wire:click="submitApplication" wire:loading.attr="disabled"
                 class="w-full py-3 bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white dark:text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2">
                 <span wire:loading.remove>🚀 Kirim Pengajuan Premium</span>
