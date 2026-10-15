@@ -14,6 +14,7 @@ class StoryDetail extends Component
     public $chapters;
     public $lastReadChapter = null;
     public $tab = '';
+    public $showAgeConfirmation = false;
 
     protected $listeners = ['review-updated' => '$refresh'];
 
@@ -28,6 +29,10 @@ class StoryDetail extends Component
 
         $this->chapters = $story->chapters()->where('status', 'published')->orderBy('order_number', 'asc')->get();
 
+        if ($story->is_mature) {
+            $this->showAgeConfirmation = true;
+        }
+
         if (auth()->check()) {
             $history = ReadHistory::where('user_id', auth()->id())->where('story_id', $story->id)->with('chapter')->first();
 
@@ -37,6 +42,16 @@ class StoryDetail extends Component
 
             $viewService->incrementStoryView($story);
         }
+    }
+
+    public function cancelVerifyAge()
+    {
+        $this->showAgeConfirmation = false;
+    }
+
+    public function verifyAge()
+    {
+        $this->showAgeConfirmation = false;
     }
 
     public function toggleLibrary()

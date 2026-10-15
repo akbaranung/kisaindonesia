@@ -240,4 +240,42 @@
     <div class="py-6 px-2 pb-6">
         @livewire('Story.story-review', ['storyId' => $story->id])
     </div>
+
+    @if ($showAgeConfirmation)
+        <div
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md select-none animate-fade-in">
+            <div
+                class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-slate-100 dark:border-slate-800">
+                <div
+                    class="w-14 h-14 bg-rose-50 dark:bg-rose-950/60 text-rose-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 border border-rose-100 dark:border-rose-900/50">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+
+                <h3 class="text-base font-black text-slate-900 dark:text-slate-100">Konten Khusus Dewasa (18+)</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                    Cerita <span class="font-bold text-slate-800 dark:text-slate-200">"{{ $story->title }}"</span> ini
+                    mengandung tema, bahasa, atau adegan yang ditujukan khusus untuk pembaca dewasa.
+                </p>
+
+                <div
+                    class="my-4 p-3 bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-slate-100 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-300 font-medium">
+                    Apakah usia Anda sudah 18 tahun atau lebih?
+                </div>
+
+                <div class="flex flex-col gap-2 mt-4">
+                    {{-- Tombol Ya, Lanjutkan --}}
+                    <button wire:click="verifyAge"
+                        class="w-full p-3 text-xs font-black text-white bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 rounded-xl shadow-xs transition transform active:scale-95">
+                        Ya, Saya Sudah 18 Tahun
+                    </button>
+
+                    {{-- Tombol Batal / Kembali ke Daftar Cerita --}}
+                    <a href="{{ URL::previous() }}" wire:navigate
+                        class="w-full p-3 text-xs font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition">
+                        Tidak, Kembali
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

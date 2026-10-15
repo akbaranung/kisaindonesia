@@ -105,7 +105,8 @@
         </div>
 
         <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Tipe
+            <label
+                class="block text-xs font-black text-slate-400 dark:text-slate-300 uppercase tracking-wider mb-2">Tipe
                 Karya</label>
             <div class="grid grid-cols-3 gap-2">
                 @foreach (['novel' => 'Novel', 'puisi' => 'Puisi', 'non_fiksi' => 'Non-Fiksi'] as $key => $label)
@@ -125,7 +126,7 @@
             {{-- Dropdown Genre Utama --}}
             <div>
                 <label
-                    class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Genre
+                    class="block text-xs font-black text-slate-400 dark:text-slate-300 uppercase tracking-wider mb-1.5">Genre
                     Utama</label>
                 <select wire:model.live="parent_genre_id"
                     class="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium">
@@ -142,7 +143,7 @@
             {{-- Dropdown Sub-Genre (Terhubung secara dinamis) --}}
             <div>
                 <label
-                    class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Sub-Genre</label>
+                    class="block text-xs font-black text-slate-400 dark:text-slate-300 uppercase tracking-wider mb-1.5">Sub-Genre</label>
                 <select wire:model.live="genreId" {{ empty($subGenres) ? 'disabled' : '' }}
                     class="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-900">
                     <option value="">
@@ -155,6 +156,31 @@
                 @error('genreId')
                     <span class="text-[10px] text-rose-500 font-medium mt-1 block">{{ $message }}</span>
                 @enderror
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <div
+                class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="space-y-0.5">
+                    <label for="is_mature"
+                        class="text-xs font-black text-slate-400 dark:text-slate-100 flex items-center gap-2">
+                        <span>Konten Dewasa (18+)</span>
+                        <span
+                            class="px-2 py-0.5 text-[10px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-full">18+
+                            Only</span>
+                    </label>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                        Aktifkan jika cerita ini mengandung unsur kekerasan, bahasa kasar, atau tema dewasa.
+                    </p>
+                </div>
+
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" wire:model="is_mature" id="is_mature" class="sr-only peer">
+                    <div
+                        class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-700 peer-checked:bg-brand-600">
+                    </div>
+                </label>
             </div>
         </div>
 

@@ -19,7 +19,8 @@ class Story extends Model
         'monetization_type',
         'type',
         'pen_name_id',
-        'is_editor_choice'
+        'is_editor_choice',
+        'is_mature'
     ];
 
     protected $casts = ['is_editor_choice' => 'boolean'];

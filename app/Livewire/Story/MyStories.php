@@ -32,6 +32,7 @@ class MyStories extends Component
     public string $status = 'draft';
     public $cover;
     public $existingCover = null; //Menampilkan cover lama ketika edit data
+    public $is_mature = false;
 
     public $selectedStoryId;
     public $selectedStoryTitle;
@@ -106,6 +107,7 @@ class MyStories extends Component
         $this->synopsis = '';
         $this->status = 'draft';
         $this->type = 'novel';
+        $this->is_mature = false;
         $this->cover = null;
         $this->existingCover = null;
     }
@@ -197,6 +199,7 @@ class MyStories extends Component
         $this->synopsis = $story->synopsis;
         $this->status = $story->status;
         $this->existingCover = $story->cover_path;
+        $this->is_mature = $story->is_mature;
         $this->loadParentGenres();
 
         $genre = $story->genre;
@@ -232,7 +235,8 @@ class MyStories extends Component
             'type' => 'required|in:novel,puisi,non_fiksi',
             'synopsis' => 'required|string|max:1000',
             'cover' => 'nullable|image|max:2048',
-            'pen_name_id' => 'required|exists:pen_names,id'
+            'pen_name_id' => 'required|exists:pen_names,id',
+            'is_mature' => 'boolean'
         ], [
             'title.required' => 'Judul novelnya jangan lupa diisi, Bro.',
             'type.required' => 'Tipe novelnya jangan lupa dipilih, Bro.',
@@ -241,7 +245,7 @@ class MyStories extends Component
             'genreId.exists' => 'Genre yang kamu pilih tidak terdaftar.',
             'synopsis.required' => 'Sinopsis singkat wajib ada biar pembaca penasaran.',
             'cover.image' => 'File harus berupa gambar (jpg, jpeg, png).',
-            'cover.max' => 'Ukuran cover kegedean, Bro. Maksimal 5MB aja.',
+            'cover.max' => 'Ukuran file maksimal 2MB.',
             'pen_name_id.required' => 'Pilih terlebih dahulu nama pena/penulis nya!'
         ]);
 
@@ -284,7 +288,8 @@ class MyStories extends Component
                 'synopsis' => $this->synopsis,
                 'cover_path' => $coverPath,
                 'type' => $this->type,
-                'pen_name_id' => $this->pen_name_id
+                'pen_name_id' => $this->pen_name_id,
+                'is_mature' => $this->is_mature
             ]
         );
 
