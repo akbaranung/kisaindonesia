@@ -107,9 +107,8 @@
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    const bottomNavSpace = 64;
                     container.scrollTo({
-                        top: container.scrollHeight - container.clientHeight + bottomNavSpace,
+                        top: container.scrollHeight,
                         behavior
                     });
                 });
@@ -318,7 +317,7 @@
     </header>
 
     {{-- KONTEN UTAMA --}}
-    <main class="flex-1 flex flex-col w-full gap-4">
+    <main class="flex-1 flex flex-col w-full p-3 sm:p-4 gap-4">
 
         @if ($isLocked)
             {{-- TAMPILAN GEMBOK PAYWALL --}}
@@ -452,10 +451,11 @@
 
                 <div class="flex-1 flex flex-col w-full gap-4">
 
+                    {{-- Container Area Chat yang diisolasi scroll-nya --}}
                     <div class="relative w-full">
                         <div @click="triggerNextChat()" x-ref="chatScrollArea"
                             style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}"
-                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[calc(100dvh-11rem)] min-h-[450px] overflow-y-auto overscroll-contain touch-pan-y scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
+                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[75vh] max-h-[750px] overflow-y-auto overscroll-contain touch-pan-y scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
 
                             <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
 
@@ -633,9 +633,10 @@
                         </div>
                     </div>
 
-                    <div class="relative mt-[3rem]">
+                    {{-- Tombol Lihat Komentar yang digeser lebih ke atas agar tidak terlalu berdempetan --}}
+                    <div class="relative mt-2">
                         <button @click.stop="scrollToComments()" x-cloak title="Lompat ke Komentar"
-                            class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2.5 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-900 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 dark:border-slate-600/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
+                            class="absolute -top-2 left-1/2 -translate-x-1/2 z-20 px-4 py-2.5 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-900 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 dark:border-slate-600/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
                             <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -647,7 +648,7 @@
 
                     {{-- Area Komentar & Navigasi Bab --}}
                     <div x-ref="commentSection" x-cloak @click.stop
-                        class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 transition-colors">
+                        class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 mt-6 transition-colors">
 
                         <div class="flex items-center justify-between gap-3">
                             @if ($prevSlug)
