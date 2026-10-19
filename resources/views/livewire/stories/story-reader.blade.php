@@ -146,27 +146,15 @@
         const shouldShift = canScroll && atBottom;
         this.isAtBottom = shouldShift;
 
-        // Ambil elemen target referensi (misal chatSection atau chatScrollArea)
-        const targetEl = this.$refs.chatSection || container;
+        // Prioritaskan scroll di dalam chat container, cegah body ikut tertarik
+        const targetEl = this.$refs.mainContent;
 
         if (shouldShift && targetEl) {
-            // Mentokkan elemen ke bagian atas layar (top = 0)
-            const targetPosition = targetEl.getBoundingClientRect().top + window.scrollY;
-
-            if (Math.abs(window.scrollY - targetPosition) > 2) {
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        } else {
-            // Kembalikan posisi window ke paling atas dokumen jika diperlukan
-            if (window.scrollY > 0) {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            }
+            // Mentokkan elemen ke bagian atas layar (top = 0) secara presisi menggunakan scrollIntoView
+            targetEl.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
     },
 
@@ -391,7 +379,7 @@
     </header>
 
     {{-- KONTEN UTAMA --}}
-    <main class="flex-1 flex flex-col w-full gap-4">
+    <main class="flex-1 flex flex-col w-full gap-4" x-ref="mainContent">
 
         @if ($isLocked)
             {{-- TAMPILAN GEMBOK PAYWALL --}}
@@ -575,7 +563,7 @@
                         : null;
                 @endphp
 
-                <div class="flex-1 flex flex-col w-full gap-2 sm:gap-3" x-ref="chatSection">
+                <div class="flex-1 flex flex-col w-full gap-2 sm:gap-3">
 
                     {{-- Container Area Chat yang diisolasi scroll-nya --}}
                     <div class="relative w-full">
@@ -761,32 +749,14 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between gap-3 mb-4">
-                        @if ($prevSlug)
-                            <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}" wire:navigate
-                                class="p-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition">
-                                Bab Sebelumnya
-                            </a>
-                        @else
-                            <div></div>
-                        @endif
 
-                        @if ($nextSlug)
-                            <a href="{{ route('stories.chapter.read', [$story->slug, $nextSlug]) }}" wire:navigate
-                                class="p-2.5 px-4 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition">
-                                Bab Berikutnya
-                            </a>
-                        @endif
-                    </div>
-
-                    <div class="mb-[10px]"></div>
 
                     {{-- Area Komentar & Navigasi Bab --}}
                     <div x-ref="commentSection" x-cloak @click.stop
                         class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 -mt-1 sm:mt-0 transition-colors">
 
                         {{-- Header Komentar & Tombol Kembali ke Chat --}}
-                        {{-- <div
+                        <div
                             class="flex items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-slate-100 dark:border-slate-800">
                             <div class="flex items-center gap-2">
                                 <i class="fa-regular fa-comments text-brand-500 text-base"></i>
@@ -807,7 +777,27 @@
                                 <span>Ke Chat</span>
                             </button>
                         </div>
-                        <livewire:story.chapter.chapter-comments :chapter="$chapter" /> --}}
+
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            @if ($prevSlug)
+                                <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}" wire:navigate
+                                    class="p-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition">
+                                    Bab Sebelumnya
+                                </a>
+                            @else
+                                <div></div>
+                            @endif
+
+                            @if ($nextSlug)
+                                <a href="{{ route('stories.chapter.read', [$story->slug, $nextSlug]) }}" wire:navigate
+                                    class="p-2.5 px-4 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition">
+                                    Bab Berikutnya
+                                </a>
+                            @endif
+                        </div>
+
+
+                        <livewire:story.chapter.chapter-comments :chapter="$chapter" />
                     </div>
 
                 </div>
