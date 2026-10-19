@@ -17,7 +17,8 @@
 
 
     <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia(
+                '(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -25,7 +26,8 @@
     </script>
 </head>
 
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between max-w-md mx-auto transition-colors duration-200 overscroll-y-none">
+<body
+    class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between max-w-md mx-auto transition-colors duration-200 overscroll-y-none">
     {{ $slot }}
     @include('partials.bottom-nav')
 
@@ -60,7 +62,7 @@
     @php
         $isDuitkuSandbox = filter_var(
             \App\Models\Setting::get('duitku_is_sandbox', config('services.duitku.sandbox', true)),
-            FILTER_VALIDATE_BOOLEAN
+            FILTER_VALIDATE_BOOLEAN,
         );
     @endphp
     <script
@@ -137,7 +139,11 @@
                 localStorage.removeItem('theme');
                 syncThemeState();
             }
-            window.dispatchEvent(new CustomEvent('theme-changed', { detail: { theme: mode } }));
+            window.dispatchEvent(new CustomEvent('theme-changed', {
+                detail: {
+                    theme: mode
+                }
+            }));
         }
 
         function toggleTheme() {

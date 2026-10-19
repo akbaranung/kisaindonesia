@@ -140,24 +140,28 @@
     checkChatScroll() {
         const container = this.$refs.chatScrollArea;
         if (!container) return;
+
         const canScroll = container.scrollHeight > container.clientHeight + 10;
         const atBottom = (container.scrollTop + container.clientHeight) >= (container.scrollHeight - 25);
         const shouldShift = canScroll && atBottom;
         this.isAtBottom = shouldShift;
 
-        const shiftPixels = 35;
+        // Ambil elemen target referensi (misal chatSection atau chatScrollArea)
+        const targetEl = this.$refs.chatSection || container;
 
-        if (shouldShift) {
-            // Geser body/window sedikit ke atas saat chat di paling bawah
-            if (window.scrollY < shiftPixels - 5) {
+        if (shouldShift && targetEl) {
+            // Mentokkan elemen ke bagian atas layar (top = 0)
+            const targetPosition = targetEl.getBoundingClientRect().top + window.scrollY;
+
+            if (Math.abs(window.scrollY - targetPosition) > 2) {
                 window.scrollTo({
-                    top: shiftPixels,
+                    top: targetPosition,
                     behavior: 'smooth'
                 });
             }
         } else {
-            // Kembalikan body/window saat user scroll chat ke atas
-            if (window.scrollY > 0 && window.scrollY <= 55) {
+            // Kembalikan posisi window ke paling atas dokumen jika diperlukan
+            if (window.scrollY > 0) {
                 window.scrollTo({
                     top: 0,
                     behavior: 'smooth'
@@ -775,12 +779,14 @@
                         @endif
                     </div>
 
+                    <div class="mb-[10px]"></div>
+
                     {{-- Area Komentar & Navigasi Bab --}}
                     <div x-ref="commentSection" x-cloak @click.stop
                         class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 -mt-1 sm:mt-0 transition-colors">
 
                         {{-- Header Komentar & Tombol Kembali ke Chat --}}
-                        <div
+                        {{-- <div
                             class="flex items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-slate-100 dark:border-slate-800">
                             <div class="flex items-center gap-2">
                                 <i class="fa-regular fa-comments text-brand-500 text-base"></i>
@@ -801,7 +807,7 @@
                                 <span>Ke Chat</span>
                             </button>
                         </div>
-                        <livewire:story.chapter.chapter-comments :chapter="$chapter" />
+                        <livewire:story.chapter.chapter-comments :chapter="$chapter" /> --}}
                     </div>
 
                 </div>
