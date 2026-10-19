@@ -11,6 +11,7 @@
     showResetModal: false,
     touchStartY: 0,
     isSwiping: false,
+    isAtBottom: false,
 
     init() {
         // Cegah pull-to-refresh browser pada level dokumen
@@ -24,6 +25,10 @@
         this.checkIfFinished();
         this.resetTypingTimer();
 
+        this.$nextTick(() => {
+            this.checkChatScroll();
+        });
+
         this.$watch('fontSize', value => {
             localStorage.setItem('reader_font_size', value);
         });
@@ -36,6 +41,7 @@
     restartReading() {
         this.showResetModal = false;
         this.visibleCount = 1;
+        this.isAtBottom = false;
         $wire.updateChatProgress(1);
         this.checkIfFinished();
         this.resetTypingTimer();
@@ -44,6 +50,7 @@
             const container = this.$refs.chatScrollArea;
             if (container) {
                 container.scrollTop = 0;
+                this.checkChatScroll();
             }
         });
     },
@@ -125,6 +132,14 @@
         }
     },
 
+    checkChatScroll() {
+        const container = this.$refs.chatScrollArea;
+        if (!container) return;
+        const canScroll = container.scrollHeight > container.clientHeight + 10;
+        const atBottom = (container.scrollTop + container.clientHeight) >= (container.scrollHeight - 25);
+        this.isAtBottom = canScroll && atBottom;
+    },
+
     scrollToBottom(behavior = 'smooth') {
         this.$nextTick(() => {
             const container = this.$refs.chatScrollArea;
@@ -136,6 +151,9 @@
                         top: container.scrollHeight,
                         behavior
                     });
+                    setTimeout(() => {
+                        this.checkChatScroll();
+                    }, behavior === 'smooth' ? 250 : 30);
                 });
             });
         });
@@ -527,16 +545,16 @@
                         : null;
                 @endphp
 
-                <div class="flex-1 flex flex-col w-full gap-4" x-ref="chatSection">
+                <div class="flex-1 flex flex-col w-full gap-2 sm:gap-3" x-ref="chatSection">
 
                     {{-- Container Area Chat yang diisolasi scroll-nya --}}
                     <div class="relative w-full">
                         <div @touchstart="touchStartY = $event.touches[0].clientY; isSwiping = false"
                             @touchmove="if (Math.abs($event.touches[0].clientY - touchStartY) > 8) { isSwiping = true }"
                             @click="if (isSwiping) { isSwiping = false; return; } triggerNextChat()"
-                            x-ref="chatScrollArea"
+                            @scroll.passive="checkChatScroll()" x-ref="chatScrollArea"
                             style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}; overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;"
-                            class="px-3 py-4 md:p-6 pb-12 flex flex-col w-full cursor-pointer h-[calc(100dvh-7.5rem)] min-h-[520px] md:h-[calc(100dvh-8rem)] md:max-h-[850px] overflow-y-auto overscroll-contain touch-pan-y rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
+                            class="px-3 py-4 md:p-6 pb-12 flex flex-col w-full cursor-pointer h-[calc(100dvh-8.5rem)] min-h-[480px] md:h-[calc(100dvh-9rem)] md:max-h-[820px] overflow-y-auto overscroll-contain touch-pan-y rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
 
                             <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
 
@@ -749,19 +767,9 @@
                         </div>
                     </div>
 
-                    {{-- Tombol Buka Komentar --}}
-                    <div class="flex items-center justify-center my-1">
-                        <button @click.stop="scrollToComments()" type="button" title="Buka Komentar"
-                            class="px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs font-bold rounded-full shadow-md border border-slate-200/80 dark:border-slate-800 flex items-center gap-2 transition transform active:scale-95">
-                            <i class="fa-regular fa-comment-dots text-brand-500"></i>
-                            <span>Buka Kolom Komentar ({{ $chapter->comments()->count() }})</span>
-                            <i class="fa-solid fa-arrow-down text-[10px] text-slate-400"></i>
-                        </button>
-                    </div>
-
                     {{-- Area Komentar & Navigasi Bab --}}
                     <div x-ref="commentSection" x-cloak @click.stop
-                        class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 mt-2 transition-colors">
+                        class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 -mt-1 sm:mt-0 transition-colors">
 
                         {{-- Header Komentar & Tombol Kembali ke Chat --}}
                         <div
