@@ -25,7 +25,7 @@
     </script>
 </head>
 
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between max-w-md mx-auto transition-colors duration-200">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between max-w-md mx-auto transition-colors duration-200 overscroll-y-none">
     {{ $slot }}
     @include('partials.bottom-nav')
 

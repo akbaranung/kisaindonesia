@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Nonaktifkan aksi pull-to-refresh bawaan mobile browser agar scroll chat tidak memicu reload */
+html, body {
+    overscroll-behavior-y: none;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Fallback jaminan visibilitas icon mode gelap/terang */

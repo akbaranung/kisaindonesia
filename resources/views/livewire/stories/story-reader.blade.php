@@ -9,8 +9,14 @@
     typingTimer: null,
     showComments: false,
     showResetModal: false,
+    touchStartY: 0,
+    isSwiping: false,
 
     init() {
+        // Cegah pull-to-refresh browser pada level dokumen
+        document.documentElement.style.overscrollBehaviorY = 'none';
+        document.body.style.overscrollBehaviorY = 'none';
+
         if (Number(this.visibleCount) >= Number(this.totalRows) && Number(this.totalRows) > 0) {
             this.showResetModal = true;
         }
@@ -51,10 +57,23 @@
         this.$nextTick(() => {
             const commentEl = this.$refs.commentSection;
             if (commentEl) {
-                commentEl.scrollIntoView({ behavior: 'smooth' });
+                const headerOffset = 65;
+                const elementPosition = commentEl.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
             } else {
                 this.scrollToBottom();
             }
+        });
+    },
+
+    scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
         });
     },
 
@@ -95,7 +114,13 @@
         if (!this.showComments) {
             this.typingTimer = setTimeout(() => {
                 this.isTyping = true;
-                this.scrollToBottom();
+                const container = this.$refs.chatScrollArea;
+                if (container) {
+                    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+                    if (isNearBottom) {
+                        this.scrollToBottom();
+                    }
+                }
             }, 10000);
         }
     },
@@ -126,7 +151,7 @@
         }
     }
 }"
-    class="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col max-w-2xl w-full mx-auto border-x border-slate-100 dark:border-slate-800 shadow-xs relative transition-colors duration-200">
+    class="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col max-w-2xl w-full mx-auto border-x border-slate-100 dark:border-slate-800 shadow-xs relative transition-colors duration-200 overscroll-y-none">
 
     {{-- Notification Toast saat Salin Tautan --}}
     <div x-show="copied" x-cloak x-transition:enter="transition ease-out duration-300 transform"
@@ -294,6 +319,19 @@
                 </div>
             </div>
 
+            {{-- Tombol Lompat ke Komentar di Header --}}
+            <button @click="scrollToComments()" title="Lihat Komentar"
+                class="p-2 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition rounded-xl hover:bg-brand-50 dark:hover:bg-brand-950/40 active:scale-90 relative">
+                <i class="fa-regular fa-comment text-sm"></i>
+                @php $cCount = $chapter->comments()->count(); @endphp
+                @if ($cCount > 0)
+                    <span
+                        class="absolute top-1 right-1 min-w-[14px] h-[14px] px-1 bg-brand-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+                        {{ $cCount > 99 ? '99+' : $cCount }}
+                    </span>
+                @endif
+            </button>
+
             <button @click="shareChapter()" title="Bagikan Bab Ini"
                 class="p-2 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition rounded-xl hover:bg-brand-50 dark:hover:bg-brand-950/40 active:scale-90">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,18 +339,6 @@
                         d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684" />
                 </svg>
             </button>
-
-            @auth
-                <div
-                    class="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/60 border border-amber-100/80 dark:border-amber-800/60 px-2.5 py-1 rounded-full">
-                    <span class="text-xs">🫘</span>
-                    <span
-                        class="text-xs font-black text-amber-700 dark:text-amber-300">{{ auth()->user()->kisa_bean_balance ?? 0 }}</span>
-                </div>
-            @else
-                <a href="/login" wire:navigate
-                    class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline">Masuk</a>
-            @endauth
         </div>
     </header>
 
@@ -413,18 +439,43 @@
             @if ($chapter->type === 'regular')
                 {{-- KONTEN REGULAR --}}
                 <div
-                    class="p-4 pb-5 flex-1 flex flex-col w-full bg-white dark:bg-slate-900 rounded-2xl transition-colors shadow-2xs">
+                    class="p-4 sm:p-6 md:p-8 pb-10 flex-1 flex flex-col w-full bg-white dark:bg-slate-900 rounded-2xl transition-colors shadow-2xs mb-20 min-h-[calc(100dvh-7.5rem)]">
+
+                    {{-- Header Judul Bab di Konten Bacaan --}}
+                    <div class="mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <span
+                            class="text-[11px] font-black tracking-wider text-brand-600 dark:text-brand-400 uppercase">
+                            Bab {{ $chapter->order_number }}
+                        </span>
+                        <h2
+                            class="text-base sm:text-xl font-black text-slate-900 dark:text-slate-100 mt-1 leading-snug">
+                            {{ $chapter->title }}
+                        </h2>
+                        @if ($chapter->word_count)
+                            <p
+                                class="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-1 flex items-center gap-2">
+                                <span><i class="fa-regular fa-clock mr-1"></i> ±
+                                    {{ max(1, ceil($chapter->word_count / 150)) }} menit baca</span>
+                                <span>•</span>
+                                <span>{{ number_format($chapter->word_count) }} kata</span>
+                            </p>
+                        @endif
+                    </div>
+
+                    {{-- Konten Teks Novel / Puisi --}}
                     <div :class="fontSize"
-                        class="prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 leading-relaxed md:leading-loose prose-p:my-5 prose-headings:text-slate-900 dark:prose-headings:text-slate-100 prose-headings:font-black prose-strong:font-black prose-strong:text-slate-900 dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 text-justify transition-all duration-150">
+                        class="prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 leading-relaxed md:leading-loose prose-p:text-[inherit] prose-p:my-5 prose-headings:text-slate-900 dark:prose-headings:text-slate-100 prose-headings:font-black prose-strong:font-black prose-strong:text-slate-900 dark:prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 break-words transition-all duration-150 text-justify">
                         {!! $regularContent !!}
                     </div>
 
+                    {{-- Navigasi Bab Sebelumnya & Berikutnya --}}
                     <div
-                        class="flex items-center justify-between mt-12 pt-6 border-t border-slate-100 dark:border-slate-800">
+                        class="flex items-center justify-between mt-12 pt-6 border-t border-slate-100 dark:border-slate-800 gap-3">
                         @if ($prevSlug)
                             <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}" wire:navigate
-                                class="p-3 px-5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition">
-                                Bab Sebelumnya
+                                class="flex-1 max-w-[170px] p-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition text-center flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                                <span>Bab Sebelumnya</span>
                             </a>
                         @else
                             <div></div>
@@ -432,12 +483,39 @@
 
                         @if ($nextSlug)
                             <a href="{{ route('stories.chapter.read', [$story->slug, $nextSlug]) }}" wire:navigate
-                                class="p-3 px-5 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white text-xs font-bold rounded-xl transition">
-                                Bab Berikutnya
+                                class="flex-1 max-w-[170px] p-2.5 px-4 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white text-xs font-black rounded-xl shadow-xs transition text-center flex items-center justify-center gap-1.5 active:scale-95">
+                                <span>Bab Berikutnya</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
                             </a>
                         @endif
                     </div>
-                    <livewire:story.chapter.chapter-comments :chapter="$chapter" />
+
+                    {{-- Area Komentar dengan x-ref agar shortcut header berfungsi --}}
+                    <div x-ref="commentSection" class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+                        <div
+                            class="flex items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-comments text-brand-500 text-base"></i>
+                                <span class="text-xs font-black text-slate-900 dark:text-slate-100">Komentar
+                                    Pembaca</span>
+                                @php $regCCount = $chapter->comments()->count(); @endphp
+                                @if ($regCCount > 0)
+                                    <span
+                                        class="px-2 py-0.5 text-[10px] font-bold bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 rounded-full">
+                                        {{ $regCCount }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <button type="button" @click="scrollToTop()"
+                                class="px-3 py-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-arrow-up text-[10px]"></i>
+                                <span>Ke Atas</span>
+                            </button>
+                        </div>
+
+                        <livewire:story.chapter.chapter-comments :chapter="$chapter" />
+                    </div>
                 </div>
             @else
                 {{-- KONTEN CHAT FIC --}}
@@ -449,13 +527,16 @@
                         : null;
                 @endphp
 
-                <div class="flex-1 flex flex-col w-full gap-4">
+                <div class="flex-1 flex flex-col w-full gap-4" x-ref="chatSection">
 
-                    {{-- Container Area Chat dengan perbaikan overscroll-contain dan touch-action --}}
+                    {{-- Container Area Chat yang diisolasi scroll-nya --}}
                     <div class="relative w-full">
-                        <div @click="triggerNextChat()" x-ref="chatScrollArea"
-                            style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}; overscroll-behavior-y: contain;"
-                            class="px-3 py-4 md:p-6 pb-8 flex flex-col w-full cursor-pointer h-[72vh] max-h-[700px] overflow-y-auto overscroll-y-contain touch-pan-y scroll-smooth rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
+                        <div @touchstart="touchStartY = $event.touches[0].clientY; isSwiping = false"
+                            @touchmove="if (Math.abs($event.touches[0].clientY - touchStartY) > 8) { isSwiping = true }"
+                            @click="if (isSwiping) { isSwiping = false; return; } triggerNextChat()"
+                            x-ref="chatScrollArea"
+                            style="{{ $chatBgUrl ? "background-image: url('{$chatBgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;" : '' }}; overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;"
+                            class="px-3 py-4 md:p-6 pb-12 flex flex-col w-full cursor-pointer h-[calc(100dvh-7.5rem)] min-h-[520px] md:h-[calc(100dvh-8rem)] md:max-h-[850px] overflow-y-auto overscroll-contain touch-pan-y rounded-2xl relative shadow-inner {{ !$chatBgUrl ? 'bg-white dark:bg-slate-900' : '' }} bg-slate-500 bg-blend-multiply transition-colors">
 
                             <div class="flex flex-col gap-3 flex-1 w-full relative z-10" id="chat-container">
 
@@ -629,28 +710,83 @@
                                         class="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-300 rounded-full animate-bounce [animation-delay:0.4s]"></span>
                                 </div>
 
+                                {{-- Kartu Bab Selesai di dalam Chat --}}
+                                <div x-show="showComments" x-cloak
+                                    x-transition:enter="transition ease-out duration-300 transform"
+                                    x-transition:enter-start="opacity-0 translate-y-4"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    class="my-4 p-5 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-200/80 dark:border-slate-800 text-center shadow-lg mx-auto max-w-sm w-full">
+                                    <div
+                                        class="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl border border-emerald-100 dark:border-emerald-900/50 shadow-2xs">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    </div>
+                                    <h4 class="text-xs font-black text-slate-900 dark:text-slate-100">
+                                        Bab {{ $chapter->order_number }} Telah Selesai!
+                                    </h4>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                                        Lanjut ke bab berikutnya atau bagikan tanggapanmu di kolom komentar.
+                                    </p>
+
+                                    <div class="flex flex-col gap-2 mt-4">
+                                        @if ($nextSlug)
+                                            <a href="{{ route('stories.chapter.read', [$story->slug, $nextSlug]) }}"
+                                                wire:navigate
+                                                class="w-full p-2.5 px-4 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white text-xs font-black rounded-xl shadow-xs transition flex items-center justify-center gap-2 active:scale-95">
+                                                <span>Lanjut Bab Berikutnya</span>
+                                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                                            </a>
+                                        @endif
+
+                                        <button type="button" @click.stop="scrollToComments()"
+                                            class="w-full p-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2">
+                                            <i class="fa-regular fa-comment-dots text-brand-500"></i>
+                                            <span>Lihat Komentar ({{ $chapter->comments()->count() }})</span>
+                                        </button>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
 
-                    {{-- Tombol Lihat Komentar yang digeser lebih ke atas agar tidak terlalu berdempetan --}}
-                    <div class="relative mt-2">
-                        <button @click.stop="scrollToComments()" x-cloak title="Lompat ke Komentar"
-                            class="absolute -top-2 left-1/2 -translate-x-1/2 z-20 px-4 py-2.5 bg-slate-900/90 dark:bg-slate-800/90 hover:bg-slate-900 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-full shadow-lg border border-slate-700/50 dark:border-slate-600/50 flex items-center gap-2 transition transform active:scale-95 backdrop-blur-xs">
-                            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                            <span>Lihat Komentar</span>
+                    {{-- Tombol Buka Komentar --}}
+                    <div class="flex items-center justify-center my-1">
+                        <button @click.stop="scrollToComments()" type="button" title="Buka Komentar"
+                            class="px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs font-bold rounded-full shadow-md border border-slate-200/80 dark:border-slate-800 flex items-center gap-2 transition transform active:scale-95">
+                            <i class="fa-regular fa-comment-dots text-brand-500"></i>
+                            <span>Buka Kolom Komentar ({{ $chapter->comments()->count() }})</span>
+                            <i class="fa-solid fa-arrow-down text-[10px] text-slate-400"></i>
                         </button>
                     </div>
 
                     {{-- Area Komentar & Navigasi Bab --}}
                     <div x-ref="commentSection" x-cloak @click.stop
-                        class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 mt-6 transition-colors">
+                        class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-20 mt-2 transition-colors">
 
-                        <div class="flex items-center justify-between gap-3">
+                        {{-- Header Komentar & Tombol Kembali ke Chat --}}
+                        <div
+                            class="flex items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-comments text-brand-500 text-base"></i>
+                                <span class="text-xs font-black text-slate-900 dark:text-slate-100">Komentar
+                                    Pembaca</span>
+                                @php $cCount = $chapter->comments()->count(); @endphp
+                                @if ($cCount > 0)
+                                    <span
+                                        class="px-2 py-0.5 text-[10px] font-bold bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 rounded-full">
+                                        {{ $cCount }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <button type="button" @click="scrollToTop()"
+                                class="px-3 py-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-arrow-up text-[10px]"></i>
+                                <span>Ke Chat</span>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3 mb-4">
                             @if ($prevSlug)
                                 <a href="{{ route('stories.chapter.read', [$story->slug, $prevSlug]) }}" wire:navigate
                                     class="p-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition">
