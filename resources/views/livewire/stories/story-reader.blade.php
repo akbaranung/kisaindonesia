@@ -608,7 +608,7 @@
 
                                         @if ($type === 'center_text')
                                             <div
-                                                class="my-3 px-4 py-2 bg-slate-200/80 dark:bg-slate-800/70 backdrop-blur-xs rounded-2xl text-center max-w-[90%] mx-auto shadow-2xs border border-slate-300/40 dark:border-slate-700/50">
+                                                class="my-3 px-4 py-2 bg-slate-200/80 dark:bg-slate-500/80 rounded-2xl text-center max-w-[90%] mx-auto shadow-2xs border border-slate-300/40 dark:border-slate-700/50">
                                                 <p :class="fontSize"
                                                     class="font-semibold italic text-slate-700 dark:text-slate-300 leading-relaxed transition-all duration-150">
                                                     {{ $row['message'] ?? ($row['center_text'] ?? '') }}
