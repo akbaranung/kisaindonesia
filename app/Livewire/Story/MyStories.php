@@ -47,6 +47,18 @@ class MyStories extends Component
     public $parentGenres = [];
     public $subGenres = [];
 
+    public function downloadContractPdf()
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->contract_signed_at) {
+            session()->flash('error', 'Anda belum menandatangani Perjanjian Kerja Sama Penulis.');
+            return redirect()->route('author.contract.sign');
+        }
+
+        return redirect()->route('author.contract.pdf');
+    }
+
 
     public function switchAction($target)
     {

@@ -49,6 +49,73 @@
                 <span>🫘</span> Promo Hero Banner Saya
             </a>
 
+
+            @php
+                $latestContractVersion = \App\Models\Setting::get('current_contract_version', 1);
+                $userVersion = auth()->user()->contract_version ?? 1;
+                $hasSigned = auth()->user()->contract_signed_at;
+
+                // Kondisi: Belum pernah tanda tangan ATAU versi kontrak user di bawah versi terbaru sistem
+                $needsSigning = !$hasSigned || $userVersion < $latestContractVersion;
+            @endphp
+
+            @if ($needsSigning)
+                {{-- BANNER BELUM TANDA TANGAN / ADA PEMBARUAN KONTRAK --}}
+                <div
+                    class="mb-6 p-4 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
+                            <i class="fa-solid fa-file-pen"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-amber-900 dark:text-amber-100">
+                                {{ $hasSigned ? 'Pembaruan Perjanjian Kerja Sama' : 'Perjanjian Kerja Sama Belum Ditandatangani' }}
+                            </h4>
+                            <p class="text-[11px] text-amber-700 dark:text-amber-300">
+                                {{ $hasSigned
+                                    ? 'Terdapat pembaruan syarat & ketentuan kontrak (Versi ' .
+                                        $latestContractVersion .
+                                        '). Mohon tinjau dan tanda tangani pembaruan ini.'
+                                    : 'Anda wajib menandatangani Perjanjian Kerja Sama Penulis terlebih dahulu sebelum mengajukan monetisasi cerita.' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('author.contract.sign') }}" wire:navigate
+                        class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
+                        <i class="fa-solid fa-signature"></i>
+                        <span>{{ $hasSigned ? 'Tanda Tangani Pembaruan' : 'Tanda Tangan Kontrak' }}</span>
+                    </a>
+                </div>
+            @else
+                {{-- BANNER KONTRAK SUDAH DITANDATANGANI & VERSI TERBARU --}}
+                <div
+                    class="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
+                            ✓
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-emerald-900 dark:text-emerald-100">Kontrak Telah
+                                Ditandatangani</h4>
+                            <p class="text-[11px] text-emerald-700 dark:text-emerald-300">
+                                Disetujui pada:
+                                {{ \Carbon\Carbon::parse(auth()->user()->contract_signed_at)->translatedFormat('d F Y, H:i') }}
+                                WIB (IP: {{ auth()->user()->contract_signature_ip }})
+                            </p>
+                        </div>
+                    </div>
+
+                    <button wire:click="downloadContractPdf" type="button"
+                        class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Unduh Dokumen PDF</span>
+                    </button>
+                </div>
+            @endif
+
             @forelse($myStories as $story)
                 @php
                     $latestRequest = $story->premiumRequests->first();

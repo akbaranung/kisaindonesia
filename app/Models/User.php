@@ -33,7 +33,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar',
         'kisa_bean_balance',
         'email_verified_at',
-        'is_active'
+        'is_active',
+        'ktp_number',
+        'pob',
+        'dob',
+        'address',
+        'contract_signed_at',
+        'contract_signature_ip',
+        'contract_version'
     ];
 
     /**

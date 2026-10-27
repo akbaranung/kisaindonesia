@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Author\ContractPdfController;
 use App\Http\Controllers\Duitku\DuitkuController;
 use App\Http\Middleware\CheckMenuAccess;
 use App\Livewire\Admin\CoinPackageIndex;
@@ -18,6 +19,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Auth\VerifyEmail;
+use App\Livewire\Author\SignContract;
 use App\Livewire\Author\WithdrawalIndex as AuthorWithdrawalIndex;
 use App\Livewire\ContactSupport;
 use App\Livewire\FollowingFeed;
@@ -110,6 +112,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/feed', FollowingFeed::class)->name('feed');
     Route::get('/my-stories', MyStories::class)->name('my-stories');
     Route::get('/library', MyLibrary::class)->name('library');
+    Route::get('/author/contract/sign', SignContract::class)->name('author.contract.sign');
+    Route::get('/author/contract/pdf', [ContractPdfController::class, 'download'])->name('author.contract.pdf');
 
     Route::get('/topup', Topup::class)->name('topup');
 
@@ -124,7 +128,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-pen-names', ManagePenNames::class)->name('pen-names.index');
     Route::get('/author/{slug}', PenNameProfile::class)->name('pen-name.show');
 
-    Route::get('/monetization/apply', ApplyPremium::class)->name('monetization.apply');
+    Route::middleware(['author.contract'])->group(function () {
+        Route::get('/monetization/apply', ApplyPremium::class)->name('monetization.apply');
+    });
 
     Route::get('/kisa-bean/history', TransactionHistory::class)->name('kisa-bean.history');
     Route::get('/notifications', FullNotificationList::class)->name('notifications.index');

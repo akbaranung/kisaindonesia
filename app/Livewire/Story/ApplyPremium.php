@@ -111,6 +111,15 @@ class ApplyPremium extends Component
 
     public function submitApplication()
     {
+        $user = Auth::user();
+
+        $latestVersion = (int) Setting::get('current_contract_version', 1);
+
+        if (!$user->contract_signed_at or ($user->contract_version ?? 1) >= $latestVersion) {
+            session('error', 'Anda harus menandatangani Perjanjian Kerja Sama Penulis terlebih dahulu.');
+            return redirect()->route('author.contract.sign');
+        }
+
         $this->validate();
 
         if (!$this->selectedStory || !$this->isEligible) {
