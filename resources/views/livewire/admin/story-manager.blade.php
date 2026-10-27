@@ -81,6 +81,7 @@
                     <th class="p-3">No.</th>
                     <th class="p-3">Judul Cerita</th>
                     <th class="p-3">Penulis</th>
+                    <th class="p-3">Email</th>
                     <th class="p-3">Kategori</th>
                     <th class="p-3 text-center">Pilihan Editor</th>
                 </tr>
@@ -96,6 +97,9 @@
                         </td>
                         <td class="p-3 text-slate-400">
                             {{ $story->author->name ?? '-' }}
+                        </td>
+                        <td class="p-3 text-slate-400">
+                            {{ $story->author->email ?? '-' }}
                         </td>
                         <td class="p-3">
                             <span
