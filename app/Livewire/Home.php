@@ -44,7 +44,7 @@ class Home extends Component
 
         $editorChoices = Story::with(['author', 'genre'])
             ->where('is_editor_choice', true)
-            ->latest()
+            ->orderByRaw('is_editor_choice DESC, editor_choice_order ASC, created_at DESC')
             ->get();
 
         $latestStories = Story::with(['penName', 'genre'])
