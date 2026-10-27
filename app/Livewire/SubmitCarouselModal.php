@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\CarouselSubmission;
+use App\Models\Setting;
 use App\Models\Story;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,10 +16,17 @@ class SubmitCarouselModal extends Component
 
     protected $listeners = ['openSubmitCarouselModal' => 'openModal'];
 
+    public function mount()
+    {
+        $this->costPerDay = Setting::get('carousel_cost_per_day', 20);
+    }
+
     public function openModal()
     {
-        $this->isOpen = true;
         $this->resetValidation();
+        $this->reset(['storyId', 'durationDays']);
+        $this->durationDays = 7;
+        $this->isOpen = true;
     }
 
     public function closeModal()
@@ -28,7 +36,8 @@ class SubmitCarouselModal extends Component
 
     public function getCalculatedCostProperty(): int
     {
-        return (int) $this->durationDays * $this->costPerDay;
+        $days = (int) $this->durationDays > 0 ? (int) $this->durationDays : 1;
+        return $days * $this->costPerDay;
     }
 
     public function submit()
@@ -44,10 +53,19 @@ class SubmitCarouselModal extends Component
             'durationDays.max' => 'Maksimal durasi promosi adalah 30 hari.',
         ]);
 
+        $story = Story::withCount(['chapters' => function ($q) {
+            $q->where('status', 'published');
+        }])->where('user_id', $user->id)->findOrFail($this->storyId);
+
+        if ($story->chapters_count < 5) {
+            $this->addError('storyId', 'Cerita ini belum memenuhi syarat. Minimal harus memiliki 5 bab yang dipublikasikan (saat ini: ' . $story->chapters_count . ' bab).');
+            return;
+        }
+
         $totalCost = $this->calculatedCost;
 
         if (($user->kisa_bean_balance ?? 0) < $totalCost) {
-            $this->addError('beans', 'Kisa Bean kamu tidak cukup untuk mengajukan promo ini.');
+            $this->addError('durationDays', 'Saldo Kisa Bean Kamu tidak mencukupi untuk durasi ini. Butuh ' . number_format($totalCost) . ' Bean.');
             return;
         }
 

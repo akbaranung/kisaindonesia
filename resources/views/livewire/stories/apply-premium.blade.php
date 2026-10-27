@@ -260,12 +260,13 @@
                 <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Belum Memenuhi Syarat Minimal
                 </p>
                 <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Syarat minimal pengajuan cerita premium adalah <strong>{{ $minBab }} Bab</strong> dan
-                    total
+                    Monetisasi dimulai dari Bab 6 dan seterusnya, syarat minimal pengajuan cerita premium adalah
+                    <strong>{{ $minBab }} Bab</strong>,
                     untuk tipe
                     <strong>{{ strtoupper($storyType) }}</strong> adalah
                     <strong>{{ $minWords . ' - ' . $maxWords }}</strong>
                     Kata. Silakan tambah bab atau isi cerita terlebih dahulu.
+
                 </p>
             </div>
         @endif

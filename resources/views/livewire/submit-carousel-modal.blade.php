@@ -27,7 +27,7 @@
                     {{-- Pilih Cerita --}}
                     <div>
                         <label class="block mb-1 text-xs font-bold text-slate-700 dark:text-slate-300">Pilih
-                            Cerita</label>
+                            Cerita (Minimal 5 Bab Dipublikasikan)</label>
                         <select wire:model="storyId"
                             class="w-full px-3 py-2 text-xs border rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
                             <option value="">-- Pilih Cerita Kamu --</option>

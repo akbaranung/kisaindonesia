@@ -14,7 +14,7 @@ class StoryManager extends Component
     public string $search = '';
     public string $category = '';
     public string $type = '';
-    public string $editorChoice = '0';
+    public string $editorChoice = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
