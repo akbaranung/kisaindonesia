@@ -20,7 +20,8 @@ class Story extends Model
         'type',
         'pen_name_id',
         'is_editor_choice',
-        'is_mature'
+        'is_mature',
+        'periodic_views_count',
     ];
 
     protected $casts = ['is_editor_choice' => 'boolean'];

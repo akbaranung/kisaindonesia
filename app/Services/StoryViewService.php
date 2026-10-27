@@ -29,6 +29,7 @@ class StoryViewService
 
         if (!Session::has($sessionKeyStory)) {
             $chapter->story()->increment('views_count');
+            $chapter->story()->increment('periodic_views_count');
 
             Session::put($sessionKeyStory, now()->timestamp);
         }
@@ -44,6 +45,7 @@ class StoryViewService
 
         if (!Session::has($sessionKeyStory)) {
             $story->increment('views_count');
+            $story->increment('periodic_views_count');
             Session::put($sessionKeyStory, now()->timestamp);
         }
     }

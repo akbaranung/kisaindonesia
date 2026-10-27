@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Genre;
 use App\Models\Story;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -52,11 +53,52 @@ class StoryManager extends Component
     public function toggleEditorChoice(int $storyId)
     {
         $story = Story::findOrFail($storyId);
-
         $story->is_editor_choice = !$story->is_editor_choice;
+
+        // JIka dinonaktifkan, reset urutannya ke 0
+        if (!$story->is_editor_choice) {
+            $story->editor_choice_order = 0;
+        }
+
         $story->save();
 
         session()->flash('message', "Status Pilihan Editor untuk '{$story->title}' berhasil diperbarui.");
+    }
+
+    public function updateEditorChoiceOrder(int $storyId, $order)
+    {
+        $story = Story::findOrFail($storyId);
+        $story->editor_choice_order = max(0, (int) $order);
+        $story->save();
+
+        session()->flash('message', "Urutan Pilihan Editor '{$story->title}' berhasil diubah ke urutan {$story->editor_choice_order}.");
+    }
+
+    public function resetAllPeriodicViews()
+    {
+
+        if (!auth()->check() || auth()->user()->email !== 'admin@kisaindonesia.id') {
+            session()->flash('error', 'Akses ditolak. Anda tidak memiliki izin untuk mereset views periodik.');
+            return;
+        }
+
+        Story::query()->update(['periodic_views_count' => 0]);
+
+        session()->flash('message', 'Views periodik berhasil di-reset untuk semua cerita.');
+    }
+
+    public function syncPeriodicViewsFromTotal()
+    {
+        // Proteksi backend: Pastikan hanya admin@kisaindonesia.id yang dapat mengeksekusi
+        if (!auth()->check() || auth()->user()->email !== 'admin@kisaindonesia.id') {
+            session()->flash('error', 'Akses ditolak. Anda tidak memiliki izin untuk melakukan sinkronisasi ini.');
+            return;
+        }
+
+        // Mengopy nilai views_count ke periodic_views_count untuk seluruh cerita
+        DB::statement('UPDATE stories SET periodic_views_count = views_count');
+
+        session()->flash('message', 'Data periodic_views_count berhasil diisi sesuai nilai views_count terkini.');
     }
 
     public function render()
@@ -84,7 +126,7 @@ class StoryManager extends Component
             ->when($this->editorChoice !== '', function ($query) {
                 $query->where('is_editor_choice', $this->editorChoice === '1');
             })
-            ->latest()
+            ->orderByRaw('is_editor_choice DESC, editor_choice_order ASC, created_at DESC')
             ->paginate(10);
 
         return view('livewire.admin.story-manager', ['stories' => $stories, 'categories' => $categories])->layout('layouts.admin');

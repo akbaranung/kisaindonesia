@@ -4,6 +4,24 @@
             <h1 class="text-xl font-bold text-slate-100">Kelola Cerita</h1>
             <p class="text-xs text-slate-400 mt-1">Atur status publikasi, pilihan editor, serta cari cerita platform.</p>
         </div>
+
+        @if (auth()->check() && auth()->user()->email === 'admin@kisaindonesia.id')
+            <div class="flex items-center gap-2">
+                <button type="button" wire:click="syncPeriodicViewsFromTotal"
+                    wire:confirm="Isi periodic_views_count menggunakan data views_count saat ini?"
+                    class="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-sync"></i>
+                    <span>Copy dari Views Count</span>
+                </button>
+
+                <button type="button" wire:click="resetAllPeriodicViews"
+                    wire:confirm="Apakah Anda yakin ingin mereset seluruh perhitungan views periodik ini ke angka 0?"
+                    class="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Reset Periodic Views</span>
+                </button>
+            </div>
+        @endif
     </div>
     <!-- Flash Message / Notifikasi -->
     @if (session()->has('message'))
@@ -81,9 +99,12 @@
                     <th class="p-3">No.</th>
                     <th class="p-3">Judul Cerita</th>
                     <th class="p-3">Penulis</th>
+                    <th class="p-3 text-center">Total Views</th>
+                    <th class="p-3 text-center">Views Periode Ini</th>
                     <th class="p-3">Email</th>
                     <th class="p-3">Kategori</th>
                     <th class="p-3 text-center">Pilihan Editor</th>
+                    <th class="p-3 text-center">Urutan</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60">
@@ -98,6 +119,10 @@
                         <td class="p-3 text-slate-400">
                             {{ $story->author->name ?? '-' }}
                         </td>
+                        <td class="p-3 text-center font-bold text-slate-300">{{ number_format($story->views_count) }}
+                        </td>
+                        <td class="p-3 text-center font-bold text-brand-400">
+                            {{ number_format($story->periodic_views_count) }}</td>
                         <td class="p-3 text-slate-400">
                             {{ $story->author->email ?? '-' }}
                         </td>
@@ -125,6 +150,16 @@
                                     @endif
                                 </span>
                             </button>
+                        </td>
+                        <td class="p-3 text-center">
+                            @if ($story->is_editor_choice)
+                                <input type="number" value="{{ $story->editor_choice_order }}"
+                                    wire:change="updateEditorChoiceOrder({{ $story->id }}, $event.target.value)"
+                                    min="1"
+                                    class="w-14 px-2 py-1 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-center text-slate-100 focus:outline-none focus:border-brand-400">
+                            @else
+                                <span class="text-[10px] text-slate-600">-</span>
+                            @endif
                         </td>
                     </tr>
                 @empty

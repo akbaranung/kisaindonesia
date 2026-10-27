@@ -1,10 +1,12 @@
 <section class="space-y-4">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-3">
         <div>
-            <h2 class="text-base font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
-                Peringkat Cerita
+            <h2
+                class="text-base font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                On Trending
             </h2>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">10 Cerita teratas dengan pembaca terbanyak saat ini.</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">10 Cerita teratas dengan pembaca terbanyak saat
+                ini.</p>
         </div>
 
         <!-- Navigasi Tab Gratis & Premium -->
@@ -36,7 +38,8 @@
                         @elseif($index == 2)
                             <span class="text-base font-bold text-amber-700 dark:text-amber-500">#3</span>
                         @else
-                            <span class="text-xs font-bold text-slate-400 dark:text-slate-500">#{{ $index + 1 }}</span>
+                            <span
+                                class="text-xs font-bold text-slate-400 dark:text-slate-500">#{{ $index + 1 }}</span>
                         @endif
                     </div>
 
@@ -47,7 +50,8 @@
                             <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-200">
                         @else
-                            <div class="w-full h-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800">
+                            <div
+                                class="w-full h-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800">
                                 📖
                             </div>
                         @endif
@@ -63,11 +67,6 @@
                             {{ '@' . ($story->penName?->name ?? 'Anonim') }}
                         </p>
                         <div class="mt-1 flex items-center gap-2">
-                            <span
-                                class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
-                                <i class="fa-regular fa-eye me-0.5"></i>
-                                {{ number_format_short($story->views_count ?? 0) }}
-                            </span>
                             @if ($story->monetization_type === 'premium')
                                 <span class="text-[10px] text-amber-500 font-bold">
                                     <i class="fa-solid fa-crown"></i>
@@ -77,7 +76,8 @@
                     </div>
 
                     <!-- Icon Chevron -->
-                    <div class="text-right flex-shrink-0 text-xs text-slate-300 dark:text-slate-600 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition group-hover:translate-x-0.5">
+                    <div
+                        class="text-right flex-shrink-0 text-xs text-slate-300 dark:text-slate-600 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition group-hover:translate-x-0.5">
                         <i class="fa-solid fa-chevron-right"></i>
                     </div>
 
