@@ -28,7 +28,7 @@ class RankingTab extends Component
         $topStories = Story::with(['author', 'genre'])
             ->where('monetization_type', $this->rankingTab)
             ->where('status', 'published')
-            ->orderByDesc('periodic_views_count')
+            ->orderByDesc('views_ranking')
             ->limit(10)
             ->get();
 

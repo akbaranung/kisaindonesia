@@ -109,7 +109,7 @@
             </thead>
             <tbody class="divide-y divide-slate-800/60">
                 @forelse($stories as $index => $story)
-                    <tr class="hover:bg-slate-800/30 transition">
+                    <tr class="hover:bg-slate-800/30 transition" wire:key="story-row-{{ $story->id }}">
                         <td class="p-3 font-semibold text-slate-200">
                             {{ $stories->firstItem() + $index }}
                         </td>

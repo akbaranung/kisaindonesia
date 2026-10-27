@@ -22,6 +22,7 @@ class Story extends Model
         'is_editor_choice',
         'is_mature',
         'periodic_views_count',
+        'vies_ranking'
     ];
 
     protected $casts = ['is_editor_choice' => 'boolean'];

@@ -82,6 +82,8 @@ class StoryManager extends Component
             return;
         }
 
+        DB::statement('UPDATE stories SET views_ranking = periodic_views_count');
+
         Story::query()->update(['periodic_views_count' => 0]);
 
         session()->flash('message', 'Views periodik berhasil di-reset untuk semua cerita.');
