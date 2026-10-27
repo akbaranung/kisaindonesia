@@ -3,7 +3,7 @@
         <div>
             <h2
                 class="text-base font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
-                On Trending
+                Trending
             </h2>
             <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">10 Cerita teratas dengan pembaca terbanyak saat
                 ini.</p>
