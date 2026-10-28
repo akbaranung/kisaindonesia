@@ -20,10 +20,13 @@ class WithdrawalIndex extends Component
     public $is_manual_bank = false; // Flag jika user ingin menginput manual
     public $has_saved_bank = false;  // Flag penanda apakah ada data bawaan dari premium
 
-    // Kalkulasi Realtime
+    // Kalkulasi Realtime & Limits
     public $rate = 150;
     public $admin_fee = 3000;
     public $min_kisa = 100;
+
+    // Filter Riwayat
+    public $filterStatus = '';
 
     public function mount()
     {
@@ -62,6 +65,28 @@ class WithdrawalIndex extends Component
         }
     }
 
+    public function selectBankPreset($name)
+    {
+        $this->is_manual_bank = true;
+        $this->bank_name = $name;
+    }
+
+    public function setKisaPreset($type)
+    {
+        $user = Auth::user();
+        $balance = (int) ($user->earned_beans ?? 0);
+
+        if ($type === 'min') {
+            $this->kisa_amount = min($this->min_kisa, $balance);
+        } elseif ($type === 'half') {
+            $this->kisa_amount = max($this->min_kisa, (int) floor($balance / 2));
+        } elseif ($type === 'max') {
+            $this->kisa_amount = $balance;
+        } else {
+            $this->kisa_amount = (int) $type;
+        }
+    }
+
     public function getGrossAmountProperty()
     {
         $amount = (int) $this->kisa_amount;
@@ -72,6 +97,27 @@ class WithdrawalIndex extends Component
     {
         $gross = $this->grossAmount;
         return max(0, $gross - $this->admin_fee);
+    }
+
+    public function getTotalWithdrawnProperty()
+    {
+        return (float) WithdrawalRequest::where('user_id', Auth::id())
+            ->where('status', 'approved')
+            ->sum('net_amount');
+    }
+
+    public function getPendingCountProperty()
+    {
+        return WithdrawalRequest::where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->count();
+    }
+
+    public function getSuccessCountProperty()
+    {
+        return WithdrawalRequest::where('user_id', Auth::id())
+            ->where('status', 'approved')
+            ->count();
     }
 
     public function submitWithdrawal()
@@ -92,6 +138,7 @@ class WithdrawalIndex extends Component
         ];
 
         $messages = [
+            'kisa_amount.required' => 'Jumlah Kisa yang ditarik wajib diisi.',
             'kisa_amount.min' => "Minimal penarikan adalah {$this->min_kisa} Kisa.",
             'kisa_amount.max' => 'Saldo Kisa Anda tidak mencukupi.',
             'bank_name.required' => 'Nama bank/e-wallet wajib diisi.',
@@ -131,9 +178,13 @@ class WithdrawalIndex extends Component
 
     public function render()
     {
-        $withdrawals = WithdrawalRequest::where('user_id', Auth::id())
-            ->latest()
-            ->paginate(10);
+        $query = WithdrawalRequest::where('user_id', Auth::id());
+
+        if (!empty($this->filterStatus)) {
+            $query->where('status', $this->filterStatus);
+        }
+
+        $withdrawals = $query->latest()->paginate(10);
 
         return view('livewire.author.withdrawal-index', [
             'withdrawals' => $withdrawals,
