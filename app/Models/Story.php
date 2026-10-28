@@ -106,4 +106,9 @@ class Story extends Model
     {
         return $this->hasMany(CarouselSubmission::class);
     }
+
+    public function contract()
+    {
+        return $this->hasOne(StoryContract::class)->latest();
+    }
 }

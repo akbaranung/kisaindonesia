@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Story;
 use App\Models\PremiumStoryRequest;
 use App\Models\Setting;
+use App\Models\StoryContract;
 use Illuminate\Support\Facades\Auth;
 
 class ApplyPremium extends Component
@@ -113,11 +114,13 @@ class ApplyPremium extends Component
     {
         $user = Auth::user();
 
+        $contract = StoryContract::where('story_id', $this->storyId)->first();
         $latestVersion = (int) Setting::get('current_contract_version', 1);
 
-        if (!$user->contract_signed_at or ($user->contract_version ?? 1) >= $latestVersion) {
-            session('error', 'Anda harus menandatangani Perjanjian Kerja Sama Penulis terlebih dahulu.');
-            return redirect()->route('author.contract.sign');
+        if (!$contract || !$contract->signed_at || (int) $contract->contract_version !== $latestVersion) {
+            session()->flash('error', 'Anda harus menandatangani Perjanjian Kerja Sama untuk cerita ini terlebih dahulu.');
+
+            return redirect()->route('author.contract.sign', ['story' => $this->storyId]);
         }
 
         $this->validate();

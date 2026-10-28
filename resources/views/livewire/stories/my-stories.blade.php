@@ -20,7 +20,7 @@
 
         @if (session()->has('success'))
             <div
-                class="p-3.5 text-xs font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-900 rounded-2xl flex items-center justify-between animate-fade-in">
+                class="p-3.5 text-xs font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-900 rounded-2xl flex items-center justify-between animate-fade-in mb-6">
                 <span><i class="fa-regular fa-circle-check"></i> {{ session('success') }}</span>
                 <button wire:click="$refresh"
                     class="text-emerald-500 hover:text-emerald-800 dark:hover:text-emerald-300">✕</button>
@@ -45,81 +45,19 @@
 
         <div class="flex flex-col gap-4">
             <a href="{{ route('promotions') }}"
-                class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 rounded-xl transition shadow-xs pointer">
+                class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 rounded-xl transition shadow-xs pointer w-fit">
                 <span>🫘</span> Promo Hero Banner Saya
             </a>
-
-
-            @php
-                $latestContractVersion = \App\Models\Setting::get('current_contract_version', 1);
-                $userVersion = auth()->user()->contract_version ?? 1;
-                $hasSigned = auth()->user()->contract_signed_at;
-
-                // Kondisi: Belum pernah tanda tangan ATAU versi kontrak user di bawah versi terbaru sistem
-                $needsSigning = !$hasSigned || $userVersion < $latestContractVersion;
-            @endphp
-
-            @if ($needsSigning)
-                {{-- BANNER BELUM TANDA TANGAN / ADA PEMBARUAN KONTRAK --}}
-                <div
-                    class="mb-6 p-4 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
-                            <i class="fa-solid fa-file-pen"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-black text-amber-900 dark:text-amber-100">
-                                {{ $hasSigned ? 'Pembaruan Perjanjian Kerja Sama' : 'Perjanjian Kerja Sama Belum Ditandatangani' }}
-                            </h4>
-                            <p class="text-[11px] text-amber-700 dark:text-amber-300">
-                                {{ $hasSigned
-                                    ? 'Terdapat pembaruan syarat & ketentuan kontrak (Versi ' .
-                                        $latestContractVersion .
-                                        '). Mohon tinjau dan tanda tangani pembaruan ini.'
-                                    : 'Anda wajib menandatangani Perjanjian Kerja Sama Penulis terlebih dahulu sebelum mengajukan monetisasi cerita.' }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <a href="{{ route('author.contract.sign') }}" wire:navigate
-                        class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
-                        <i class="fa-solid fa-signature"></i>
-                        <span>{{ $hasSigned ? 'Tanda Tangani Pembaruan' : 'Tanda Tangan Kontrak' }}</span>
-                    </a>
-                </div>
-            @else
-                {{-- BANNER KONTRAK SUDAH DITANDATANGANI & VERSI TERBARU --}}
-                <div
-                    class="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg font-bold shrink-0">
-                            ✓
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-black text-emerald-900 dark:text-emerald-100">Kontrak Telah
-                                Ditandatangani</h4>
-                            <p class="text-[11px] text-emerald-700 dark:text-emerald-300">
-                                Disetujui pada:
-                                {{ \Carbon\Carbon::parse(auth()->user()->contract_signed_at)->translatedFormat('d F Y, H:i') }}
-                                WIB (IP: {{ auth()->user()->contract_signature_ip }})
-                            </p>
-                        </div>
-                    </div>
-
-                    <button wire:click="downloadContractPdf" type="button"
-                        class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2 shrink-0">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Unduh Dokumen PDF</span>
-                    </button>
-                </div>
-            @endif
 
             @forelse($myStories as $story)
                 @php
                     $latestRequest = $story->premiumRequests->first();
                     $isPending = $latestRequest && $latestRequest->status === 'pending';
+
+                    // Pengecekan status kontrak per cerita berdasarkan versi terbaru di settings
+                    $latestContractVersion = (int) \App\Models\Setting::get('current_contract_version', 1);
+                    $contract = $story->contract; // Relasi hasOne ke story_contracts
+                    $hasSigned = $contract && $contract->contract_version >= $latestContractVersion;
                 @endphp
                 <div
                     class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-4 shadow-2xl dark:shadow-none transition-colors">
@@ -173,52 +111,93 @@
                                     Dibuat {{ $story->created_at->format('d M Y') }}
                                 </span>
                             </div>
+
+                            {{-- Status & Informasi Kontrak Per Cerita --}}
+                            <div class="mt-2.5 flex items-center gap-2">
+                                @if ($hasSigned)
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        <i class="fa-solid fa-file-contract text-[9px]"></i> Kontrak Aktif
+                                        (v{{ $contract->contract_version }})
+                                    </span>
+                                @elseif ($contract)
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Pembaruan Kontrak
+                                        Diperlukan
+                                    </span>
+                                @else
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                        <i class="fa-solid fa-file-circle-xmark text-[9px]"></i> Kontrak Belum
+                                        Ditandatangani
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
-                    <div class="block mt-5">
-                        <div class="flex items-center gap-1 self-end sm:self-center">
-                            @if ($story->monetization_type === 'premium')
+                    <div class="block mt-5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                @if ($story->monetization_type === 'premium')
+                                    <span
+                                        class="text-[9px] px-2 py-1 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-900 font-bold flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path
+                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                        Monetisasi Aktif
+                                    </span>
+                                @elseif($isPending)
+                                    <span
+                                        class="text-[9px] px-2 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 font-bold flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                            </path>
+                                        </svg>
+                                        Sedang Ditinjau Admin
+                                    </span>
+                                @else
+                                    <a href="{{ route('monetization.apply', ['story_id' => $story->id]) }}"
+                                        class="text-[9px] px-2.5 py-1 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-xs flex items-center">
+                                        <span>Monetisasi Konten</span>
+                                    </a>
+                                @endif
+
                                 <span
-                                    class="text-[9px] px-2 py-0.5 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-900 font-bold flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                    Monetisasi Aktif
+                                    class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-xl text-slate-700 dark:text-slate-300">
+                                    <livewire:update-story-status :story="$story" :key="'story-status-' . $story->id" />
                                 </span>
-                            @elseif($isPending)
-                                <span
-                                    class="text-[9px] px-2 py-0.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 font-bold flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
+                            </div>
+
+                            <div class="flex items-center gap-1.5">
+                                {{-- Tombol Aksi Kontrak Per Cerita --}}
+                                @if ($hasSigned)
+                                    <button wire:click="downloadContractPdf({{ $story->id }})" type="button"
+                                        class="text-[9px] px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition flex items-center gap-1">
+                                        <i class="fa-solid fa-file-pdf text-rose-400"></i>
+                                        <span>PDF</span>
+                                    </button>
+                                @else
+                                    <a href="{{ route('author.contract.sign', $story->id) }}" wire:navigate
+                                        class="text-[9px] px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl transition flex items-center gap-1 shadow-sm">
+                                        <i class="fa-solid fa-signature"></i>
+                                        <span>{{ $contract ? 'Ttd Pembaruan' : 'Ttd Kontrak' }}</span>
+                                    </a>
+                                @endif
+
+                                <button wire:click="editStory({{ $story->id }})"
+                                    class="text-[9px] p-1.5 bg-brand-600 hover:bg-brand-500 rounded-xl text-white transition flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                        </path>
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                     </svg>
-                                    Sedang Ditinjau Admin
-                                </span>
-                            @else
-                                <a href="{{ route('monetization.apply', ['story_id' => $story->id]) }}"
-                                    class="text-[9px] px-2 py-0.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-xs flex items-center">
-                                    <span>Monetisasi Konten</span>
-                                </a>
-                            @endif
-
-                            <span
-                                class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-xl text-slate-700 dark:text-slate-300">
-                                <livewire:update-story-status :story="$story" :key="'story-status-' . $story->id" />
-                            </span>
-
-                            <button wire:click="editStory({{ $story->id }})"
-                                class="text-[9px] px-2 py-0.5 bg-brand-600 hover:bg-brand-500 rounded-xl text-white transition flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="m16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                                </svg>
-                            </button>
-
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

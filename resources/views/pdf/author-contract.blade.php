@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Surat Perjanjian Kerja Sama - {{ $user->name }}</title>
+    <title>Surat Perjanjian Kerja Sama - {{ $story->title }} ({{ $contract->signer_name }})</title>
     <style>
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -42,6 +42,14 @@
             margin: 15px 0;
             padding-left: 15px;
             border-left: 3px solid #333;
+        }
+
+        .story-info-box {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
         }
 
         ol,
@@ -105,10 +113,11 @@
     <hr style="border: 1px solid #000; margin-bottom: 20px;">
 
     <p>
-        Pada hari ini, <strong>{{ \Carbon\Carbon::parse($signedAt)->translatedFormat('l') }}</strong> tanggal
-        <strong>{{ \Carbon\Carbon::parse($signedAt)->translatedFormat('d') }}</strong> bulan
-        <strong>{{ \Carbon\Carbon::parse($signedAt)->translatedFormat('F') }}</strong> tahun
-        <strong>{{ \Carbon\Carbon::parse($signedAt)->translatedFormat('Y') }}</strong>, bertempat di Jakarta, telah
+        Pada hari ini, <strong>{{ \Carbon\Carbon::parse($contract->signed_at)->translatedFormat('l') }}</strong> tanggal
+        <strong>{{ \Carbon\Carbon::parse($contract->signed_at)->translatedFormat('d') }}</strong> bulan
+        <strong>{{ \Carbon\Carbon::parse($contract->signed_at)->translatedFormat('F') }}</strong> tahun
+        <strong>{{ \Carbon\Carbon::parse($contract->signed_at)->translatedFormat('Y') }}</strong>, bertempat di Jakarta,
+        telah
         dibuat dan disepakati Perjanjian Kerja Sama Penerbitan dan Lisensi Eksklusif Karya ("Perjanjian") oleh dan
         antara:
     </p>
@@ -128,27 +137,30 @@
             <tr>
                 <td style="width: 150px; padding: 2px 0;">Nama Lengkap</td>
                 <td style="width: 10px; padding: 2px 0;">:</td>
-                <td style="padding: 2px 0;"><strong>{{ $user->name ?: '________________________' }}</strong></td>
+                <td style="padding: 2px 0;"><strong>{{ $contract->signer_name ?: '________________________' }}</strong>
+                </td>
             </tr>
             <tr>
                 <td style="padding: 2px 0;">Tempat/Tgl Lahir</td>
                 <td>:</td>
-                <td>{{ $user->pob ?: '__________' }},
-                    {{ $user->dob ? \Carbon\Carbon::parse($user->dob)->translatedFormat('d F Y') : '__________' }}</td>
+                <td>{{ $contract->pob ?: '__________' }},
+                    {{ $contract->dob ? \Carbon\Carbon::parse($contract->dob)->translatedFormat('d F Y') : '__________' }}
+                </td>
             </tr>
             <tr>
                 <td style="padding: 2px 0;">Alamat Domisili</td>
                 <td>:</td>
-                <td>{{ $user->address ?: '________________________' }}</td>
+                <td>{{ $contract->address ?: '________________________' }}</td>
             </tr>
             <tr>
                 <td style="padding: 2px 0;">No. KTP (NIK)</td>
                 <td>:</td>
-                <td>{{ $user->ktp_number ?: '________________________' }}</td>
+                <td>{{ $contract->ktp_number ?: '________________________' }}</td>
             </tr>
         </table>
         <p style="font-size: 10pt; color: #444; margin-top: 5px;">
-            Bertindak atas nama diri sendiri selaku pencipta dan/atau pemegang hak cipta atas karya, selanjutnya disebut
+            Bertindak atas nama diri sendiri selaku pencipta dan/atau pemegang hak cipta atas karya yang menjadi objek
+            Perjanjian ini, selanjutnya disebut
             sebagai <strong>PIHAK KEDUA</strong>.
         </p>
     </div>
@@ -218,7 +230,32 @@
     <h3>Pasal 3 • Objek Perjanjian</h3>
     <ol>
         <li>PIHAK PERTAMA dan PIHAK KEDUA sepakat bahwa objek Perjanjian ini adalah pemberian Lisensi Eksklusif oleh
-            PIHAK KEDUA kepada PIHAK PERTAMA atas Karya sebagaimana tercantum dalam Lampiran Perjanjian ini.
+            PIHAK KEDUA kepada PIHAK PERTAMA atas Karya spesifik sebagaimana tercantum dalam tabel berikut:
+
+            <div class="story-info-box">
+                <table style="width: 100%; border: none; font-size: 10pt; margin: 0;">
+                    <tr>
+                        <td style="width: 140px; padding: 3px 0; font-weight: bold;">Judul Karya</td>
+                        <td style="width: 10px; padding: 3px 0;">:</td>
+                        <td style="padding: 3px 0; font-weight: bold; color: #0284c7;">{{ $story->title }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0; font-weight: bold;">Genre</td>
+                        <td>:</td>
+                        <td>{{ $story->genre->name ?? 'Uncategorized' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0; font-weight: bold;">Jumlah Bab Tersedia</td>
+                        <td>:</td>
+                        <td>{{ $story->chapters_count ?? $story->chapters()->count() }} Bab</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 3px 0; font-weight: bold;">Versi Kontrak</td>
+                        <td>:</td>
+                        <td>Versi {{ $contract->contract_version }}</td>
+                    </tr>
+                </table>
+            </div>
         </li>
         <li>Karya sebagaimana dimaksud pada ayat (1) meliputi novel, cerita bersambung, cerita pendek, puisi, atau
             bentuk karya tulis lainnya yang disepakati PARA PIHAK.</li>
@@ -236,7 +273,7 @@
         <li>Identitas Karya sebagaimana dimaksud pada ayat (3) dituangkan dalam Lampiran yang merupakan bagian tidak
             terpisahkan dari Perjanjian ini.</li>
         <li>Dalam hal PIHAK KEDUA bermaksud menambahkan Karya lain, penambahan tersebut wajib disepakati secara tertulis
-            oleh PARA PIHAK.</li>
+            oleh PARA PIHAK melalui dokumen perjanjian terpisah.</li>
     </ol>
 
     <h3>Pasal 4 • Pemberian Lisensi Eksklusif</h3>
@@ -413,12 +450,13 @@
                 <p><strong>PIHAK KEDUA</strong><br>PENULIS</p>
                 <div class="signature-box">
                     <strong>[TANDA TANGAN DIGITAL TERVERIFIKASI]</strong><br>
-                    Nama: {{ $user->name }}<br>
-                    Waktu: {{ \Carbon\Carbon::parse($signedAt)->format('d/m/Y H:i:s') }} WIB<br>
-                    IP: {{ $ip }}
+                    Judul Karya: {{ $story->title }}<br>
+                    Nama Penandatangan: {{ $contract->signer_name }}<br>
+                    Waktu: {{ \Carbon\Carbon::parse($contract->signed_at)->format('d/m/Y H:i:s') }} WIB<br>
+                    IP Address: {{ $contract->signature_ip }}
                 </div>
-                <p class="name-underlined">{{ $user->name }}</p>
-                <p style="margin: 0; font-size: 10pt;">NIK: {{ $user->ktp_number }}</p>
+                <p class="name-underlined">{{ $contract->signer_name }}</p>
+                <p style="margin: 0; font-size: 10pt;">NIK: {{ $contract->ktp_number }}</p>
             </td>
         </tr>
     </table>

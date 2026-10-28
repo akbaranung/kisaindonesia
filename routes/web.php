@@ -112,8 +112,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/feed', FollowingFeed::class)->name('feed');
     Route::get('/my-stories', MyStories::class)->name('my-stories');
     Route::get('/library', MyLibrary::class)->name('library');
-    Route::get('/author/contract/sign', SignContract::class)->name('author.contract.sign');
-    Route::get('/author/contract/pdf', [ContractPdfController::class, 'download'])->name('author.contract.pdf');
+    Route::get('/author/stories/{story}/sign-contract', SignContract::class)->name('author.contract.sign');
+    Route::get('/author/stories/{story}/contract/pdf', [ContractPdfController::class, 'download'])->name('author.contract.pdf');
 
     Route::get('/topup', Topup::class)->name('topup');
 

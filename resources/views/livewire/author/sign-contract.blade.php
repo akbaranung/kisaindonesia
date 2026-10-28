@@ -1,14 +1,16 @@
-<div
+<div x-data="{ scrollToForm() { $refs.signatureForm.scrollIntoView({ behavior: 'smooth' }) } }"
     class="max-w-3xl mx-auto p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800 my-6">
 
     {{-- Header Judul Kontrak --}}
     <div class="text-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-        <span class="text-[10px] font-black uppercase tracking-wider text-brand-600 dark:text-brand-400"></span>
+        <span class="text-[10px] font-black uppercase tracking-wider text-brand-600 dark:text-brand-400">
+            {{ isset($story) ? 'Perjanjian Khusus Cerita: ' . $story->title : '' }}
+        </span>
         <h1 class="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100 mt-1">
             PERJANJIAN KERJA SAMA PENERBITAN DAN LISENSI EKSKLUSIF KARYA
         </h1>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Penandatanganan Master Agreement Digital Penulis (Cukup dilakukan 1 kali)
+            Penandatanganan Perjanjian Lisensi Eksklusif Karya KISA Indonesia ID
         </p>
     </div>
 
@@ -97,14 +99,11 @@
                 <li>Pendapatan Bersih adalah seluruh pendapatan yang diterima KISA dari komersialisasi Karya setelah
                     dikurangi pajak, biaya administrasi, biaya transaksi, biaya distribusi, potongan platform pihak
                     ketiga, serta biaya lain yang secara langsung berkaitan dengan transaksi tersebut.</li>
-
                 <li>Informasi Rahasia adalah seluruh informasi yang tidak tersedia untuk umum, termasuk data Penulis,
                     data pengguna, laporan pendapatan, strategi bisnis, data pemasaran, dokumen internal,
                     source code, maupun informasi lain yang oleh salah satu pihak dinyatakan sebagai rahasia.</li>
-                </li>
                 <li>Hari Kerja adalah hari Senin sampai dengan Jumat, tidak termasuk hari libur nasional yang ditetapkan
                     oleh Pemerintah Republik Indonesia.</li>
-                </li>
                 <li>Keadaan Kahar (Force Majeure) adalah setiap keadaan di luar kemampuan dan kendali Para Pihak
                     yang mengakibatkan sebagian atau seluruh kewajiban dalam Perjanjian ini tidak dapat dilaksanakan,
                     termasuk namun tidak terbatas pada bencana alam, perang, kerusuhan, kebakaran, epidemi, pandemi,
@@ -184,6 +183,7 @@
                     bertentangan dengan ketentuan peraturan perundang-undangan.</li>
             </ul>
         </div>
+
         <h3 class="font-black text-slate-900 dark:text-slate-100">Pasal 5 • Tujuan Kerja Sama</h3>
         <div class="pl-5">
             <ul class="list-decimal">
@@ -264,7 +264,6 @@
             <ul class="list-decimal">
                 <li>PARA PIHAK sepakat untuk melaksanakan Perjanjian ini dengan itikad baik, profesional, transparan,
                     serta saling menghormati hak dan kewajiban masing-masing.
-
                 </li>
                 <li>PARA PIHAK wajib menjaga kerahasiaan seluruh informasi yang diperoleh selama pelaksanaan Perjanjian,
                     kecuali diwajibkan oleh ketentuan peraturan perundang-undangan atau berdasarkan persetujuan tertulis
@@ -280,7 +279,6 @@
                     melalui musyawarah untuk mencapai mufakat sebelum menempuh upaya hukum sesuai dengan ketentuan
                     Perjanjian ini.
                 </li>
-
             </ul>
         </div>
 
@@ -515,7 +513,6 @@
                 <li>Segala hal yang belum diatur dalam Perjanjian ini akan diselesaikan berdasarkan musyawarah untuk
                     mufakat dan apabila diperlukan akan dituangkan dalam addendum yang ditandatangani oleh PARA PIHAK.
                 </li>
-
             </ul>
         </div>
 
@@ -527,8 +524,18 @@
 
     </div>
 
+    {{-- TOMBOL SCHOLL KE FORM IDENTITAS --}}
+    <div class="mt-3 flex justify-end">
+        <button type="button" @click="scrollToForm()"
+            class="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-50 dark:bg-brand-950/50 border border-brand-100 dark:border-brand-900/50 transition">
+            <span>Isi Data Identitas Tanda Tangan</span>
+            <i class="fa-solid fa-arrow-down"></i>
+        </button>
+    </div>
+
     {{-- ISIAN IDENTITAS PENULIS --}}
-    <form wire:submit.prevent="submitContract" class="mt-6 space-y-4">
+    <form x-ref="signatureForm" wire:submit.prevent="submitContract"
+        class="mt-6 space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
         <h3 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wide">
             Lengkapi Data Identitas Tanda Tangan
         </h3>
@@ -602,8 +609,8 @@
 
         {{-- Tombol Submit --}}
         <button type="submit"
-            class="w-full py-3.5 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white font-black text-xs rounded-xl shadow-md transition transform active:scale-95">
-            Tanda Tangani Kontrak Sekarang
+            class="w-full py-3.5 mb-5 bg-slate-900 dark:bg-brand-600 hover:bg-slate-800 dark:hover:bg-brand-500 text-white font-black text-xs rounded-xl shadow-md transition transform active:scale-95">
+            Tanda Tangani Kontrak Cerita Sekarang
         </button>
     </form>
 </div>

@@ -3,23 +3,26 @@
 namespace App\Http\Controllers\Author;
 
 use App\Http\Controllers\Controller;
+use App\Models\Story;
 use Illuminate\Support\Facades\Auth;
 
 class ContractPdfController extends Controller
 {
-    public function download()
+    public function download($storyId)
     {
-        $user = Auth::user();
+        $story = Story::with('contract')
+            ->where('user_id', Auth::id())
+            ->findOrFail($storyId);
 
-        if (!$user || !$user->contract_signed_at) {
-            abort(403, 'Akses ditolak. Anda belum menandatangani kontrak.');
+        $contract = $story->contract;
+
+        if (!$contract) {
+            abort(403, 'Akses ditolak. Perjanjian kerja sama untuk cerita ini belum ditandatangani.');
         }
 
-        // Generate tampilan surat kontrak PDF
         return view('pdf.author-contract', [
-            'user' => $user,
-            'signedAt' => $user->contract_signed_at,
-            'ip' => $user->contract_signature_ip,
+            'story' => $story,
+            'contract' => $contract,
         ]);
     }
 }

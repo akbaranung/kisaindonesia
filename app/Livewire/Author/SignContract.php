@@ -3,11 +3,16 @@
 namespace App\Livewire\Author;
 
 use App\Models\Setting;
+use App\Models\Story;
+use App\Models\StoryContract;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class SignContract extends Component
 {
+    public Story $story;
+
     public string $fullName = '';
     public string  $ktpNumber = '';
     public string $pob = '';
@@ -16,24 +21,28 @@ class SignContract extends Component
     public bool $agree = false;
     public bool $isSigned = false;
 
-    public function mount()
+    public function mount(Story $story)
     {
         $user = Auth::user();
 
-        if ($user->contract_signed_at) {
-            $this->isSigned = true;
-            $this->fullName = $user->name ?? '';
-            $this->ktpNumber = $user->ktp_number ?? '';
-            $this->pob = $user->pob ?? '';
-            $this->dob = $user->dob;
-            $this->address = $user->address ?? '';
-        } else {
-            $this->fullName = $user->name ?? '';
-            $this->ktpNumber = $user->ktp_number ?? '';
-            $this->pob = $user->pob ?? '';
-            $this->dob = $user->dob ? $user->dob->format('Y-m-d') : null;
-            $this->address = $user->address ?? '';
+        if ($story->user_id !== $user->id) {
+            abort(403, 'Unauthorized action.');
         }
+
+        $this->story = $story;
+
+        $latestVersion = (int) Setting::get('current_contract_version', 1);
+        $existingContract = $story->contract;
+
+        if ($existingContract && $existingContract->contract_version >= $latestVersion) {
+            return redirect()->route('my-stories');
+        }
+
+        $this->fullName = $user->name ?? '';
+        $this->ktpNumber = $existingContract->ktp_number ?? '';
+        $this->pob = $existingContract->pob ?? '';
+        $this->dob = $existingContract ? Carbon::parse($existingContract->dob)->format('Y-m-d') : null;
+        $this->address = $existingContract->address ?? '';
     }
 
     protected array $rules = [
@@ -60,21 +69,23 @@ class SignContract extends Component
     {
         $this->validate();
 
-        $user = Auth::user();
-
         $latestVersion = (int) Setting::get('current_contract_version', 1);
+        StoryContract::updateOrCreate(
+            ['story_id' => $this->story->id],
+            [
+                'user_id' => Auth::id(),
+                'contract_version' => $latestVersion,
+                'signer_name' => $this->fullName,
+                'ktp_number' => $this->ktpNumber,
+                'pob' => $this->pob,
+                'dob' => $this->dob,
+                'address' => $this->address,
+                'signed_at' => now(),
+                'signature_ip' => request()->ip(),
+            ]
+        );
 
-        $user->update([
-            'ktp_number' => $this->ktpNumber,
-            'pob' => $this->pob,
-            'dob' => $this->dob,
-            'address' => $this->address,
-            'contract_signed_at' => now(),
-            'contract_version' => $latestVersion,
-            'contract_signature_ip' => request()->ip(),
-        ]);
-
-        session()->flash('message', 'Perjanjian Kerja Sama Penerbitan berhasil ditandatangani!');
+        session()->flash('message', "Perjanjian Kerja Sama untuk cerita '{$this->story->title}' berhasil ditandatangani!");
 
         return redirect()->route('my-stories');
     }

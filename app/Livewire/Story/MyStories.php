@@ -3,6 +3,7 @@
 namespace App\Livewire\Story;
 
 use App\Models\Genre;
+use App\Models\Setting;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Story;
@@ -47,16 +48,17 @@ class MyStories extends Component
     public $parentGenres = [];
     public $subGenres = [];
 
-    public function downloadContractPdf()
+    public function downloadContractPdf(Story $story)
     {
-        $user = Auth::user();
 
-        if (!$user || !$user->contract_signed_at) {
-            session()->flash('error', 'Anda belum menandatangani Perjanjian Kerja Sama Penulis.');
-            return redirect()->route('author.contract.sign');
+        $contract = $story->contract;
+
+        if (!$contract) {
+            session()->flash('error', 'Kontrak untuk cerita ini belum ditandatangani.');
+            return redirect()->route('author.contract.sign', $story->id);
         }
 
-        return redirect()->route('author.contract.pdf');
+        return redirect()->route('author.contract.pdf', $story->id);
     }
 
 
@@ -327,6 +329,7 @@ class MyStories extends Component
 
     public function render()
     {
+        $latestContractVersion = (int) Setting::get('current_contract_version', 1);
 
         $stories = Story::query()
             ->where('user_id', Auth::id())
@@ -349,7 +352,8 @@ class MyStories extends Component
         return view('livewire.stories.my-stories', [
             'myStories' => $stories,
             'genres' => $genres,
-            'penNames' => $penNames
+            'penNames' => $penNames,
+            'latestContractVersion' => $latestContractVersion,
         ]);
     }
 }
