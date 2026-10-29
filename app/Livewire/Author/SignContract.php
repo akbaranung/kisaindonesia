@@ -39,10 +39,10 @@ class SignContract extends Component
         }
 
         $this->fullName = $user->name ?? '';
-        $this->ktpNumber = $existingContract->ktp_number ?? '';
-        $this->pob = $existingContract->pob ?? '';
-        $this->dob = $existingContract ? Carbon::parse($existingContract->dob)->format('Y-m-d') : null;
-        $this->address = $existingContract->address ?? '';
+        $this->ktpNumber = $user->ktp_number ?? '';
+        $this->pob = $user->pob ?? '';
+        $this->dob = $user ? Carbon::parse($user->dob)->format('Y-m-d') : null;
+        $this->address = $user->address ?? '';
     }
 
     protected array $rules = [
@@ -84,6 +84,31 @@ class SignContract extends Component
                 'signature_ip' => request()->ip(),
             ]
         );
+
+        $dataStory = $this->story;
+
+        if ($dataStory) {
+            $dataStory->update([
+                'monetization_type' => 'premium'
+            ]);
+
+
+            foreach ($dataStory->chapters as $chapter) {
+                if ($chapter->order_number > 5) {
+                    $priceInBeans = $chapter->calculateKisaBean();
+
+                    $chapter->update([
+                        'is_premium' => true,
+                        'bean_price'      => $priceInBeans,
+                    ]);
+                } else {
+                    $chapter->update([
+                        'is_premium' => false,
+                        'bean_price'      => 0,
+                    ]);
+                }
+            }
+        }
 
         session()->flash('message', "Perjanjian Kerja Sama untuk cerita '{$this->story->title}' berhasil ditandatangani!");
 

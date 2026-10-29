@@ -166,7 +166,7 @@
         @elseif($existingRequest && $existingRequest->status === 'pending')
             {{-- STATUS PENDING (MOBILE CARD) --}}
             <div
-                class="p-4 bg-amber-500/10 dark:bg-amber-950/50 border border-amber-300/80 dark:border-amber-800 rounded-2xl space-y-2">
+                class="p-4 mb-5 bg-amber-500/10 dark:bg-amber-950/50 border border-amber-300/80 dark:border-amber-800 rounded-2xl space-y-2">
                 <div class="flex items-center gap-2 font-bold text-amber-900 dark:text-amber-300 text-xs">
                     <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                     Pengajuan Dalam Proses Peninjauan
@@ -179,7 +179,6 @@
                 </p>
             </div>
         @elseif($selectedStory && $isEligible)
-            {{-- FORM REKENING (MOBILE STYLE) --}}
             <div
                 class="bg-white dark:bg-slate-900 p-4 mb-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5">
                 @if ($existingRequest && $existingRequest->status === 'rejected')
@@ -254,6 +253,72 @@
                         class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium"></textarea>
                 </div>
             </div>
+
+            <div
+                class="bg-white dark:bg-slate-900 p-4 mb-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5">
+                <label class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                    <span
+                        class="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 text-[10px] font-black flex items-center justify-center">3</span>
+                    Data Diri
+                </label>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Nama
+                        Lengkap (Sesuai KTP)
+                        <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" wire:model="fullName"
+                        class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
+                    @error('fullName')
+                        <span class="text-[10px] text-rose-500 font-medium block mt-1">{{ $message }}</span>
+                    @enderror
+
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Nomor
+                        KTP (16 Digits NIK)
+                        <span class="text-rose-500">*</span></label>
+                    <input type="text" wire:model="ktpNumber" maxlength="16" placeholder="3209..."
+                        class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
+                    @error('ktpNumber')
+                        <span class="text-[10px] text-rose-500 font-medium block mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Tempat
+                        Lahir
+                        <span class="text-rose-500">*</span></label>
+                    <input type="text" wire:model="pob" placeholder="Kota Lahir"
+                        class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
+                    @error('pob')
+                        <span class="text-[10px] text-rose-500 font-medium block mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div>
+                    <label
+                        class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Tanggal
+                        Lahir
+                        <span class="text-rose-500">*</span></label>
+                    <input type="date" wire:model="dob"
+                        class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
+                    @error('dob')
+                        <span class="text-[10px] text-rose-500 font-medium block mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Alamat
+                        Domisili Lengkap (Sesuai KTP)</label>
+                    <textarea wire:model="address" rows="2" placeholder="Jl. Raya No..., RT/RW, Kel/Kec, Kota..."
+                        class="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium"></textarea>
+                    @error('address')
+                        <span class="text-[10px] text-rose-500 font-medium block mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
         @elseif($selectedStory && !$isEligible)
             <div
                 class="p-4 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-1.5">
@@ -284,5 +349,6 @@
             </button>
         </div>
     @endif
+
 
 </div>

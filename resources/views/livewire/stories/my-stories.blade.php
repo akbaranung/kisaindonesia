@@ -53,6 +53,7 @@
                 @php
                     $latestRequest = $story->premiumRequests->first();
                     $isPending = $latestRequest && $latestRequest->status === 'pending';
+                    $isApproved = $latestRequest && $latestRequest->status === 'approved';
 
                     // Pengecekan status kontrak per cerita berdasarkan versi terbaru di settings
                     $latestContractVersion = (int) \App\Models\Setting::get('current_contract_version', 1);
@@ -126,7 +127,7 @@
                                         <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Pembaruan Kontrak
                                         Diperlukan
                                     </span>
-                                @else
+                                @elseif ($isApproved and !$hasSigned)
                                     <span
                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
                                         <i class="fa-solid fa-file-circle-xmark text-[9px]"></i> Kontrak Belum
@@ -148,6 +149,17 @@
                                                 d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
                                         Monetisasi Aktif
+                                    </span>
+                                @elseif ($isApproved and $story->monetization_type === 'free')
+                                    <span
+                                        class="text-[9px] px-2 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 font-bold flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                            </path>
+                                        </svg>
+                                        Tanda Tangan Kontrak
                                     </span>
                                 @elseif($isPending)
                                     <span
@@ -174,19 +186,18 @@
                             </div>
 
                             <div class="flex items-center gap-1.5">
-                                {{-- Tombol Aksi Kontrak Per Cerita --}}
-                                @if ($hasSigned)
-                                    <button wire:click="downloadContractPdf({{ $story->id }})" type="button"
-                                        class="text-[9px] px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition flex items-center gap-1">
-                                        <i class="fa-solid fa-file-pdf text-rose-400"></i>
-                                        <span>PDF</span>
-                                    </button>
-                                @else
+                                @if ($isApproved and !$hasSigned)
                                     <a href="{{ route('author.contract.sign', $story->id) }}" wire:navigate
                                         class="text-[9px] px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl transition flex items-center gap-1 shadow-sm">
                                         <i class="fa-solid fa-signature"></i>
                                         <span>{{ $contract ? 'Ttd Pembaruan' : 'Ttd Kontrak' }}</span>
                                     </a>
+                                @elseif($hasSigned)
+                                    <button wire:click="downloadContractPdf({{ $story->id }})" type="button"
+                                        class="text-[9px] px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition flex items-center gap-1">
+                                        <i class="fa-solid fa-file-pdf text-rose-400"></i>
+                                        <span>PDF</span>
+                                    </button>
                                 @endif
 
                                 <button wire:click="editStory({{ $story->id }})"

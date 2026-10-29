@@ -128,9 +128,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-pen-names', ManagePenNames::class)->name('pen-names.index');
     Route::get('/author/{slug}', PenNameProfile::class)->name('pen-name.show');
 
-    Route::middleware(['author.contract'])->group(function () {
-        Route::get('/monetization/apply', ApplyPremium::class)->name('monetization.apply');
-    });
+    // Route::middleware(['author.contract'])->group(function () {
+    Route::get('/monetization/apply', ApplyPremium::class)->name('monetization.apply');
+    // });
 
     Route::get('/kisa-bean/history', TransactionHistory::class)->name('kisa-bean.history');
     Route::get('/notifications', FullNotificationList::class)->name('notifications.index');

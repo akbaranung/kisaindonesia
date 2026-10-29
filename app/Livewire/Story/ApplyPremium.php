@@ -7,6 +7,8 @@ use App\Models\Story;
 use App\Models\PremiumStoryRequest;
 use App\Models\Setting;
 use App\Models\StoryContract;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ApplyPremium extends Component
@@ -19,6 +21,12 @@ class ApplyPremium extends Component
     public $accountHolderName = '';
     public $authorNotes = '';
 
+    public string $fullName = '';
+    public string  $ktpNumber = '';
+    public string $pob = '';
+    public ?string $dob = null;
+    public string $address = '';
+
     public $isEligible = false;
     public $totalWords = 0;
     public $totalChapters = 0;
@@ -30,6 +38,12 @@ class ApplyPremium extends Component
         'accountNumber'     => 'required|numeric|digits_between:8,20',
         'accountHolderName' => 'required|string|max:100',
         'authorNotes'       => 'nullable|string|max:500',
+
+        'fullName' => 'required|string|min:3|max:255',
+        'ktpNumber' => 'required|numeric|digits:16',
+        'pob' => 'required|string|min:2|max:100',
+        'dob' => 'required|date|before:-17 years',
+        'address' => 'required|string|min:10|max:500',
     ];
 
     protected $messages = [
@@ -37,6 +51,14 @@ class ApplyPremium extends Component
         'accountNumber.required'     => 'Nomor rekening wajib diisi.',
         'accountNumber.numeric'      => 'Nomor rekening harus berupa angka.',
         'accountHolderName.required' => 'Nama pemilik rekening wajib diisi.',
+
+        'fullName.required' => 'Nama lengkap sesuai KTP wajib diisi.',
+        'ktpNumber.required' => 'Nomor KTP 16 digit wajib diisi.',
+        'ktpNumber.digits' => 'Nomor KTP harus berjumlah 16 digit angka.',
+        'pob.required' => 'Tempat lahir wajib diisi.',
+        'dob.required' => 'Tanggal lahir wajib diisi.',
+        'dob.before' => 'Penulis harus berusia minimal 17 tahun untuk menandatangani kontrak.',
+        'address.required' => 'Alamat domisili lengkap wajib diisi.',
     ];
 
     public function mount()
@@ -47,6 +69,14 @@ class ApplyPremium extends Component
         if ($this->storyId) {
             $this->loadStoryDetails();
         }
+
+        $user = Auth::user();
+
+        $this->fullName = $user->name ?? '';
+        $this->ktpNumber = $user->ktp_number ?? '';
+        $this->pob = $user->pob ?? '';
+        $this->dob = $user ? Carbon::parse($user->dob)->format('Y-m-d') : null;
+        $this->address = $user->address ?? '';
     }
 
     public function updatedStoryId()
@@ -81,7 +111,6 @@ class ApplyPremium extends Component
         foreach ($this->selectedStory->chapters as $index => $chapter) {
             $words = $chapter->word_count;
             $beans = $chapter->calculateKisaBean();
-            $minBab = Setting::get('min_apply_bab');
 
             $this->totalWords += $words;
 
@@ -107,6 +136,8 @@ class ApplyPremium extends Component
             }
         }
 
+        $minBab = Setting::get('min_apply_bab');
+
         $this->isEligible = ($this->totalChapters >= $minBab) && ($validPremiumChapters > 0) && ($invalidChaptersCount === 0);
     }
 
@@ -114,21 +145,12 @@ class ApplyPremium extends Component
     {
         $user = Auth::user();
 
-        $contract = StoryContract::where('story_id', $this->storyId)->first();
-        $latestVersion = (int) Setting::get('current_contract_version', 1);
-
-        if (!$contract || !$contract->signed_at || (int) $contract->contract_version !== $latestVersion) {
-            session()->flash('error', 'Anda harus menandatangani Perjanjian Kerja Sama untuk cerita ini terlebih dahulu.');
-
-            return redirect()->route('author.contract.sign', ['story' => $this->storyId]);
-        }
-
         $this->validate();
 
-        if (!$this->selectedStory || !$this->isEligible) {
-            session()->flash('error', 'Cerita Anda belum memenuhi syarat kelayakan.');
-            return;
-        }
+        // if (!$this->selectedStory || !$this->isEligible) {
+        //     session()->flash('error', 'Cerita Anda belum memenuhi syarat kelayakan.');
+        //     return;
+        // }
 
         if ($this->existingRequest && $this->existingRequest->status === 'pending') {
             session()->flash('error', 'Pengajuan untuk cerita ini sedang dalam proses peninjauan.');
@@ -145,6 +167,12 @@ class ApplyPremium extends Component
             'total_chapters_submitted' => $this->totalChapters,
             'status'                  => 'pending',
         ]);
+
+        $user->ktp_number = $this->ktpNumber;
+        $user->pob = $this->pob;
+        $user->dob = $this->dob;
+        $user->address = $this->address;
+        $user->save();
 
         session()->flash('success', 'Pengajuan cerita premium berhasil dikirim! Tim kami akan meninjau pengajuan Anda.');
         $this->loadStoryDetails();

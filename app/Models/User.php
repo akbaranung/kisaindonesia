@@ -61,7 +61,9 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'dob' => 'date',
+        'signed_at' => 'datetime'
     ];
 
     public function isAdmin(): bool

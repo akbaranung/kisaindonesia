@@ -65,28 +65,28 @@ class ManagePremiumRequests extends Component
             'processed_by' => Auth::id()
         ]);
 
-        if ($requestItem->story) {
-            $requestItem->story->update([
-                'monetization_type' => 'premium'
-            ]);
+        // if ($requestItem->story) {
+        //     $requestItem->story->update([
+        //         'monetization_type' => 'premium'
+        //     ]);
 
 
-            foreach ($requestItem->story->chapters as $chapter) {
-                if ($chapter->order_number > 5) {
-                    $priceInBeans = $chapter->calculateKisaBean();
+        //     foreach ($requestItem->story->chapters as $chapter) {
+        //         if ($chapter->order_number > 5) {
+        //             $priceInBeans = $chapter->calculateKisaBean();
 
-                    $chapter->update([
-                        'is_premium' => true,
-                        'bean_price'      => $priceInBeans,
-                    ]);
-                } else {
-                    $chapter->update([
-                        'is_premium' => false,
-                        'bean_price'      => 0,
-                    ]);
-                }
-            }
-        }
+        //             $chapter->update([
+        //                 'is_premium' => true,
+        //                 'bean_price'      => $priceInBeans,
+        //             ]);
+        //         } else {
+        //             $chapter->update([
+        //                 'is_premium' => false,
+        //                 'bean_price'      => 0,
+        //             ]);
+        //         }
+        //     }
+        // }
 
         $user = $requestItem->user;
 
