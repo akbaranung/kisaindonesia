@@ -128,7 +128,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/stories/{story:slug}/chapters/{chapter:slug}', StoryReader::class)->name('stories.chapter.read');
     Route::get('/my-pen-names', ManagePenNames::class)->name('pen-names.index');
-    Route::get('/author/{slug}', PenNameProfile::class)->name('pen-name.show');
+    Route::get('/author/{id}', PenNameProfile::class)->name('pen-name.show');
 
     // Route::middleware(['author.contract'])->group(function () {
     Route::get('/monetization/apply', ApplyPremium::class)->name('monetization.apply');

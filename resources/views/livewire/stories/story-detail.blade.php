@@ -126,8 +126,7 @@
                 <img src="{{ $story->penName->profile_photo_url }}" alt="{{ $story->penName->name }}"
                     class="w-full h-full object-cover">
             </div>
-            <a href="{{ route('pen-name.show', $story->penName->slug) }}"
-                class="flex items-center gap-1 hover:underline">
+            <a href="{{ route('pen-name.show', $story->penName->id) }}" class="flex items-center gap-1 hover:underline">
                 <span>{{ $story->penName->name }}</span>
                 <span><i class="fa-solid fa-chevron-right text-xs"></i></span>
             </a>

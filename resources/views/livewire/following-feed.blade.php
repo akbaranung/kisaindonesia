@@ -39,7 +39,7 @@
                     class="bg-white rounded-2xl p-4 md:p-5 border border-slate-100 shadow-sm hover:border-slate-200 transition">
                     {{-- Header: Info Nama Pena --}}
                     <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-50">
-                        <a href="{{ route('pen-name.show', $chapter->story->penName->slug) }}"
+                        <a href="{{ route('pen-name.show', $chapter->story->penName->id) }}"
                             class="flex items-center gap-3 group">
                             <div
                                 class="w-10 h-10 rounded-full bg-brand-100 overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center font-bold text-brand-600 text-sm">

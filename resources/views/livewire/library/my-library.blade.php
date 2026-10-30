@@ -199,7 +199,7 @@
                         <div
                             class="flex items-center justify-between mt-3 pt-2 border-t border-slate-50 dark:border-slate-800">
                             <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">
-                                Dibuat Oleh: <a href="{{ route('pen-name.show', [$story->penName->slug]) }}"
+                                Dibuat Oleh: <a href="{{ route('pen-name.show', [$story->penName->id]) }}"
                                     class="hover:underline">{{ $story->penName->name ?? 'Penulis Kisa' }}</a>
                             </span>
                         </div>

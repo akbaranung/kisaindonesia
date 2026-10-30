@@ -51,9 +51,9 @@ class PenNameProfile extends Component
         $this->reset(['search', 'status', 'genreId', 'sortBy']);
     }
 
-    public function mount(string $slug)
+    public function mount(string $id)
     {
-        $this->penName = PenName::where('slug', $slug)->withCount('followers')->firstOrFail();
+        $this->penName = PenName::where('id', $id)->withCount('followers')->firstOrFail();
     }
 
     public function render()

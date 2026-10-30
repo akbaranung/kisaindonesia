@@ -68,7 +68,8 @@
                 @foreach ($editorChoices as $story)
                     <div class="w-28 flex-shrink-0 snap-start transition">
                         {{-- Cover Image --}}
-                        <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
+                        <div
+                            class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
                             <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
                                 @if ($story->cover_path)
                                     <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
@@ -126,7 +127,8 @@
                                         class="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
                                         <div class="flex items-center gap-0.5 text-amber-500">
                                             <span><i class="fa-solid fa-star"></i></span>
-                                            <span class="text-slate-700 dark:text-slate-200">{{ $story->average_rating ?? '0.0' }}</span>
+                                            <span
+                                                class="text-slate-700 dark:text-slate-200">{{ $story->average_rating ?? '0.0' }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -143,8 +145,8 @@
                             </h3>
 
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
-                                <a
-                                    href="{{ route('pen-name.show', [$story->penName->slug]) }}" class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
+                                <a href="{{ route('pen-name.show', [$story->penName->id]) }}"
+                                    class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                             </span>
                         </div>
                     </div>
@@ -160,7 +162,8 @@
                         class="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fa-solid fa-sparkles text-amber-500"></i> Cerita Terbaru
                     </h2>
-                    <p class="text-[11px] text-slate-400 dark:text-slate-500">10 Rilisan karya cerita terbaru di Kisa</p>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-500">10 Rilisan karya cerita terbaru di Kisa
+                    </p>
                 </div>
                 <a href="{{ route('stories.index') }}" wire:navigate
                     class="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 shrink-0">
@@ -173,7 +176,8 @@
                 @foreach ($latestStories as $story)
                     <div class="w-28 flex-shrink-0 snap-start transition">
                         {{-- Cover Image --}}
-                        <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
+                        <div
+                            class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
                             <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
                                 @if ($story->cover_path)
                                     <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
@@ -231,7 +235,8 @@
                                         class="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
                                         <div class="flex items-center gap-0.5 text-amber-500">
                                             <span><i class="fa-solid fa-star"></i></span>
-                                            <span class="text-slate-700 dark:text-slate-200">{{ $story->average_rating ?? '0.0' }}</span>
+                                            <span
+                                                class="text-slate-700 dark:text-slate-200">{{ $story->average_rating ?? '0.0' }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -248,8 +253,8 @@
                             </h3>
 
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
-                                <a
-                                    href="{{ route('pen-name.show', [$story->penName->slug ?? '']) }}" class="hover:underline">{{ '@' . ($story->penName?->name ?? 'Penulis Kisa') }}</a>
+                                <a href="{{ route('pen-name.show', [$story->penName->id ?? '']) }}"
+                                    class="hover:underline">{{ '@' . ($story->penName?->name ?? 'Penulis Kisa') }}</a>
                             </span>
                         </div>
                     </div>

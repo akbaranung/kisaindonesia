@@ -1,4 +1,5 @@
-<div class="w-full min-h-screen bg-slate-50 dark:bg-slate-950 max-w-2xl mx-auto border-x border-slate-100 dark:border-slate-800 pb-28 transition-colors duration-200">
+<div
+    class="w-full min-h-screen bg-slate-50 dark:bg-slate-950 max-w-2xl mx-auto border-x border-slate-100 dark:border-slate-800 pb-28 transition-colors duration-200">
     {{-- 📱 TOP NAVIGATION BAR --}}
     <header
         class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-4 py-3.5 flex items-center justify-between gap-3 transition-colors">
@@ -11,8 +12,10 @@
             </a>
             <div class="flex items-center gap-2">
                 <div>
-                    <h1 class="font-black text-base text-slate-900 dark:text-slate-100 tracking-tight">{{ $parentCategory->name }}</h1>
-                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{{ $totalStories }} Cerita Ditemukan</p>
+                    <h1 class="font-black text-base text-slate-900 dark:text-slate-100 tracking-tight">
+                        {{ $parentCategory->name }}</h1>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{{ $totalStories }} Cerita
+                        Ditemukan</p>
                 </div>
             </div>
         </div>
@@ -29,7 +32,8 @@
 
         {{-- 🔍 SEARCH BAR --}}
         <div class="p-4 relative">
-            <div class="absolute inset-y-0 left-4 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+            <div
+                class="absolute inset-y-0 left-4 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -49,14 +53,16 @@
 
         {{-- 🌟 SEKSYEN PILIHAN EDITOR (Hanya jika ada) --}}
         @if ($editorChoices->count() > 0 && empty($search) && empty($selectedSubCategory))
-            <section class="space-y-3 bg-brand-50/40 dark:bg-slate-900/50 p-4 rounded-3xl border border-brand-100/70 dark:border-slate-800">
+            <section
+                class="space-y-3 bg-brand-50/40 dark:bg-slate-900/50 p-4 rounded-3xl border border-brand-100/70 dark:border-slate-800">
                 <div class="flex items-center justify-between">
                     <div>
                         <h2
                             class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
                             Pilihan Editor {{ $parentCategory->name }}
                         </h2>
-                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Kisah unggulan rekomendasi tim editor</p>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Kisah unggulan rekomendasi tim
+                            editor</p>
                     </div>
                 </div>
 
@@ -65,7 +71,8 @@
                     @foreach ($editorChoices as $story)
                         <div class="w-28 flex-shrink-0 snap-start transition">
                             {{-- Cover Image --}}
-                            <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
+                            <div
+                                class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
                                 <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
                                     @if ($story->cover_path)
                                         <img src="{{ asset('storage/' . $story->cover_path) }}"
@@ -134,7 +141,8 @@
 
                             {{-- Detail Cerita --}}
                             <div class="flex flex-col">
-                                <h3 class="text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug">
+                                <h3
+                                    class="text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug">
                                     <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
                                         class="hover:text-brand-600 dark:hover:text-brand-400 transition">
                                         {{ $story->title }}
@@ -142,8 +150,8 @@
                                 </h3>
 
                                 <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
-                                    <a
-                                        href="{{ route('pen-name.show', [$story->penName->slug]) }}" class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
+                                    <a href="{{ route('pen-name.show', [$story->penName->id]) }}"
+                                        class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                                 </span>
                             </div>
                         </div>
@@ -155,7 +163,8 @@
         {{-- 🏷️ FILTER SUB-KATEGORI --}}
         @if ($subCategories->count() > 0)
             <div class="p-4 space-y-2">
-                <h3 class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Filter Sub-Kategori</h3>
+                <h3 class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Filter
+                    Sub-Kategori</h3>
                 <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                     <button wire:click="selectSubCategory('')"
                         class="px-3.5 py-1.5 rounded-full text-xs font-bold transition shrink-0 border {{ empty($selectedSubCategory) ? 'bg-slate-900 dark:bg-brand-600 text-white border-slate-900 dark:border-brand-600 shadow-2xs' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800' }}">
@@ -183,7 +192,8 @@
                 @forelse ($stories as $story)
                     <div class="w-28 flex-shrink-0 snap-start transition">
                         {{-- Cover Image --}}
-                        <div class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
+                        <div
+                            class="w-full h-48 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative mb-2">
                             <a href="{{ route('stories.read', $story->slug) }}" wire:navigate>
                                 @if ($story->cover_path)
                                     <img src="{{ asset('storage/' . $story->cover_path) }}" alt="{{ $story->title }}"
@@ -259,8 +269,8 @@
                             </h3>
 
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
-                                <a
-                                    href="{{ route('pen-name.show', [$story->penName->slug]) }}" class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
+                                <a href="{{ route('pen-name.show', [$story->penName->id]) }}"
+                                    class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                             </span>
                         </div>
                     </div>
@@ -271,7 +281,8 @@
                             class="w-14 h-14 bg-amber-50 dark:bg-amber-950/60 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 border border-amber-100 dark:border-amber-800/60">
                             <i class="fa-solid fa-book-open"></i>
                         </div>
-                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">Belum Ada Cerita Ditemukan</h4>
+                        <h4 class="text-sm font-black text-slate-800 dark:text-slate-100">Belum Ada Cerita Ditemukan
+                        </h4>
                         <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
                             Tidak ada cerita yang cocok dengan kata kunci atau filter sub-kategori terpilih.
                         </p>

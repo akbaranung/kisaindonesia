@@ -102,7 +102,7 @@
 
                         {{-- Akses Aksi --}}
                         <div class="flex items-center justify-between text-xs">
-                            <a href="{{ route('pen-name.show', $penName->slug) }}" target="_blank"
+                            <a href="{{ route('pen-name.show', $penName->id) }}" target="_blank"
                                 class="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 font-medium inline-flex items-center gap-1">
                                 Lihat Publik
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
