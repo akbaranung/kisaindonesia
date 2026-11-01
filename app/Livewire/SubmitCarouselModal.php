@@ -101,7 +101,8 @@ class SubmitCarouselModal extends Component
                 'story_id' => $this->storyId,
                 'cost_in_beans' => $totalCost,
                 'status' => 'pending',
-                'referenceCode' => $refGroup
+                'referenceCode' => $refGroup,
+                'days' => $this->durationDays
             ]);
         });
 
