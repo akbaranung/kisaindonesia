@@ -14,7 +14,8 @@
         <div class="rounded-2xl border border-slate-800/80 bg-slate-900 p-5 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total User</span>
-                <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl text-sm">👥</span>
+                <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl text-sm"><i
+                        class="fa-solid fa-users"></i></span>
             </div>
             <div class="flex items-baseline justify-between">
                 <h3 class="text-2xl font-black text-slate-100">{{ $totalUsers }}</h3>
@@ -26,10 +27,10 @@
         <div class="rounded-2xl border border-slate-800/80 bg-slate-900 p-5 shadow-sm">
             <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Cerita</span>
-                <span class="p-2 bg-sky-500/10 text-sky-400 rounded-xl text-sm">📚</span>
+                <span class="p-2 bg-sky-500/10 text-sky-400 rounded-xl text-sm"><i class="fa-solid fa-book"></i></span>
             </div>
             <div class="flex items-baseline justify-between">
-                <h3 class="text-2xl font-black text-slate-100">0</h3>
+                <h3 class="text-2xl font-black text-slate-100">{{ $storiesPublished }}</h3>
                 <span class="text-[11px] text-slate-400 font-bold">Dipublikasi</span>
             </div>
         </div>
@@ -37,24 +38,26 @@
         <!-- Card 3 -->
         <div class="rounded-2xl border border-slate-800/80 bg-slate-900 p-5 shadow-sm">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kategori</span>
-                <span class="p-2 bg-amber-500/10 text-amber-400 rounded-xl text-sm">🏷️</span>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Koin User</span>
+                <span class="p-2 bg-amber-500/10 text-amber-400 rounded-xl text-sm"><i
+                        class="fa-solid fa-coins"></i></span>
             </div>
             <div class="flex items-baseline justify-between">
-                <h3 class="text-2xl font-black text-slate-100">0</h3>
-                <span class="text-[11px] text-slate-400 font-bold">Genre aktif</span>
+                <h3 class="text-2xl font-black text-slate-100">{{ $totalKoin }}</h3>
+                <span class="text-[11px] text-slate-400 font-bold">Koin User</span>
             </div>
         </div>
 
         <!-- Card 4 -->
         <div class="rounded-2xl border border-slate-800/80 bg-slate-900 p-5 shadow-sm">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Laporan</span>
-                <span class="p-2 bg-rose-500/10 text-rose-400 rounded-xl text-sm">🚩</span>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Royalti</span>
+                <span class="p-2 bg-rose-500/10 text-rose-400 rounded-xl text-sm"><i
+                        class="fa-solid fa-hand-holding-dollar"></i></span>
             </div>
             <div class="flex items-baseline justify-between">
-                <h3 class="text-2xl font-black text-slate-100">0</h3>
-                <span class="text-[11px] text-rose-400 font-bold">Perlu review</span>
+                <h3 class="text-2xl font-black text-slate-100">{{ $totalRoyalti }}</h3>
+                <span class="text-[11px] text-rose-400 font-bold">Total Royalti</span>
             </div>
         </div>
 

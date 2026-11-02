@@ -69,6 +69,8 @@
                         <th class="p-3">Karya (Cerita)</th>
                         <th class="p-3">Status</th>
                         <th class="p-3">Bergabung</th>
+                        <th class="p-3">Koin Royalti</th>
+                        <th class="p-3">Kisa Bean</th>
                         <th class="p-3 text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -119,6 +121,14 @@
                             <!-- Tanggal Mendaftar -->
                             <td class="p-3 text-slate-500">
                                 {{ $user->created_at->format('d M Y') }}
+                            </td>
+
+                            <td class="p-3 text-slate-500">
+                                {{ $user->kisa_bean_balance }}
+                            </td>
+
+                            <td class="p-3 text-slate-500">
+                                {{ $user->earned_beans }}
                             </td>
 
                             <!-- Actions -->
