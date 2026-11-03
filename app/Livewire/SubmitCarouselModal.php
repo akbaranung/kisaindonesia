@@ -3,6 +3,7 @@
 use App\Models\CarouselSubmission;
 use App\Models\Setting;
 use App\Models\Story;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -82,6 +83,9 @@ class SubmitCarouselModal extends Component
 
         DB::transaction(function () use ($user, $totalCost) {
             $user->decrement('kisa_bean_balance', $totalCost);
+
+            $admin = User::where('email', 'admin@kisaindonesia.id')->firstOrFail();
+            $admin->increment('earned_beans', $totalCost);
 
             // Buat Catatan Transaksi (Jika ada tabel coin_transactions)
             $refGroup = 'ADS-' . date('Ymd') . '-' . strtoupper(Str::random(6));

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\CarouselSubmission;
+use App\Models\User;
 use App\Models\UserTransaction;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -84,6 +85,9 @@ class ManageCarouselSubmissions extends Component
 
         DB::transaction(function () use ($submission, $transactionUser) {
             $submission->user->increment('kisa_bean_balance', $submission->cost_in_beans);
+
+            $admin = User::where('email', 'admin@kisaindonesia.id')->firstOrFail();
+            $admin->decrement('earned_beans', $submission->cost_in_beans);
 
             $transactionUser->update([
                 'status' => 'failed'
