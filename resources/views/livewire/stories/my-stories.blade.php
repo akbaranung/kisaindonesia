@@ -55,10 +55,12 @@
                     $isPending = $latestRequest && $latestRequest->status === 'pending';
                     $isApproved = $latestRequest && $latestRequest->status === 'approved';
 
-                    // Pengecekan status kontrak per cerita berdasarkan versi terbaru di settings
+                    // Pengecekan status kontrak per cerita berdasarkan versi terbaru di settings dan masa berlaku 5 tahun
                     $latestContractVersion = (int) \App\Models\Setting::get('current_contract_version', 1);
                     $contract = $story->contract; // Relasi hasOne ke story_contracts
-                    $hasSigned = $contract && $contract->contract_version >= $latestContractVersion;
+                    $isContractExpired = $contract && $contract->isExpired();
+                    $hasSigned =
+                        $contract && $contract->contract_version >= $latestContractVersion && !$isContractExpired;
                 @endphp
                 <div
                     class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-4 shadow-2xl dark:shadow-none transition-colors">
@@ -70,56 +72,69 @@
                                     <img src="{{ asset('storage/' . $story->cover_path) }}"
                                         class="w-full h-full object-cover">
                                 @else
-                                    <svg class="w-6 h-6 text-slate-300 dark:text-slate-600" fill="none"
-                                        stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                                    </svg>
+                                    <span class="text-xs text-slate-400 font-bold">No Cover</span>
                                 @endif
                             </a>
                         </div>
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-sm font-black text-slate-800 dark:text-white truncate">
+                                <a href="{{ route('stories.chapters', $story->id) }}" wire:navigate
+                                    class="hover:underline">
+                                    {{ $story->title }}
+                                </a>
+                            </h2>
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">
+                                {{ $story->synopsis ?? 'Tidak ada sinopsis' }}
+                            </p>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                                <span
+                                    class="text-[9px] px-2 py-0.5 rounded-lg font-bold
+                                {{ $story->status === 'published'
+                                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
+                                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700' }}">
+                                    {{ ucfirst($story->status) }}
+                                </span>
+                                <span
+                                    class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                    {{ $story->chapters_count ?? $story->chapters()->count() }} Bab
+                                </span>
+                                <span
+                                    class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                    {{ $story->genre->name ?? 'Uncategorized' }}
+                                </span>
 
-                        <div class="flex-2 min-w-0">
-                            <div class="flex items-center gap-2 mb-1">
-                                @if ($story->monetization_type === 'premium')
+                                @if ($isPending)
                                     <span
-                                        class="px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950/80 text-brand-800 dark:text-brand-300 text-[10px] font-extrabold uppercase">
-                                        ⭐ Premium
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
+                                        Menunggu Review
                                     </span>
-                                @else
+                                @elseif($isApproved)
                                     <span
-                                        class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase">
-                                        Gratis
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        Pengajuan Disetujui
                                     </span>
                                 @endif
-                                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                                    {{ $story->genre->name }}</p>
-                            </div>
-                            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate"><a
-                                    href="{{ route('stories.chapters', $story->id) }}"
-                                    wire:navigate>{{ $story->title }}</a></h3>
-
-                            <div
-                                class="flex items-center gap-3 mt-2 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
-                                <span class="flex items-center gap-0.5">
-                                    <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none"
-                                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                    </svg>
-                                    {{ $story->chapters->count() }} Bab
-                                    <span class="mx-1">•</span>
-                                    Dibuat {{ $story->created_at->format('d M Y') }}
-                                </span>
                             </div>
 
                             {{-- Status & Informasi Kontrak Per Cerita --}}
-                            <div class="mt-2.5 flex items-center gap-2">
+                            <div class="mt-2.5 flex flex-wrap items-center gap-1.5">
                                 @if ($hasSigned)
                                     <span
                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                         <i class="fa-solid fa-file-contract text-[9px]"></i> Kontrak Aktif
                                         (v{{ $contract->contract_version }})
+                                    </span>
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                                        title="Berlaku 5 tahun s.d. {{ \Carbon\Carbon::parse($contract->expires_at)->translatedFormat('d M Y') }}">
+                                        <i class="fa-regular fa-clock text-[9px]"></i> 5 Thn (s.d.
+                                        {{ \Carbon\Carbon::parse($contract->expires_at)->format('d/m/Y') }})
+                                    </span>
+                                @elseif ($isContractExpired)
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                        <i class="fa-solid fa-clock-rotate-left text-[9px]"></i> Masa Kontrak Berakhir
+                                        (5 Tahun)
                                     </span>
                                 @elseif ($contract)
                                     <span
@@ -143,39 +158,30 @@
                             <div class="flex items-center gap-2">
                                 @if ($story->monetization_type === 'premium')
                                     <span
-                                        class="text-[9px] px-2 py-1 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-900 font-bold flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path
-                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                        Monetisasi Aktif
-                                    </span>
-                                @elseif ($isApproved and $story->monetization_type === 'free')
-                                    <span
-                                        class="text-[9px] px-2 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 font-bold flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                            </path>
-                                        </svg>
-                                        Tanda Tangan Kontrak
-                                    </span>
-                                @elseif($isPending)
-                                    <span
-                                        class="text-[9px] px-2 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 font-bold flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                            </path>
-                                        </svg>
-                                        Sedang Ditinjau Admin
+                                        class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 font-black rounded-lg">
+                                        PREMIUM
                                     </span>
                                 @else
-                                    <a href="{{ route('monetization.apply', ['story_id' => $story->id]) }}"
-                                        class="text-[9px] px-2.5 py-1 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all shadow-xs flex items-center">
-                                        <span>Monetisasi Konten</span>
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 font-bold rounded-lg">
+                                        GRATIS
+                                    </span>
+                                @endif
+
+                                @if ($isPending)
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
+                                        Review
+                                    </span>
+                                @elseif($isApproved)
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        Disetujui
+                                    </span>
+                                @elseif($story->monetization_type === 'free')
+                                    <a href="{{ route('monetization.apply', $story->id) }}" wire:navigate
+                                        class="text-[9px] px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition flex items-center gap-1 shadow-sm">
+                                        <span>Ajukan Monetisasi</span>
                                     </a>
                                 @endif
 
@@ -186,11 +192,11 @@
                             </div>
 
                             <div class="flex items-center gap-1.5">
-                                @if ($isApproved and !$hasSigned)
+                                @if (($isApproved and !$hasSigned) || $isContractExpired)
                                     <a href="{{ route('author.contract.sign', $story->id) }}" wire:navigate
                                         class="text-[9px] px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl transition flex items-center gap-1 shadow-sm">
                                         <i class="fa-solid fa-signature"></i>
-                                        <span>{{ $contract ? 'Ttd Pembaruan' : 'Ttd Kontrak' }}</span>
+                                        <span>{{ $isContractExpired ? 'Perpanjang Kontrak (5 Thn)' : ($contract ? 'Ttd Pembaruan' : 'Ttd Kontrak') }}</span>
                                     </a>
                                 @elseif($hasSigned)
                                     <button wire:click="downloadContractPdf({{ $story->id }})" type="button"

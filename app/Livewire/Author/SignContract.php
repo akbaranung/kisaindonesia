@@ -34,7 +34,7 @@ class SignContract extends Component
         $latestVersion = (int) Setting::get('current_contract_version', 1);
         $existingContract = $story->contract;
 
-        if ($existingContract && $existingContract->contract_version >= $latestVersion) {
+        if ($existingContract && $existingContract->contract_version >= $latestVersion && !$existingContract->isExpired()) {
             return redirect()->route('my-stories');
         }
 
@@ -70,17 +70,22 @@ class SignContract extends Component
         $this->validate();
 
         $latestVersion = (int) Setting::get('current_contract_version', 1);
+        $signedAt = now();
+        $durationYears = 5;
+
         StoryContract::updateOrCreate(
             ['story_id' => $this->story->id],
             [
                 'user_id' => Auth::id(),
                 'contract_version' => $latestVersion,
+                'duration_years' => $durationYears,
                 'signer_name' => $this->fullName,
                 'ktp_number' => $this->ktpNumber,
                 'pob' => $this->pob,
                 'dob' => $this->dob,
                 'address' => $this->address,
-                'signed_at' => now(),
+                'signed_at' => $signedAt,
+                'expires_at' => (clone $signedAt)->addYears($durationYears),
                 'signature_ip' => request()->ip(),
             ]
         );
@@ -110,7 +115,7 @@ class SignContract extends Component
             }
         }
 
-        session()->flash('message', "Perjanjian Kerja Sama untuk cerita '{$this->story->title}' berhasil ditandatangani!");
+        session()->flash('message', "Perjanjian Kerja Sama (Periode 5 Tahun) untuk cerita '{$this->story->title}' berhasil ditandatangani!");
 
         return redirect()->route('my-stories');
     }

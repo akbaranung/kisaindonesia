@@ -29,9 +29,14 @@ class CheckAuthorContract
         if ($storyId) {
             $contract = StoryContract::where('story_id', $storyId)->first();
             $latestVersion = (int) Setting::get('current_contract_version', 1);
+            $isExpired = $contract && $contract->isExpired();
 
-            if (!$contract || !$contract->signed_at || (int) $contract->contract_version !== $latestVersion) {
-                session()->flash('error', 'Anda harus menandatangani Perjanjian Kerja Sama untuk cerita ini terlebih dahulu.');
+            if (!$contract || !$contract->signed_at || (int) $contract->contract_version !== $latestVersion || $isExpired) {
+                if ($isExpired) {
+                    session()->flash('error', 'Masa berlaku kontrak (5 tahun) untuk cerita ini telah berakhir. Silakan tanda tangani perpanjangan kontrak.');
+                } else {
+                    session()->flash('error', 'Anda harus menandatangani Perjanjian Kerja Sama untuk cerita ini terlebih dahulu.');
+                }
 
                 return redirect()->route('author.contract.sign', ['story' => $storyId]);
             }

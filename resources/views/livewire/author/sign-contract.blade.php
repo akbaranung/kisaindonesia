@@ -12,6 +12,16 @@
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Penandatanganan Perjanjian Lisensi Eksklusif Karya KISA Indonesia ID
         </p>
+
+        {{-- Badge Durasi & Periode Kontrak 5 Tahun --}}
+        <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <i class="fa-solid fa-clock text-[10px]"></i> Durasi Kontrak: 5 (Lima) Tahun
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                <i class="fa-solid fa-calendar-days text-[10px]"></i> Periode: {{ now()->translatedFormat('d F Y') }} s/d {{ now()->addYears(5)->translatedFormat('d F Y') }}
+            </span>
+        </div>
     </div>
 
     {{-- KOTAK DOKUMEN SURAT PERJANJIAN (SCROLLABLE & READ-ONLY) --}}
@@ -137,9 +147,40 @@
         <div class="pl-5">
             <ul class="list-decimal">
                 <li>PIHAK PERTAMA dan PIHAK KEDUA sepakat bahwa objek Perjanjian ini adalah pemberian Lisensi Eksklusif
-                    oleh PIHAK KEDUA kepada PIHAK PERTAMA atas Karya sebagaimana tercantum dalam Lampiran Perjanjian ini
-                    untuk diterbitkan, dipublikasikan, didistribusikan, dipromosikan, dan dikomersialisasikan melalui
-                    Platform KISA Indonesia ID.</li>
+                    oleh PIHAK KEDUA kepada PIHAK PERTAMA atas Karya sebagaimana tercantum dalam data berikut untuk
+                    diterbitkan, dipublikasikan, didistribusikan, dipromosikan, dan dikomersialisasikan melalui
+                    Platform KISA Indonesia ID:
+
+                    <div class="my-3 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] space-y-1">
+                        <table class="w-full text-slate-700 dark:text-slate-300">
+                            <tr>
+                                <td class="w-36 py-1 font-bold">Judul Karya</td>
+                                <td class="w-3 py-1">:</td>
+                                <td class="py-1 font-bold text-brand-600 dark:text-brand-400">{{ $story->title }}</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1 font-bold">Genre</td>
+                                <td>:</td>
+                                <td>{{ $story->genre->name ?? 'Uncategorized' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1 font-bold">Jumlah Bab Tersedia</td>
+                                <td>:</td>
+                                <td>{{ $story->chapters_count ?? $story->chapters()->count() }} Bab</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1 font-bold">Durasi Kontrak</td>
+                                <td>:</td>
+                                <td><strong class="text-emerald-600 dark:text-emerald-400">5 (lima) Tahun</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="py-1 font-bold">Periode Kontrak</td>
+                                <td>:</td>
+                                <td><strong>{{ now()->translatedFormat('d F Y') }} s/d {{ now()->addYears(5)->translatedFormat('d F Y') }}</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </li>
                 <li>Karya sebagaimana dimaksud pada ayat (1) melipuiti novel, cerita bersambung, cerita pendek, puisi,
                     atau bentuk karya tulis lainnya yang telah disepakati oleh PARA PIHAK sebagai objek Perjanjian.</li>
                 <li>Identitas Karya yang menjadi objek Perjanjian paling sedikit memuat:</li>
@@ -165,7 +206,7 @@
         <h3 class="font-black text-slate-900 dark:text-slate-100">Pasal 4 • Pemberian Lisensi Eksklusif</h3>
         <div class="pl-5">
             <ul class="list-decimal">
-                <li>PIHAK PEDUA dengan ini memberikan kepada PIHAK PERTAMA hak lisensi yang bersifat eksklusif untuk
+                <li>PIHAK KEDUA dengan ini memberikan kepada PIHAK PERTAMA hak lisensi yang bersifat eksklusif untuk
                     menerbitkan, memperbanyak, menyimpan, menampilkan, mendistribusikan, mempromosikan,
                     mengomersialisasikan, serta memanfaatkan Karya selama jangka waktu Perjanjian.</li>
                 <li>Selama Perjanjian ini berlaku, PIHAK KEDUA tidak diperkenakan menerbitkan, mengunggah,
@@ -438,14 +479,10 @@
             <ul class="list-decimal">
                 <li>Perjanjian ini mulai berlaku sejak tanggal ditandatangani oleh PARA PIHAK.
                 </li>
-                <li>Jangka waktu Perjanjian ini adalah selama PIHAK KEDUA menggunakan platform KISA Indonesia ID.
+                <li>Jangka waktu Perjanjian ini berlaku selama <strong>5 (lima) tahun</strong> terhitung sejak tanggal Perjanjian ini ditandatangani oleh PARA PIHAK ("Jangka Waktu Kontrak").
                 </li>
-                <li>PIHAK PERTAMA berhak menghentikan sementara publikasi Karya sampai permasalahan sebagaimana dimaksud
-                    pada ayat (1) memperoleh penyelesaian.
-                </li>
-                <li>Setelah jangka waktu sebagaimana dimaksud pada ayat (2) berakhir, Perjanjian dapat diperpanjang
-                    berdasarkan kesepakatan tertulis PARA PIHAK.</li>
-                <li>Apabila tidak terdapat kesepakatan mengenai perpanjangan sebagaimana dimaksud pada ayat (3), maka
+                <li>Setelah jangka waktu 5 (lima) tahun sebagaimana dimaksud pada ayat (2) berakhir, Perjanjian dapat diperpanjang berdasarkan kesepakatan tertulis PARA PIHAK.</li>
+                <li>Apabila tidak terdapat kesepakatan tertulis mengenai perpanjangan sebagaimana dimaksud pada ayat (3), maka
                     Perjanjian berakhir dengan sendirinya tanpa mengurangi hak dan kewajiban PARA PIHAK yang telah
                     timbul sebelum berakhirnya Perjanjian.</li>
             </ul>
@@ -479,7 +516,7 @@
                 <li>Berakhirnya Perjanjian tidak menghapus hak dan kewajiban PARA PIHAK yang telah timbul sebelum
                     tanggal berakhirnya Perjanjian.
                 </li>
-                <li>Setelah Perjanjian berakhir, PIHAK PERTAMA wajib menghentikan penerbitan baru atas Karya, kecuali
+                <li>Setelah Perjanjian berakhir (termasuk berakhirnya masa kontrak 5 tahun tanpa perpanjangan), PIHAK PERTAMA wajib menghentikan penerbitan baru atas Karya, kecuali
                     PARA PIHAK menyepakati lain secara tertulis.
                 </li>
                 <li>Hak Cipta atas Karya tetap berada pada PIHAK KEDUA sesuai dengan ketentuan Perjanjian dan peraturan
@@ -600,7 +637,7 @@
                 class="text-xs text-slate-700 dark:text-slate-300 font-medium leading-relaxed select-none">
                 Saya menyatakan bahwa seluruh data di atas adalah BENAR. Saya telah membaca, memahami, dan menyetujui
                 seluruh isi <strong>Perjanjian Kerja Sama Penerbitan dan Lisensi Eksklusif Karya KISA Indonesia
-                    ID</strong> ini secara sadar tanpa paksaan dari pihak mana pun.
+                    ID</strong> untuk jangka waktu atau periode kontrak selama 5 (lima) tahun ini secara sadar tanpa paksaan dari pihak mana pun.
             </label>
         </div>
         @error('agree')

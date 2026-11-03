@@ -250,6 +250,24 @@
                         <td>{{ $story->chapters_count ?? $story->chapters()->count() }} Bab</td>
                     </tr>
                     <tr>
+                        <td style="padding: 3px 0; font-weight: bold;">Durasi Kontrak</td>
+                        <td>:</td>
+                        <td><strong>{{ $contract->duration_years ?? 5 }} (lima) Tahun</strong></td>
+                    </tr>
+                    @if($contract->signed_at)
+                    <tr>
+                        <td style="padding: 3px 0; font-weight: bold;">Periode Kontrak</td>
+                        <td>:</td>
+                        <td>
+                            @php
+                                $start = \Carbon\Carbon::parse($contract->signed_at);
+                                $end = $contract->expires_at ? \Carbon\Carbon::parse($contract->expires_at) : (clone $start)->addYears($contract->duration_years ?? 5);
+                            @endphp
+                            <strong>{{ $start->translatedFormat('d F Y') }} s/d {{ $end->translatedFormat('d F Y') }}</strong>
+                        </td>
+                    </tr>
+                    @endif
+                    <tr>
                         <td style="padding: 3px 0; font-weight: bold;">Versi Kontrak</td>
                         <td>:</td>
                         <td>Versi {{ $contract->contract_version }}</td>
@@ -284,70 +302,45 @@
         <li>Selama Perjanjian ini berlaku, PIHAK KEDUA tidak diperkenankan menerbitkan, mengunggah, mendistribusikan,
             melisensikan, atau mengomersialisasikan Karya kepada pihak lain tanpa persetujuan tertulis dari PIHAK
             PERTAMA.</li>
-        <li>Lisensi eksklusif sebagaimana dimaksud pada ayat (1) meliputi penerbitan melalui aplikasi KISA Indonesia ID,
-            situs web resmi, media sosial resmi, maupun media digital lain yang ditunjuk oleh PIHAK PERTAMA.
-        </li>
-        <li>Pemberian Lisensi Eksklusif ini tidak mengakibatkan beralihnya Hak Cipta atas Karya dari PIHAK KEDUA kepada
-            PIHAK PERTAMA.</li>
-        <li>PIHAK PERTAMA berhak menggunakan judul Karya, sampul, sinopsis, kutipan, ilustrasi, serta materi promosi
-            lainnya yang berkaitan dengan Karya untuk kepentingan pemasaran.</li>
+        <li>Lisensi ini meliputi hak pengelolaan konten secara digital di platform KISA Indonesia ID serta seluruh kanal
+            distribusi resminya.</li>
     </ol>
 
     <h3>Pasal 5 • Tujuan Kerja Sama</h3>
     <ol>
-        <li>Kerja sama ini bertujuan untuk mengembangkan potensi komersial Karya melalui sistem penerbitan digital yang
-            dikelola PIHAK PERTAMA dengan tetap menghormati hak moral dan ekonomi PIHAK KEDUA.</li>
-        <li>PIHAK PERTAMA berkewajiban mengelola Karya secara profesional melalui proses editorial, publikasi, promosi,
-            distribusi, dan monetisasi.</li>
-        <li>PIHAK KEDUA berkewajiban mendukung pelaksanaan kerja sama dengan menyediakan Karya berkualitas dan memenuhi
-            ketentuan Perjanjian.</li>
-        <li>Hubungan hukum yang timbul dari Perjanjian ini merupakan hubungan kemitraan, sehingga tidak menimbulkan
-            hubungan kerja di bidang ketenagakerjaan.</li>
+        <li>Mengoptimalkan potensi komersial Karya melalui sistem penerbitan digital profesional.</li>
+        <li>PIHAK PERTAMA berkewajiban melakukan pengelolaan editorial, promosi, dan distribusi secara optimal.</li>
+        <li>PIHAK KEDUA berkewajiban menjaga orisinalitas naskah dan mendukung aktivitas publikasi.</li>
     </ol>
 
     <h3>Pasal 6 • Hak dan Kewajiban PIHAK PERTAMA</h3>
     <ol>
-        <li>PIHAK PERTAMA berhak memperoleh Lisensi Eksklusif atas Karya untuk diterbitkan, dipublikasikan,
-            didistribusikan, dan dimonetisasi.</li>
-        <li>PIHAK PERTAMA berhak melakukan seleksi, penyuntingan, tata letak, desain sampul, dan penyesuaian teknis
-            dengan tetap menghormati substansi serta hak moral PIHAK KEDUA.</li>
-        <li>PIHAK PERTAMA berhak menentukan waktu penerbitan, jadwal publikasi, strategi promosi, dan bentuk monetisasi
-            Karya.</li>
-        <li>PIHAK PERTAMA berhak menggunakan materi promosi, sinopsis, dan nama pena Penulis untuk kepentingan
-            pemasaran.</li>
-        <li>PIHAK PERTAMA berkewajiban menerbitkan dan mengelola Karya secara profesional sesuai standar operasional
-            KISA Indonesia ID.</li>
-        <li>PIHAK PERTAMA berkewajiban menjaga kerahasiaan data pribadi PIHAK KEDUA.</li>
-        <li>PIHAK PERTAMA berkewajiban memberikan laporan pendapatan dan membayarkan royalti sesuai mekanisme
-            Perjanjian.</li>
+        <li>Menerbitkan dan mendistribusikan Karya melalui Platform digital KISA Indonesia ID.</li>
+        <li>Menentukan strategi penetapan harga koin/bean, promosi, dan pemasaran Karya.</li>
+        <li>Melakukan penyuntingan dan penyesuaian editorial tanpa mengubah substansi cerita.</li>
+        <li>Membayarkan royalti kepada PIHAK KEDUA secara tepat waktu dan transparan.</li>
+        <li>Menyediakan laporan pendapatan berkala yang dapat diakses oleh PIHAK KEDUA.</li>
     </ol>
 
     <h3>Pasal 7 • Hak dan Kewajiban PIHAK KEDUA</h3>
     <ol>
-        <li>PIHAK KEDUA berhak tetap diakui sebagai pencipta dan pemegang Hak Cipta atas Karya.</li>
-        <li>PIHAK KEDUA berhak memperoleh royalti atau kompensasi sesuai ketentuan Perjanjian.</li>
-        <li>PIHAK KEDUA berhak memperoleh informasi mengenai perkembangan publikasi dan monetisasi Karya.</li>
-        <li>PIHAK KEDUA berkewajiban menyerahkan Karya yang merupakan hasil ciptaan sendiri, asli, serta tidak melanggar
-            hak kekayaan intelektual pihak lain.</li>
-        <li>PIHAK KEDUA berkewajiban menyelesaikan Karya sesuai jadwal dan target yang disepakati.</li>
-        <li>Selama Perjanjian berlaku, PIHAK KEDUA dilarang melisensikan Karya kepada pihak lain tanpa izin tertulis
-            PIHAK PERTAMA.</li>
-        <li>PIHAK KEDUA bertanggung jawab penuh atas keaslian Karya dan membebaskan PIHAK PERTAMA dari tuntutan pihak
-            ketiga.</li>
+        <li>Menjamin bahwa Karya merupakan karya orisinal dan bukan hasil plagiarisme atau pelanggaran hak cipta pihak
+            lain.</li>
+        <li>Menerima royalti dan bonus sesuai ketentuan dalam Perjanjian ini.</li>
+        <li>Menjaga kerahasiaan data internal serta informasi komersial Platform KISA Indonesia ID.</li>
+        <li>Menyelesaikan penulisan naskah sesuai jadwal dan standar editorial yang telah ditetapkan.</li>
     </ol>
 
     <h3>Pasal 8 • Hak dan Kewajiban Bersama</h3>
     <ol>
-        <li>PARA PIHAK sepakat melaksanakan Perjanjian dengan itikad baik, profesional, dan transparan.</li>
-        <li>PARA PIHAK wajib menjaga kerahasiaan seluruh informasi yang diperoleh selama pelaksanaan kerja sama.</li>
-        <li>Setiap perubahan ruang lingkup kerja sama wajib didasarkan pada kesepakatan tertulis.</li>
-        <li>Penyelesaian perselisihan diutamakan melalui musyawarah untuk mufakat.</li>
+        <li>Saling menjaga reputasi baik dan integritas PARA PIHAK.</li>
+        <li>Menyelesaikan setiap perbedaan pendapat melalui musyawarah untuk mufakat.</li>
+        <li>Menghormati hak kekayaan intelektual masing-masing pihak.</li>
     </ol>
 
     <h3>Pasal 9 • Proses Editorial</h3>
     <ol>
-        <li>PIHAK PERTAMA berhak melakukan evaluasi terhadap Karya sesuai standar editorial KISA Indonesia ID.
-        </li>
+        <li>PIHAK PERTAMA berhak melakukan kurasi dan proses editorial terhadap naskah.</li>
         <li>Apabila diperlukan penyempurnaan, PIHAK PERTAMA akan menyampaikan catatan editorial dan rekomendasi revisi
             secara tertulis.</li>
         <li>PIHAK KEDUA wajib melakukan revisi dalam jangka waktu yang disepakati.</li>
@@ -357,26 +350,24 @@
 
     <h3>Pasal 10 • Kepemilikan Hak Cipta</h3>
     <ol>
-        <li>Karya yang diobjekkan dalam Perjanjian ini murni hasil ciptaan asli PIHAK KEDUA.</li>
-        <li>Hak Cipta atas Karya tetap sepenuhnya menjadi milik PIHAK KEDUA.</li>
-        <li>Penandatanganan Perjanjian tidak mengalihkan kepemilikan Hak Cipta kepada PIHAK PERTAMA.</li>
+        <li>Hak Cipta atas Karya sepenuhnya tetap berada pada PIHAK KEDUA selaku pencipta karya.</li>
+        <li>Perjanjian ini adalah perjanjian lisensi eksklusif dan bukan pengalihan kepemilikan Hak Cipta (*copyright
+            transfer*).</li>
     </ol>
 
     <h3>Pasal 11 • Hak Adaptasi dan Pengembangan Karya</h3>
     <ol>
-        <li>Rencana adaptasi Karya ke media lain (film, serial, audiobook, dll.) wajib dikomunikasikan kepada PIHAK
-            KEDUA.</li>
-        <li>PIHAK PERTAMA memiliki hak utama (*first right of refusal*) untuk melakukan negosiasi atas pemanfaatan hak
-            adaptasi Karya selama Perjanjian berlaku.</li>
+        <li>Pemanfaatan Karya untuk adaptasi (seperti film, serial, komik, atau cetak fisik) akan dibahas melalui
+            kesepakatan tersendiri dalam Addendum Perjanjian.</li>
+        <li>PIHAK PERTAMA mendapat hak prioritas pertama (*right of first refusal*) untuk mengelola adaptasi Karya
+            tersebut.</li>
     </ol>
 
     <h3>Pasal 12 • Perlindungan Hak Kekayaan Intelektual</h3>
     <ol>
-        <li>Apabila terjadi sengketa hak kekayaan intelektual atas Karya, PARA PIHAK sepakat untuk saling bekerja
-            sama.</li>
-        <li>PIHAK KEDUA bertanggung jawab penuh atas gugatan pihak ketiga terkait keaslian ciptaan.</li>
-        <li>PIHAK PERTAMA berhak menangguhkan publikasi Karya sementara waktu apabila timbul sengketa hukum.
-        </li>
+        <li>PIHAK KEDUA menjamin secara hukum bahwa Karya bebas dari sengketa pihak ketiga manapun.</li>
+        <li>Apabila di kemudian hari terbukti ada pelanggaran hak cipta oleh PIHAK KEDUA, maka sepenuhnya menjadi
+            tanggung jawab PIHAK KEDUA secara hukum perdata maupun pidana.</li>
     </ol>
 
     <h3>Pasal 13 • Royalti dan Bonus Tamat</h3>
@@ -400,9 +391,9 @@
     <h3>Pasal 14 • Jangka Waktu Perjanjian</h3>
     <ol>
         <li>Perjanjian ini berlaku sejak tanggal ditandatangani oleh PARA PIHAK.</li>
-        <li>Jangka waktu Perjanjian ini berlangsung selama PIHAK KEDUA menggunakan platform KISA Indonesia ID.
-        </li>
-        <li>Perjanjian dapat diperpanjang atas dasar kesepakatan tertulis PARA PIHAK.</li>
+        <li>Jangka waktu Perjanjian ini berlaku selama <strong>5 (lima) tahun</strong> terhitung sejak tanggal Perjanjian ini ditandatangani oleh PARA PIHAK ("Jangka Waktu Kontrak").</li>
+        <li>Setelah jangka waktu 5 (lima) tahun sebagaimana dimaksud pada ayat (2) berakhir, Perjanjian dapat diperpanjang atas dasar kesepakatan tertulis PARA PIHAK.</li>
+        <li>Apabila tidak terdapat kesepakatan tertulis mengenai perpanjangan sebagaimana dimaksud pada ayat (3), maka Perjanjian berakhir dengan sendirinya demi hukum tanpa mengurangi hak dan kewajiban PARA PIHAK yang telah timbul sebelum berakhirnya Perjanjian.</li>
     </ol>
 
     <h3>Pasal 15 • Pengakhiran Perjanjian</h3>
@@ -421,7 +412,7 @@
     <ol>
         <li>Berakhirnya Perjanjian tidak menghapus hak dan kewajiban finansial yang telah timbul sebelumnya.
         </li>
-        <li>PIHAK PERTAMA wajib menghentikan publikasi baru atas Karya setelah masa kontrak habis.</li>
+        <li>PIHAK PERTAMA wajib menghentikan publikasi baru atas Karya setelah masa kontrak 5 (lima) tahun habis, kecuali disepakati perpanjangan oleh PARA PIHAK.</li>
         <li>Hak Cipta sepenuhnya tetap berada di tangan PIHAK KEDUA.</li>
     </ol>
 
@@ -451,6 +442,7 @@
                 <div class="signature-box">
                     <strong>[TANDA TANGAN DIGITAL TERVERIFIKASI]</strong><br>
                     Judul Karya: {{ $story->title }}<br>
+                    Durasi: {{ $contract->duration_years ?? 5 }} Tahun<br>
                     Nama Penandatangan: {{ $contract->signer_name }}<br>
                     Waktu: {{ \Carbon\Carbon::parse($contract->signed_at)->format('d/m/Y H:i:s') }} WIB<br>
                     IP Address: {{ $contract->signature_ip }}
