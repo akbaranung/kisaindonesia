@@ -5,6 +5,8 @@ namespace App\Livewire\Admin;
 use App\Models\CarouselSubmission;
 use App\Models\User;
 use App\Models\UserTransaction;
+use App\Notifications\CarouselSubmissionApproved;
+use App\Notifications\CarouselSubmissionRejected;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -44,6 +46,8 @@ class ManageCarouselSubmissions extends Component
                 'expires_at' => now()->addDays($submission->days)
             ]);
         });
+
+        $submission->user->notify(new CarouselSubmissionApproved($submission));
 
         session()->flash('message', 'Pengajuan disetujui! Banner langsung tayang hingga ' . $submission->expires_at->format('d M Y H:i'));
     }
@@ -98,6 +102,10 @@ class ManageCarouselSubmissions extends Component
                 'admin_note' => $this->rejectReason,
             ]);
         });
+
+        $submission->user->notify(
+            new CarouselSubmissionRejected($submission, $this->rejectReason)
+        );
 
         session()->flash('message', 'Pengajuan ditolak & Kisa Bean telah dikembalikan ke user.');
         $this->closeRejectModal();
