@@ -42,17 +42,17 @@
                 const scrollHeight = scrollableParent.scrollHeight;
                 const clientHeight = scrollableParent.clientHeight;
 
-                if (scrollTop <= 2 && dy > 0) {
+                // Hanya cegah jika benar-benar di ujung atas dan mencoba menarik ke bawah (pull-to-refresh)
+                if (scrollTop <= 0 && dy > 0) {
                     if (e.cancelable) e.preventDefault();
                     return;
                 }
 
-                if (scrollTop + clientHeight >= scrollHeight - 2 && dy < 0) {
+                // Hanya cegah jika benar-benar di ujung bawah dan mencoba mendorong ke atas
+                if (scrollTop + clientHeight >= scrollHeight && dy < 0) {
                     if (e.cancelable) e.preventDefault();
                     return;
                 }
-            } else {
-                if (e.cancelable) e.preventDefault();
             }
         }, { passive: false });
 
@@ -61,7 +61,6 @@
         );
     },
     scrollStep(direction) {
-        // Otomatis mendeteksi target scroll apakah Quill Editor atau Canvas Chat
         const quillEditor = document.querySelector('#chapter-editor-root .ql-editor');
         const canvas = document.getElementById('editor-canvas');
         const targetEl = quillEditor || canvas;
@@ -73,7 +72,6 @@
     },
     scrollToTop() {
         const canvas = document.getElementById('editor-canvas');
-
         if (canvas) {
             canvas.scrollTo({
                 top: 0,
@@ -191,7 +189,14 @@
     <!-- ========================================== -->
     <div class="relative flex-1 min-h-0 flex flex-col">
         <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;"
-            x-ref="canvas" id="editor-canvas"
+            x-ref="canvas" id="editor-canvas" x-init="$nextTick(() => {
+                setTimeout(() => {
+                    const el = $el;
+                    if (el) {
+                        el.scrollTop = el.scrollHeight;
+                    }
+                }, 150);
+            })"
             class="no-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 space-y-4">
 
             <div class="max-w-xl mx-auto space-y-2">
@@ -486,16 +491,17 @@
                                     $wire.set('regularContent', html, false);
                                 });
                     
+                                // Otomatis scroll halaman agar editor berada di atas keyboard saat fokus
                                 window.quillEditor.root.addEventListener('focus', () => {
                                     setTimeout(() => {
                                         const editorContainer = document.querySelector('#chapter-editor-root .ql-container');
                                         if (editorContainer) {
                                             editorContainer.scrollIntoView({
                                                 behavior: 'smooth',
-                                                block: 'center' // Memposisikan editor di tengah-tengah ruang sisa di atas keyboard
+                                                block: 'center'
                                             });
                                         }
-                                    }, 300); // Penundaan agar animasi keyboard perangkat selesai muncul
+                                    }, 300);
                                 });
                             });
                         }
@@ -505,7 +511,7 @@
                         </div>
                     </div>
 
-                    <!-- Tombol Navigasi Naik/Turun & Ke Paling Atas (Quill Mode) -->
+                    <!-- Tombol Navigasi Naik/Turun (Quill Mode) -->
                     <div
                         class="absolute right-3 top-28 z-30 flex flex-col gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
                         <button type="button" @click="scrollStep('up')"
