@@ -179,7 +179,8 @@
                                         Disetujui
                                     </span>
                                 @elseif($story->monetization_type === 'free')
-                                    <a href="{{ route('monetization.apply', $story->id) }}" wire:navigate
+                                    <a href="{{ route('monetization.apply', ['story_id' => $story->id]) }}"
+                                        wire:navigate
                                         class="text-[9px] px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition flex items-center gap-1 shadow-sm">
                                         <span>Ajukan Monetisasi</span>
                                     </a>

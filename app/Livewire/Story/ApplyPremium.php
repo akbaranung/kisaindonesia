@@ -147,10 +147,10 @@ class ApplyPremium extends Component
 
         $this->validate();
 
-        // if (!$this->selectedStory || !$this->isEligible) {
-        //     session()->flash('error', 'Cerita Anda belum memenuhi syarat kelayakan.');
-        //     return;
-        // }
+        if (!$this->selectedStory || !$this->isEligible) {
+            session()->flash('error', 'Cerita Anda belum memenuhi syarat kelayakan.');
+            return;
+        }
 
         if ($this->existingRequest && $this->existingRequest->status === 'pending') {
             session()->flash('error', 'Pengajuan untuk cerita ini sedang dalam proses peninjauan.');

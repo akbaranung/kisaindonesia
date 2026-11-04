@@ -338,6 +338,18 @@
 
     </div>
 
+    @if (session('error'))
+        <div
+            class="mb-5 p-3.5 bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs rounded-2xl flex items-start gap-2.5 shadow-2xs">
+            <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="font-medium leading-relaxed">{{ session('error') }}</div>
+        </div>
+    @endif
+
     {{-- FLOATING BOTTOM BAR (MOBILE ACTION BUTTON) --}}
     @if ($selectedStory && $isEligible && (!$existingRequest || $existingRequest->status !== 'pending'))
         <div
@@ -349,6 +361,5 @@
             </button>
         </div>
     @endif
-
 
 </div>

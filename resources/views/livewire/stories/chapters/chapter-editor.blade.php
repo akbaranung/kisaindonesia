@@ -1,5 +1,5 @@
-<div
-    class="fixed inset-0 z-40 flex w-full flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased overflow-hidden transition-colors duration-200">
+<div id="chapter-editor-root"
+    class="fixed inset-0 z-40 flex w-full flex-col overscroll-none bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased overflow-hidden transition-colors duration-200">
     <header
         class="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between shrink-0 z-20">
         <div class="flex items-center gap-3">
@@ -327,7 +327,7 @@
             </div>
             <!-- TAMPILAN CANVAS REGULER / NOVEL / PUISI -->
         @else
-            <div class="max-w-xl mx-auto h-[calc(100vh-200px)] flex flex-col pt-2">
+            <div class="max-w-xl mx-auto h-[calc(100dvh-200px)] min-h-[320px] flex flex-col pt-2">
                 <!-- Quill Editor Wrapper dengan $nextTick -->
                 <div x-data="{
                     initQuill() {
@@ -385,8 +385,8 @@
                         });
                     }
                 }" x-init="initQuill()" wire:ignore
-                    class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                    <div x-ref="editor" id="editor" class="text-slate-800 dark:text-slate-200 min-h-[350px]">
+                    class="flex flex-col flex-1 min-h-0 bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+                    <div x-ref="editor" id="editor" class="text-slate-800 dark:text-slate-200">
                     </div>
                 </div>
             </div>
@@ -751,6 +751,35 @@
 </div>
 
 <style>
+    /* Matikan pull-to-refresh / overscroll di level halaman saat editor terbuka */
+    html:has(#chapter-editor-root),
+    body:has(#chapter-editor-root) {
+        overscroll-behavior-y: none;
+        overscroll-behavior-x: none;
+    }
+
+    /* Editor = area scroll utama: toolbar tetap, isi tulisan yang scroll */
+    #chapter-editor-root .ql-container.ql-snow {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #chapter-editor-root .ql-toolbar.ql-snow {
+        flex-shrink: 0;
+    }
+
+    #chapter-editor-root .ql-editor {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+    }
+
     .ql-image-resize-module {
         border: 1px dashed #38bdf8 !important;
     }
@@ -797,7 +826,6 @@
     }
 
     .ql-editor {
-        min-height: 250px;
         color: #1e293b;
     }
 
