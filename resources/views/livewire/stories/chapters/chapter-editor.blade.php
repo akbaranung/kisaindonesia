@@ -6,22 +6,28 @@
     initPtrGuard() {
         const root = this.$el;
 
-        // Cegah pull-to-refresh browser pada level dokumen
+        // Cegah pull-to-refresh browser / WebView pada level dokumen
         this.prevHtmlOverscroll = document.documentElement.style.overscrollBehaviorY;
         this.prevBodyOverscroll = document.body.style.overscrollBehaviorY;
         document.documentElement.style.overscrollBehaviorY = 'none';
         document.body.style.overscrollBehaviorY = 'none';
 
         root.addEventListener('touchstart', (e) => {
+            if (!e.touches || e.touches.length === 0) return;
             this.startX = e.touches[0].clientX;
             this.startY = e.touches[0].clientY;
         }, { passive: true });
 
         root.addEventListener('touchmove', (e) => {
+            if (!e.touches || e.touches.length === 0) return;
+
             const dx = e.touches[0].clientX - this.startX;
             const dy = e.touches[0].clientY - this.startY;
 
-            // Cari elemen scrollable terdekat di dalam target sentuhan (misal: Quill editor atau chat container)
+            // Abaikan jika gerakan lebih ke arah horizontal (swipe samping)
+            if (Math.abs(dx) > Math.abs(dy)) return;
+
+            // Cari kontainer scrollable terdekat tempat jari menyentuh
             let el = e.target;
             let scrollableParent = null;
 
@@ -39,17 +45,20 @@
                 const scrollHeight = scrollableParent.scrollHeight;
                 const clientHeight = scrollableParent.clientHeight;
 
-                // Jika elemen berada di paling atas dan mencoba scroll ke atas (pull down)
-                // ATAU berada di paling bawah dan mencoba scroll ke bawah
-                // Cegah default browser agar tidak terjadi reload / pull-to-refresh
-                if ((scrollTop <= 0 && dy > 0) || (scrollTop + clientHeight >= scrollHeight && dy < 0)) {
+                // Jika pengguna berada di posisi paling ATAS dan menarik ke bawah (pull-down)
+                // ATAU di posisi paling BAWAH dan mendorong ke atas -> Kunci agar APK tidak reload/bounce
+                if ((scrollTop <= 0 && dy > 0) || (scrollTop + clientHeight >= scrollHeight - 1 && dy < 0)) {
                     if (e.cancelable) e.preventDefault();
                 }
             } else {
-                // Jika tidak berada di dalam area scroll yang valid, cegah default untuk mengamankan halaman
+                // Sentuhan di luar area scroll (seperti header/footer) dilarang memicu scroll dokumen
                 if (e.cancelable) e.preventDefault();
             }
         }, { passive: false });
+
+        ['touchend', 'touchcancel'].forEach(t =>
+            root.addEventListener(t, (e) => e.stopPropagation(), { passive: true })
+        );
     },
     destroy() {
         document.documentElement.style.overscrollBehaviorY = this.prevHtmlOverscroll;
@@ -163,7 +172,7 @@
     <!-- 2. MAIN CANVAS AREA (SCROLLABLE)           -->
     <!-- ========================================== -->
     <div class="relative flex-1 min-h-0 flex flex-col">
-        <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;"
+        <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;"
             x-ref="canvas" id="editor-canvas"
             class="{{ $type === 'chat' ? 'chat-scroll-hidden pr-6' : 'editor-scroll' }} flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 pb-24 space-y-4">
             <!-- Flash Messages -->
@@ -513,7 +522,6 @@
                     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
                 },
                 jumpTo(e) {
-                    const rect = this.$refs.track.getBoundingClientRect();
                     const ratio = (e.clientY - rect.top - this.thumbH / 2) / Math.max(1, rect.height - this.thumbH);
                     this.el.scrollTop = Math.min(1, Math.max(0, ratio)) * (this.el.scrollHeight - this.el.clientHeight);
                 }
@@ -636,12 +644,17 @@
             @endif
 
             <!-- 3. INPUT FORM CHAT -->
-            <div class="space-y-1">
-                <form wire:submit.prevent="saveBubble" class="flex items-center gap-2">
+            <div class="space-y-1" x-data="{
+                resize(el) {
+                    el.style.height = 'auto';
+                    el.style.height = (el.scrollHeight) + 'px';
+                }
+            }">
+                <form wire:submit.prevent="saveBubble" class="flex items-end gap-2">
 
                     <!-- Tombol Plus (+) untuk Buka Popup Tipe Pesan -->
                     <button type="button" @click="showTypePicker = true"
-                        class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl shrink-0 transition flex items-center justify-center active:scale-95"
+                        class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl shrink-0 transition flex items-center justify-center active:scale-95 mb-0.5"
                         title="Pilih Tipe Pesan">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
@@ -649,10 +662,11 @@
                         </svg>
                     </button>
 
-                    <!-- A. Tipe Pesan TEKS -->
+                    <!-- A. Tipe Pesan TEKS (Dinamis / Auto-Resize) -->
                     @if ($message_type === 'text')
-                        <input type="text" wire:model="message" placeholder="Ketik pesan chat..."
-                            class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
+                        <textarea wire:model="message" x-init="resize($el)" @input="resize($el)" rows="1"
+                            placeholder="Ketik pesan chat..."
+                            class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600 resize-none max-h-32 overflow-y-auto leading-relaxed"></textarea>
 
                         <!-- B. Tipe Pesan GAMBAR -->
                     @elseif($message_type === 'image')
@@ -681,15 +695,17 @@
                             <input type="text" wire:model="call_duration" placeholder="Durasi (02:45)"
                                 class="px-2.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
                         </div>
+
+                        <!-- D. Tipe Pesan TEKS TENGAH (Auto-Resize) -->
                     @elseif($message_type === 'center_text')
-                        <input type="text" wire:model="message"
+                        <textarea wire:model="message" x-init="resize($el)" @input="resize($el)" rows="1"
                             placeholder="Tulis narasi / keterangan waktu (cth: 'Keesokan Harinya')..."
-                            class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-brand-600 dark:text-brand-300 italic focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
+                            class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-brand-600 dark:text-brand-300 italic focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600 resize-none max-h-32 overflow-y-auto leading-relaxed"></textarea>
                     @endif
 
                     <!-- Tombol Kirim / Update -->
                     <button type="submit"
-                        class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white dark:text-slate-950 font-bold text-xs rounded-xl shrink-0 transition flex items-center gap-1 shadow-md shadow-brand-500/10">
+                        class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white dark:text-slate-950 font-bold text-xs rounded-xl shrink-0 transition flex items-center gap-1 shadow-md shadow-brand-500/10 mb-0.5">
                         <span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.5" stroke="currentColor" class="size-4">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -699,22 +715,6 @@
                     </button>
 
                 </form>
-                @error('message')
-                    <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block pt-0.5">⚠️
-                        {{ $message }}</span>
-                @enderror
-                @error('image_upload')
-                    <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block pt-0.5">⚠️
-                        {{ $message }}</span>
-                @enderror
-                @error('call_type')
-                    <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block pt-0.5">⚠️
-                        {{ $message }}</span>
-                @enderror
-                @error('call_duration')
-                    <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block pt-0.5">⚠️
-                        {{ $message }}</span>
-                @enderror
             </div>
 
             <!-- 4. POPUP ACTION SHEET PILIHAN TIPE PESAN -->
@@ -890,10 +890,11 @@
 </div>
 
 <style>
-    /* Matikan pull-to-refresh / overscroll di level halaman saat editor terbuka */
+    /* Matikan pull-to-refresh / overscroll di level dokumen saat editor terbuka */
     html,
     body {
         overscroll-behavior-y: none !important;
+        overscroll-behavior-x: none !important;
         position: fixed;
         overflow: hidden;
         width: 100%;
@@ -902,12 +903,7 @@
 
     #chapter-editor-root {
         overscroll-behavior: none !important;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    #editor-canvas {
-        overscroll-behavior: contain !important;
-        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y;
     }
 
     /* Quill: tinggi mengikuti isi, scroll ditangani container utama */
