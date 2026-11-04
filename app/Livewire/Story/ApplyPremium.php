@@ -37,13 +37,13 @@ class ApplyPremium extends Component
         'bankName'          => 'required|string|max:50',
         'accountNumber'     => 'required|numeric|digits_between:8,20',
         'accountHolderName' => 'required|string|max:100',
-        'authorNotes'       => 'nullable|string|max:500',
+        'authorNotes'       => 'nullable|string',
 
         'fullName' => 'required|string|min:3|max:255',
         'ktpNumber' => 'required|numeric|digits:16',
         'pob' => 'required|string|min:2|max:100',
         'dob' => 'required|date|before:-17 years',
-        'address' => 'required|string|min:10|max:500',
+        'address' => 'required|string|min:10',
     ];
 
     protected $messages = [
