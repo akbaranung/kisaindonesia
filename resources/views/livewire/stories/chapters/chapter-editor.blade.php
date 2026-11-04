@@ -486,17 +486,16 @@
                                     $wire.set('regularContent', html, false);
                                 });
                     
-                                // TAMBAHAN: Otomatis scroll ke bawah saat Quill mendapatkan focus (keyboard muncul)
                                 window.quillEditor.root.addEventListener('focus', () => {
                                     setTimeout(() => {
-                                        const canvas = document.getElementById('editor-canvas');
-                                        if (canvas) {
-                                            canvas.scrollTo({
-                                                top: canvas.scrollHeight,
-                                                behavior: 'smooth'
+                                        const editorContainer = document.querySelector('#chapter-editor-root .ql-container');
+                                        if (editorContainer) {
+                                            editorContainer.scrollIntoView({
+                                                behavior: 'smooth',
+                                                block: 'center' // Memposisikan editor di tengah-tengah ruang sisa di atas keyboard
                                             });
                                         }
-                                    }, 300); // Penundaan agar animasi keyboard perangkat selesai dimuat
+                                    }, 300); // Penundaan agar animasi keyboard perangkat selesai muncul
                                 });
                             });
                         }
