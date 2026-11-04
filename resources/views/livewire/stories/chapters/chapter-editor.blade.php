@@ -153,297 +153,378 @@
     <!-- ========================================== -->
     <!-- 2. MAIN CANVAS AREA (SCROLLABLE)           -->
     <!-- ========================================== -->
-    <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;"
-        class="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 pb-24 space-y-4">
-        <!-- Flash Messages -->
-        <div class="max-w-xl mx-auto space-y-2">
-            @if (session()->has('message'))
+    <div class="relative flex-1 min-h-0 flex flex-col">
+        <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;"
+            x-ref="canvas" id="editor-canvas"
+            class="{{ $type === 'chat' ? 'chat-scroll-hidden pr-6' : 'editor-scroll' }} flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 pb-24 space-y-4">
+            <!-- Flash Messages -->
+            <div class="max-w-xl mx-auto space-y-2">
+                @if (session()->has('message'))
+                    <div
+                        class="p-3 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs rounded-xl flex items-center justify-between">
+                        <span>✓ {{ session('message') }}</span>
+                    </div>
+                @endif
+
+                @if (session()->has('warning'))
+                    <div
+                        class="p-3 bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs rounded-xl flex items-center justify-between">
+                        <span>⚠️ {{ session('warning') }}</span>
+                    </div>
+                @endif
+            </div>
+
+
+            <!-- Input Judul & Cover Bab -->
+            <div class="max-w-xl mx-auto space-y-3">
                 <div
-                    class="p-3 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs rounded-xl flex items-center justify-between">
-                    <span>✓ {{ session('message') }}</span>
-                </div>
-            @endif
-
-            @if (session()->has('warning'))
-                <div
-                    class="p-3 bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs rounded-xl flex items-center justify-between">
-                    <span>⚠️ {{ session('warning') }}</span>
-                </div>
-            @endif
-        </div>
-
-
-        <!-- Input Judul & Cover Bab -->
-        <div class="max-w-xl mx-auto space-y-3">
-            <div
-                class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs">
-                <div
-                    class="relative w-14 h-16 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden shrink-0 flex items-center justify-center">
-                    @if ($chapter_cover_upload)
-                        <img src="{{ $chapter_cover_upload->temporaryUrl() }}" class="w-full h-full object-cover">
-                    @elseif ($chapter_existing_cover)
-                        <img src="{{ Storage::url($chapter_existing_cover) }}" class="w-full h-full object-cover">
-                    @else
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="w-6 h-6 text-slate-400 dark:text-slate-600">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                        </svg>
-                    @endif
-                </div>
-
-                <div class="flex-1 min-w-0">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Cover Bab
-                        (Opsional)</span>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <label
-                            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-[11px] rounded-lg cursor-pointer transition border border-slate-200 dark:border-slate-700/60 shrink-0">
-                            <span>
-                                <i class="fa-solid fa-camera"></i>
-                                {{ $chapter_cover_upload || $chapter_existing_cover ? 'Ganti Cover' : 'Upload Cover' }}</span>
-                            <input type="file" wire:model="chapter_cover_upload" accept="image/*" class="hidden">
-                        </label>
-                        @if ($chapter_cover_upload || $chapter_existing_cover)
-                            <button type="button" wire:click="removeChapterCover" wire:confirm="Hapus cover bab ini?"
-                                class="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 font-semibold text-[11px] rounded-lg transition border border-rose-500/20 shrink-0">
-                                <i class="fa-solid fa-trash"></i> Hapus
-                            </button>
+                    class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xs">
+                    <div
+                        class="relative w-14 h-16 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden shrink-0 flex items-center justify-center">
+                        @if ($chapter_cover_upload)
+                            <img src="{{ $chapter_cover_upload->temporaryUrl() }}" class="w-full h-full object-cover">
+                        @elseif ($chapter_existing_cover)
+                            <img src="{{ Storage::url($chapter_existing_cover) }}" class="w-full h-full object-cover">
+                        @else
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor"
+                                class="w-6 h-6 text-slate-400 dark:text-slate-600">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                            </svg>
                         @endif
                     </div>
-                </div>
-            </div>
-            @error('chapter_cover_upload')
-                <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block mt-1">{{ $message }}</span>
-            @enderror
 
-            <input type="text" wire:model.live="title" placeholder="Judul Bab Cerita..."
-                class="w-full bg-transparent text-lg font-extrabold text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none border-b border-slate-200 dark:border-slate-800 pb-2 focus:border-brand-500 transition">
-            @error('title')
-                <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block mt-1">{{ $message }}</span>
-            @enderror
+                    <div class="flex-1 min-w-0">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Cover Bab
+                            (Opsional)</span>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <label
+                                class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-[11px] rounded-lg cursor-pointer transition border border-slate-200 dark:border-slate-700/60 shrink-0">
+                                <span>
+                                    <i class="fa-solid fa-camera"></i>
+                                    {{ $chapter_cover_upload || $chapter_existing_cover ? 'Ganti Cover' : 'Upload Cover' }}</span>
+                                <input type="file" wire:model="chapter_cover_upload" accept="image/*" class="hidden">
+                            </label>
+                            @if ($chapter_cover_upload || $chapter_existing_cover)
+                                <button type="button" wire:click="removeChapterCover"
+                                    wire:confirm="Hapus cover bab ini?"
+                                    class="px-2 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 font-semibold text-[11px] rounded-lg transition border border-rose-500/20 shrink-0">
+                                    <i class="fa-solid fa-trash"></i> Hapus
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @error('chapter_cover_upload')
+                    <span
+                        class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block mt-1">{{ $message }}</span>
+                @enderror
+
+                <input type="text" wire:model.live="title" placeholder="Judul Bab Cerita..."
+                    class="w-full bg-transparent text-lg font-extrabold text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none border-b border-slate-200 dark:border-slate-800 pb-2 focus:border-brand-500 transition">
+                @error('title')
+                    <span
+                        class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block mt-1">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <!-- TAMPILAN CANVAS CHAT FIC -->
+            @if ($type === 'chat')
+                <div class="max-w-xl mx-auto space-y-4 pb-36">
+
+                    @forelse($bubbles as $index => $b)
+                        @php
+                            $char = $characters->firstWhere('id', $b['character_id'] ?? null);
+                            $isRight = ($char->default_position ?? 'left') === 'right';
+                            $isLeft = ($char->default_position ?? 'right') === 'left';
+                            $isCenter = $b['message_type'] === 'center_text';
+                            $charName = $char ? $char->name : 'Unknown';
+                            $avatar =
+                                $char && $char->avatar_path
+                                    ? asset('storage/' . $char->avatar_path)
+                                    : 'https://ui-avatars.com/api/?name=' . urlencode($charName) . '&background=random';
+                        @endphp
+
+                        <!-- A. Tipe Pesan TEKS -->
+                        @if (($b['message_type'] ?? 'text') === 'text')
+                            <div class="space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
+                                <div
+                                    class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                    {{-- Avatar --}}
+                                    <img src="{{ $avatar }}"
+                                        class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
+
+                                    {{-- Gelembung Pesan --}}
+                                    <div
+                                        class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
+                                        <span
+                                            class="text-[10px] font-black text-slate-500 dark:text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
+                                        @if (!$isRight && !empty($row['character_name']))
+                                            <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
+                                                {{ $row['character_name'] }}
+                                            </span>
+                                        @endif
+
+                                        <div
+                                            class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/80 dark:border-slate-800' }}">
+                                            <p class="whitespace-pre-line">{{ $b['message'] ?? '' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- B. Tipe Pesan GAMBAR -->
+                        @elseif(($b['message_type'] ?? '') === 'image')
+                            <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
+                                <div
+                                    class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                    {{-- Avatar --}}
+                                    <img src="{{ $avatar }}"
+                                        class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
+
+                                    {{-- Gelembung Pesan --}}
+                                    <div
+                                        class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
+                                        <span
+                                            class="text-[10px] font-black text-slate-500 dark:text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
+                                        @if (!$isRight && !empty($row['character_name']))
+                                            <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
+                                                {{ $row['character_name'] }}
+                                            </span>
+                                        @endif
+
+                                        <div
+                                            class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'border border-brand-500 text-slate-950 rounded-br-xs' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/80 dark:border-slate-800' }}">
+                                            @if (isset($b['image_upload']) && $b['image_upload'])
+                                                <img src="{{ $b['image_upload']->temporaryUrl() }}"
+                                                    class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
+                                            @elseif(!empty($b['image_url'] ?? ($b['existing_image_url'] ?? null)))
+                                                <img src="{{ Storage::url($b['image_url'] ?? $b['existing_image_url']) }}"
+                                                    class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
+                                            @endif
+                                            <p class="whitespace-pre-line">
+                                                @if (!empty($b['caption'] ?? $b['message']))
+                                                    <p
+                                                        class="p-2 text-xs text-slate-600 dark:text-slate-300 leading-normal">
+                                                        {{ $b['caption'] ?? $b['message'] }}</p>
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- C. Tipe Pesan LOG PANGGILAN -->
+                        @elseif(($b['message_type'] ?? '') === 'call')
+                            <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
+                                <div
+                                    class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                    <img src="{{ $avatar }}"
+                                        class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
+                                    <div
+                                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-sm text-slate-800 dark:text-slate-100">
+                                        @if (($b['call_type'] ?? '') === 'missed')
+                                            <span
+                                                class="text-rose-500 dark:text-rose-400 font-bold flex items-center gap-1">📵
+                                                Panggilan
+                                                Tak Terjawab</span>
+                                        @elseif(($b['call_type'] ?? '') === 'incoming')
+                                            <span
+                                                class="text-emerald-500 dark:text-emerald-400 font-bold flex items-center gap-1">📲
+                                                Panggilan Masuk</span>
+                                        @else
+                                            <span
+                                                class="text-brand-600 dark:text-brand-400 font-bold flex items-center gap-1">📞
+                                                Panggilan
+                                                Keluar</span>
+                                        @endif
+
+                                        <span
+                                            class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">({{ $b['call_duration'] ?? '00:00' }})</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif (($b['message_type'] ?? '') === 'center_text')
+                            <div class="flex flex-col items-center justify-center my-4 group">
+                                <div
+                                    class="px-3 py-1 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-full text-[11px] text-slate-600 dark:text-slate-400 font-medium italic text-center max-w-[85%] shadow-sm">
+                                    {{ $b['message'] ?? '' }}
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Aksi Quick Edit & Hapus Row -->
+                        @php
+                            if ($isRight) {
+                                $position = 'justify-end';
+                            } elseif ($isLeft) {
+                                $position = 'justify-start';
+                            } elseif ($isCenter) {
+                                $position = 'justify-center';
+                            }
+                        @endphp
+
+
+                        <div
+                            class="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 pt-0.5 {{ $position }}">
+                            <button type="button" wire:click="editBubble({{ $index }})"
+                                class="hover:text-brand-600 dark:hover:text-brand-400 font-semibold transition">Edit</button>
+                            <span>•</span>
+                            <button type="button" wire:click="deleteBubble({{ $index }})"
+                                class="hover:text-rose-500 dark:hover:text-rose-400 font-semibold transition">Hapus</button>
+                        </div>
+
+
+
+                    @empty
+                        <div class="py-20 text-center space-y-2">
+                            <span class="text-3xl">💬</span>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">Belum ada gelembung pesan. Tulis
+                                pesan di
+                                panel bawah!</p>
+                        </div>
+                    @endforelse
+
+                </div>
+                <!-- TAMPILAN CANVAS REGULER / NOVEL / PUISI -->
+            @else
+                <div class="max-w-xl mx-auto pt-2">
+                    <!-- Quill Editor Wrapper dengan $nextTick -->
+                    <div x-data="{
+                        initQuill() {
+                            this.$nextTick(() => {
+                                if (!$refs.editor) return;
+                    
+                                if (typeof ImageResize !== 'undefined' && typeof Quill !== 'undefined') {
+                                    Quill.register('modules/imageResize', ImageResize.default || ImageResize);
+                                }
+                    
+                                window.quillEditor = new Quill($refs.editor, {
+                                    theme: 'snow',
+                                    placeholder: 'Tuliskan isi cerita, narasi, atau deskripsi bab di sini...',
+                                    modules: {
+                                        toolbar: [
+                                            [{ 'header': [1, 2, 3, false] }],
+                                            ['bold', 'italic', 'underline', 'strike'],
+                                            [{ 'color': [] }, { 'background': [] }],
+                                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                            [{ 'align': [] }],
+                                            ['blockquote', 'code-block'],
+                                            ['image', 'link'],
+                                            ['clean']
+                                        ],
+                                        imageResize: {
+                                            displaySize: true
+                                        },
+                                        clipboard: {
+                                            matchers: [
+                                                [Node.ELEMENT_NODE, function(node, delta) {
+                                                    if (delta.ops) {
+                                                        delta.ops.forEach(op => {
+                                                            if (op.attributes) {
+                                                                delete op.attributes.color;
+                                                                delete op.attributes.background;
+                                                            }
+                                                        });
+                                                    }
+                                                    return delta;
+                                                }]
+                                            ]
+                                        }
+                                    }
+                                });
+                    
+                                let initialContent = $wire.get('regularContent');
+                                if (initialContent) {
+                                    window.quillEditor.clipboard.dangerouslyPasteHTML(initialContent);
+                                }
+                    
+                                window.quillEditor.on('text-change', () => {
+                                    let html = window.quillEditor.root.innerHTML;
+                                    $wire.set('regularContent', html, false);
+                                });
+                            });
+                        }
+                    }" x-init="initQuill()" wire:ignore
+                        class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <div x-ref="editor" id="editor" class="text-slate-800 dark:text-slate-200">
+                        </div>
+                    </div>
+                </div>
+            @endif
+
         </div>
 
-        <!-- TAMPILAN CANVAS CHAT FIC -->
         @if ($type === 'chat')
-            <div class="max-w-xl mx-auto space-y-4 pb-36">
-
-                @forelse($bubbles as $index => $b)
-                    @php
-                        $char = $characters->firstWhere('id', $b['character_id'] ?? null);
-                        $isRight = ($char->default_position ?? 'left') === 'right';
-                        $isLeft = ($char->default_position ?? 'right') === 'left';
-                        $isCenter = $b['message_type'] === 'center_text';
-                        $charName = $char ? $char->name : 'Unknown';
-                        $avatar =
-                            $char && $char->avatar_path
-                                ? asset('storage/' . $char->avatar_path)
-                                : 'https://ui-avatars.com/api/?name=' . urlencode($charName) . '&background=random';
-                    @endphp
-
-                    <!-- A. Tipe Pesan TEKS -->
-                    @if (($b['message_type'] ?? 'text') === 'text')
-                        <div class="space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
-                            <div class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                {{-- Avatar --}}
-                                <img src="{{ $avatar }}"
-                                    class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
-
-                                {{-- Gelembung Pesan --}}
-                                <div class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
-                                    <span
-                                        class="text-[10px] font-black text-slate-500 dark:text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
-                                    @if (!$isRight && !empty($row['character_name']))
-                                        <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
-                                            {{ $row['character_name'] }}
-                                        </span>
-                                    @endif
-
-                                    <div
-                                        class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/80 dark:border-slate-800' }}">
-                                        <p class="whitespace-pre-line">{{ $b['message'] ?? '' }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- B. Tipe Pesan GAMBAR -->
-                    @elseif(($b['message_type'] ?? '') === 'image')
-                        <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
-                            <div class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                {{-- Avatar --}}
-                                <img src="{{ $avatar }}"
-                                    class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
-
-                                {{-- Gelembung Pesan --}}
-                                <div class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
-                                    <span
-                                        class="text-[10px] font-black text-slate-500 dark:text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
-                                    @if (!$isRight && !empty($row['character_name']))
-                                        <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
-                                            {{ $row['character_name'] }}
-                                        </span>
-                                    @endif
-
-                                    <div
-                                        class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'border border-brand-500 text-slate-950 rounded-br-xs' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/80 dark:border-slate-800' }}">
-                                        @if (isset($b['image_upload']) && $b['image_upload'])
-                                            <img src="{{ $b['image_upload']->temporaryUrl() }}"
-                                                class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
-                                        @elseif(!empty($b['image_url'] ?? ($b['existing_image_url'] ?? null)))
-                                            <img src="{{ Storage::url($b['image_url'] ?? $b['existing_image_url']) }}"
-                                                class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
-                                        @endif
-                                        <p class="whitespace-pre-line">
-                                            @if (!empty($b['caption'] ?? $b['message']))
-                                                <p
-                                                    class="p-2 text-xs text-slate-600 dark:text-slate-300 leading-normal">
-                                                    {{ $b['caption'] ?? $b['message'] }}</p>
-                                            @endif
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <!-- C. Tipe Pesan LOG PANGGILAN -->
-                    @elseif(($b['message_type'] ?? '') === 'call')
-                        <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
-                            <div class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                <img src="{{ $avatar }}"
-                                    class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
-                                <div
-                                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-sm text-slate-800 dark:text-slate-100">
-                                    @if (($b['call_type'] ?? '') === 'missed')
-                                        <span
-                                            class="text-rose-500 dark:text-rose-400 font-bold flex items-center gap-1">📵
-                                            Panggilan
-                                            Tak Terjawab</span>
-                                    @elseif(($b['call_type'] ?? '') === 'incoming')
-                                        <span
-                                            class="text-emerald-500 dark:text-emerald-400 font-bold flex items-center gap-1">📲
-                                            Panggilan Masuk</span>
-                                    @else
-                                        <span
-                                            class="text-brand-600 dark:text-brand-400 font-bold flex items-center gap-1">📞
-                                            Panggilan
-                                            Keluar</span>
-                                    @endif
-
-                                    <span
-                                        class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">({{ $b['call_duration'] ?? '00:00' }})</span>
-                                </div>
-                            </div>
-                        </div>
-                    @elseif (($b['message_type'] ?? '') === 'center_text')
-                        <div class="flex flex-col items-center justify-center my-4 group">
-                            <div
-                                class="px-3 py-1 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-full text-[11px] text-slate-600 dark:text-slate-400 font-medium italic text-center max-w-[85%] shadow-sm">
-                                {{ $b['message'] ?? '' }}
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Aksi Quick Edit & Hapus Row -->
-                    @php
-                        if ($isRight) {
-                            $position = 'justify-end';
-                        } elseif ($isLeft) {
-                            $position = 'justify-start';
-                        } elseif ($isCenter) {
-                            $position = 'justify-center';
-                        }
-                    @endphp
-
-
-                    <div
-                        class="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 pt-0.5 {{ $position }}">
-                        <button type="button" wire:click="editBubble({{ $index }})"
-                            class="hover:text-brand-600 dark:hover:text-brand-400 font-semibold transition">Edit</button>
-                        <span>•</span>
-                        <button type="button" wire:click="deleteBubble({{ $index }})"
-                            class="hover:text-rose-500 dark:hover:text-rose-400 font-semibold transition">Hapus</button>
-                    </div>
-
-
-
-                @empty
-                    <div class="py-20 text-center space-y-2">
-                        <span class="text-3xl">💬</span>
-                        <p class="text-xs text-slate-400 dark:text-slate-500">Belum ada gelembung pesan. Tulis pesan di
-                            panel bawah!</p>
-                    </div>
-                @endforelse
-
-            </div>
-            <!-- TAMPILAN CANVAS REGULER / NOVEL / PUISI -->
-        @else
-            <div class="max-w-xl mx-auto h-[calc(100dvh-200px)] min-h-[320px] flex flex-col pt-2">
-                <!-- Quill Editor Wrapper dengan $nextTick -->
-                <div x-data="{
-                    initQuill() {
-                        this.$nextTick(() => {
-                            if (!$refs.editor) return;
-                
-                            if (typeof ImageResize !== 'undefined' && typeof Quill !== 'undefined') {
-                                Quill.register('modules/imageResize', ImageResize.default || ImageResize);
-                            }
-                
-                            window.quillEditor = new Quill($refs.editor, {
-                                theme: 'snow',
-                                placeholder: 'Tuliskan isi cerita, narasi, atau deskripsi bab di sini...',
-                                modules: {
-                                    toolbar: [
-                                        [{ 'header': [1, 2, 3, false] }],
-                                        ['bold', 'italic', 'underline', 'strike'],
-                                        [{ 'color': [] }, { 'background': [] }],
-                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                        [{ 'align': [] }],
-                                        ['blockquote', 'code-block'],
-                                        ['image', 'link'],
-                                        ['clean']
-                                    ],
-                                    imageResize: {
-                                        displaySize: true
-                                    },
-                                    clipboard: {
-                                        matchers: [
-                                            [Node.ELEMENT_NODE, function(node, delta) {
-                                                if (delta.ops) {
-                                                    delta.ops.forEach(op => {
-                                                        if (op.attributes) {
-                                                            delete op.attributes.color;
-                                                            delete op.attributes.background;
-                                                        }
-                                                    });
-                                                }
-                                                return delta;
-                                            }]
-                                        ]
-                                    }
-                                }
-                            });
-                
-                            let initialContent = $wire.get('regularContent');
-                            if (initialContent) {
-                                window.quillEditor.clipboard.dangerouslyPasteHTML(initialContent);
-                            }
-                
-                            window.quillEditor.on('text-change', () => {
-                                let html = window.quillEditor.root.innerHTML;
-                                $wire.set('regularContent', html, false);
-                            });
-                        });
-                    }
-                }" x-init="initQuill()" wire:ignore
-                    class="flex flex-col flex-1 min-h-0 bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                    <div x-ref="editor" id="editor" class="text-slate-800 dark:text-slate-200">
+            {{-- Scrollbar kustom yang bisa diseret --}}
+            <div x-data="{
+                el: null,
+                visible: false,
+                dragging: false,
+                thumbH: 40,
+                thumbTop: 0,
+                startY: 0,
+                startScroll: 0,
+                init() {
+                    this.el = document.getElementById('editor-canvas');
+                    if (!this.el) return;
+                    const upd = () => this.update();
+                    this.el.addEventListener('scroll', upd, { passive: true });
+                    window.addEventListener('resize', upd);
+                    new ResizeObserver(upd).observe(this.el);
+                    new MutationObserver(upd).observe(this.el, { childList: true, subtree: true, attributes: true });
+                    this.$nextTick(upd);
+                },
+                update() {
+                    if (!this.el || !this.$refs.track) return;
+                    const sh = this.el.scrollHeight,
+                        ch = this.el.clientHeight;
+                    this.visible = sh > ch + 4;
+                    if (!this.visible) return;
+                    const trackH = this.$refs.track.clientHeight;
+                    this.thumbH = Math.max(40, trackH * ch / sh);
+                    const maxTop = Math.max(1, trackH - this.thumbH);
+                    this.thumbTop = maxTop * (this.el.scrollTop / Math.max(1, sh - ch));
+                },
+                startDrag(e) {
+                    this.dragging = true;
+                    this.startY = e.clientY;
+                    this.startScroll = this.el.scrollTop;
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                },
+                onDrag(e) {
+                    if (!this.dragging) return;
+                    const trackH = this.$refs.track.clientHeight;
+                    const scrollable = this.el.scrollHeight - this.el.clientHeight;
+                    const ratio = scrollable / Math.max(1, trackH - this.thumbH);
+                    this.el.scrollTop = this.startScroll + (e.clientY - this.startY) * ratio;
+                },
+                endDrag(e) {
+                    this.dragging = false;
+                    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+                },
+                jumpTo(e) {
+                    const rect = this.$refs.track.getBoundingClientRect();
+                    const ratio = (e.clientY - rect.top - this.thumbH / 2) / Math.max(1, rect.height - this.thumbH);
+                    this.el.scrollTop = Math.min(1, Math.max(0, ratio)) * (this.el.scrollHeight - this.el.clientHeight);
+                }
+            }" x-show="visible" x-cloak
+                class="absolute right-0 top-2 bottom-2 w-6 z-30 select-none" style="touch-action: none;">
+                <div x-ref="track" @pointerdown.self.prevent="jumpTo($event)" class="absolute inset-0">
+                    <div @pointerdown.stop.prevent="startDrag($event)" @pointermove="onDrag($event)"
+                        @pointerup="endDrag($event)" @pointercancel="endDrag($event)"
+                        :style="'height:' + thumbH + 'px; transform: translateY(' + thumbTop + 'px); touch-action: none;'"
+                        class="absolute right-0 w-6 flex justify-end pr-1 cursor-grab active:cursor-grabbing">
+                        <div class="h-full rounded-full transition-[width,background-color] duration-150"
+                            :class="dragging ? 'w-2 bg-brand-500' : 'w-1.5 bg-slate-400/80 dark:bg-slate-500/80'"></div>
                     </div>
                 </div>
             </div>
         @endif
-
     </div>
 
     @if ($type === 'chat')
+
         <div x-data="{ showTypePicker: false }"
             class="shrink-0 p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
 
@@ -807,28 +888,48 @@
         overscroll-behavior-x: none;
     }
 
-    /* Editor = area scroll utama: toolbar tetap, isi tulisan yang scroll */
+    /* Quill: tinggi mengikuti isi, scroll ditangani container utama */
     #chapter-editor-root .ql-container.ql-snow {
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
-
-    #chapter-editor-root .ql-toolbar.ql-snow {
-        flex-shrink: 0;
+        height: auto;
+        overflow: visible;
     }
 
     #chapter-editor-root .ql-editor {
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-y;
+        height: auto;
+        min-height: 350px;
+        overflow-y: visible;
         padding-bottom: 6rem;
-        scroll-padding-bottom: 6rem;
+    }
+
+    /* Toolbar tetap menempel di atas saat isi panjang discroll */
+    #chapter-editor-root .ql-toolbar.ql-snow {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    /* Chat: scrollbar native disembunyikan, diganti scrollbar kustom yang bisa diseret */
+    #chapter-editor-root .chat-scroll-hidden {
+        scrollbar-width: none;
+    }
+
+    #chapter-editor-root .chat-scroll-hidden::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Scrollbar tipis yang terlihat di container utama (Quill) */
+    #chapter-editor-root .editor-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 transparent;
+    }
+
+    #chapter-editor-root .editor-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #chapter-editor-root .editor-scroll::-webkit-scrollbar-thumb {
+        background-color: #94a3b8;
+        border-radius: 9999px;
     }
 
     .ql-image-resize-module {
