@@ -183,7 +183,7 @@
     <div class="relative flex-1 min-h-0 flex flex-col">
         <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;"
             x-ref="canvas" id="editor-canvas"
-            class="no-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 pb-24 space-y-4">
+            class="no-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 space-y-4">
 
             <div class="max-w-xl mx-auto space-y-2">
                 @if (session()->has('message'))
@@ -400,9 +400,23 @@
                         </div>
                     @endforelse
 
+                    <div
+                        class="absolute right-2 bottom-10 z-30 flex flex-col gap-1.5 opacity-50 hover:opacity-100 transition-opacity">
+                        <button type="button" @click="scrollStep('up')"
+                            class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
+                            title="Naik 300px">
+                            <i class="fa-solid fa-chevron-up"></i>
+                        </button>
+                        <button type="button" @click="scrollStep('down')"
+                            class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
+                            title="Turun 300px">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+
                 </div>
             @else
-                <div class="max-w-xl mx-auto pt-2 pb-10">
+                <div class="relative max-w-xl mx-auto pt-2">
                     <div x-data="{
                         initQuill() {
                             this.$nextTick(() => {
@@ -463,102 +477,23 @@
                         <div x-ref="editor" id="editor" class="text-slate-800 dark:text-slate-200">
                         </div>
                     </div>
-                </div>
 
-                <div x-data="{ showConfirmModal: false }" class="max-w-xl mx-auto flex justify-end">
-
-                    {{-- <button type="button"
-                        @click="
-            if ($wire.status === 'published' && '{{ $chapter->status }}' !== 'published') {
-                showConfirmModal = true;
-            } else {
-                $wire.saveChapter();
-            }
-        "
-                        wire:loading.attr="disabled" wire:target="saveChapter"
-                        class="px-4 py-2 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white dark:text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5 disabled:opacity-50">
-                        <span wire:loading.remove wire:target="saveChapter"><i class="fas fa-save"></i> Simpan</span>
-                        <span wire:loading wire:target="saveChapter">Menyimpan...</span>
-                    </button> --}}
-
-                    <template x-teleport="body">
-                        <div x-show="showConfirmModal" x-cloak x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                            class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-
-                            <div @click.away="showConfirmModal = false"
-                                class="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4">
-
-                                <div class="flex items-center gap-3 text-amber-500">
-                                    <div class="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Konfirmasi
-                                            Publikasi</h3>
-                                        <p class="text-[10px] text-slate-500 dark:text-slate-400">Tindakan ini tidak
-                                            dapat
-                                            dibatalkan</p>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl">
-                                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                                        Konten yang sudah dipublikasikan <strong
-                                            class="text-rose-500 dark:text-rose-400">tidak dapat
-                                            dihapus</strong> dan tidak bisa dikembalikan ke status Draft, hanya
-                                        diizinkan
-                                        untuk diedit.
-                                    </p>
-                                    <p class="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-2">Lanjutkan
-                                        publikasi bab ini?</p>
-                                </div>
-
-                                <div
-                                    class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-                                    <button type="button" @click="showConfirmModal = false"
-                                        class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl transition">
-                                        Batal
-                                    </button>
-                                    <button type="button"
-                                        @click="
-                            showConfirmModal = false;
-                            $wire.saveChapter();
-                        "
-                                        class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white dark:text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-brand-500/10 transition">
-                                        Ya, Publikasikan
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
+                    <div
+                        class="absolute right-2 top-28 z-30 flex flex-col gap-1.5 opacity-50 hover:opacity-100 transition-opacity">
+                        <button type="button" @click="scrollStep('up')"
+                            class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
+                            title="Naik 300px">
+                            <i class="fa-solid fa-chevron-up"></i>
+                        </button>
+                        <button type="button" @click="scrollStep('down')"
+                            class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
+                            title="Turun 300px">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
                 </div>
             @endif
-
         </div>
-
-        <!-- TOMBOL FLOATING NAVIGASI CEPAT (NAIK & TURUN) -->
-        <div
-            class="absolute right-3 bottom-5 z-30 flex flex-col gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
-            <button type="button" @click="scrollStep('up')"
-                class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
-                title="Naik 300px">
-                <i class="fa-solid fa-chevron-up"></i>
-            </button>
-            <button type="button" @click="scrollStep('down')"
-                class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
-                title="Turun 300px">
-                <i class="fa-solid fa-chevron-down"></i>
-            </button>
-        </div>
-
     </div>
 
     @if ($type === 'chat')
@@ -936,8 +871,8 @@
 
     /* FIX QUILL: Kunci tinggi Quill Editor agar TIDAK DINAMIS, berikan scrollbar internal */
     #chapter-editor-root .ql-container.ql-snow {
-        height: 90vh !important;
-        max-height: 90vh !important;
+        height: 80vh !important;
+        max-height: 80vh !important;
         overflow: hidden;
     }
 
