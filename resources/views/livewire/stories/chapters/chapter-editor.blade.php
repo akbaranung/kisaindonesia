@@ -901,13 +901,6 @@
         padding-bottom: 6rem;
     }
 
-    /* Toolbar tetap menempel di atas saat isi panjang discroll */
-    #chapter-editor-root .ql-toolbar.ql-snow {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-
     /* Chat: scrollbar native disembunyikan, diganti scrollbar kustom yang bisa diseret */
     #chapter-editor-root .chat-scroll-hidden {
         scrollbar-width: none;
