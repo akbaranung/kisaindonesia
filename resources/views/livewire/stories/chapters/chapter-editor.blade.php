@@ -489,11 +489,14 @@
                                 // TAMBAHAN: Otomatis scroll ke bawah saat Quill mendapatkan focus (keyboard muncul)
                                 window.quillEditor.root.addEventListener('focus', () => {
                                     setTimeout(() => {
-                                        window.quillEditor.root.scrollTo({
-                                            top: window.quillEditor.root.scrollHeight,
-                                            behavior: 'smooth'
-                                        });
-                                    }, 300); // Penundaan (delay) sejenak agar animasi kemunculan keyboard perangkat selesai
+                                        const canvas = document.getElementById('editor-canvas');
+                                        if (canvas) {
+                                            canvas.scrollTo({
+                                                top: canvas.scrollHeight,
+                                                behavior: 'smooth'
+                                            });
+                                        }
+                                    }, 300); // Penundaan agar animasi keyboard perangkat selesai dimuat
                                 });
                             });
                         }
