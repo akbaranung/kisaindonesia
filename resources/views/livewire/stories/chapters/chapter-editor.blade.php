@@ -6,7 +6,7 @@
     initPtrGuard() {
         const root = this.$el;
 
-        // Cegah pull-to-refresh browser pada level dokumen (sama seperti story-reader)
+        // Cegah pull-to-refresh browser pada level dokumen
         this.prevHtmlOverscroll = document.documentElement.style.overscrollBehaviorY;
         this.prevBodyOverscroll = document.body.style.overscrollBehaviorY;
         document.documentElement.style.overscrollBehaviorY = 'none';
@@ -15,32 +15,41 @@
         root.addEventListener('touchstart', (e) => {
             this.startX = e.touches[0].clientX;
             this.startY = e.touches[0].clientY;
-            e.stopPropagation();
         }, { passive: true });
 
         root.addEventListener('touchmove', (e) => {
-            e.stopPropagation(); // cegah handler pull-to-refresh di layout/global
             const dx = e.touches[0].clientX - this.startX;
             const dy = e.touches[0].clientY - this.startY;
-            if (dy <= 0 || Math.abs(dx) > Math.abs(dy)) return;
 
-            // Masih ada area yang bisa discroll ke atas? biarkan scroll normal
-            let el = e.target,
-                canScrollUp = false;
-            while (el && el !== root.parentElement) {
-                const oy = getComputedStyle(el).overflowY;
-                if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight && el.scrollTop > 0) {
-                    canScrollUp = true;
+            // Cari elemen scrollable terdekat di dalam target sentuhan (misal: Quill editor atau chat container)
+            let el = e.target;
+            let scrollableParent = null;
+
+            while (el && el !== root) {
+                const oy = window.getComputedStyle(el).overflowY;
+                if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight) {
+                    scrollableParent = el;
                     break;
                 }
                 el = el.parentElement;
             }
-            if (!canScrollUp && e.cancelable) e.preventDefault();
-        }, { passive: false });
 
-        ['touchend', 'touchcancel'].forEach(t =>
-            root.addEventListener(t, (e) => e.stopPropagation(), { passive: true })
-        );
+            if (scrollableParent) {
+                const scrollTop = scrollableParent.scrollTop;
+                const scrollHeight = scrollableParent.scrollHeight;
+                const clientHeight = scrollableParent.clientHeight;
+
+                // Jika elemen berada di paling atas dan mencoba scroll ke atas (pull down)
+                // ATAU berada di paling bawah dan mencoba scroll ke bawah
+                // Cegah default browser agar tidak terjadi reload / pull-to-refresh
+                if ((scrollTop <= 0 && dy > 0) || (scrollTop + clientHeight >= scrollHeight && dy < 0)) {
+                    if (e.cancelable) e.preventDefault();
+                }
+            } else {
+                // Jika tidak berada di dalam area scroll yang valid, cegah default untuk mengamankan halaman
+                if (e.cancelable) e.preventDefault();
+            }
+        }, { passive: false });
     },
     destroy() {
         document.documentElement.style.overscrollBehaviorY = this.prevHtmlOverscroll;
@@ -882,10 +891,23 @@
 
 <style>
     /* Matikan pull-to-refresh / overscroll di level halaman saat editor terbuka */
-    html:has(#chapter-editor-root),
-    body:has(#chapter-editor-root) {
-        overscroll-behavior-y: none;
-        overscroll-behavior-x: none;
+    html,
+    body {
+        overscroll-behavior-y: none !important;
+        position: fixed;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    }
+
+    #chapter-editor-root {
+        overscroll-behavior: none !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #editor-canvas {
+        overscroll-behavior: contain !important;
+        -webkit-overflow-scrolling: touch;
     }
 
     /* Quill: tinggi mengikuti isi, scroll ditangani container utama */
