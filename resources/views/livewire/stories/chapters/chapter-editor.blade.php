@@ -61,11 +61,14 @@
         );
     },
     scrollStep(direction) {
+        // Cek apakah mode aktif adalah Quill editor atau Canvas biasa
+        const quillEditor = document.querySelector('#chapter-editor-root .ql-editor');
         const canvas = document.getElementById('editor-canvas');
-        if (canvas) {
-            // Menggeser sejauh 300 piksel ke atas atau ke bawah secara mulus (smooth)
+        const targetEl = quillEditor || canvas;
+
+        if (targetEl) {
             const amount = direction === 'up' ? -300 : 300;
-            canvas.scrollBy({ top: amount, behavior: 'smooth' });
+            targetEl.scrollBy({ top: amount, behavior: 'smooth' });
         }
     },
     destroy() {
@@ -399,7 +402,7 @@
 
                 </div>
             @else
-                <div class="max-w-xl mx-auto pt-2">
+                <div class="max-w-xl mx-auto pt-2 pb-10">
                     <div x-data="{
                         initQuill() {
                             this.$nextTick(() => {
@@ -462,7 +465,7 @@
                     </div>
                 </div>
 
-                <div x-data="{ showConfirmModal: false }">
+                <div x-data="{ showConfirmModal: false }" class="max-w-xl mx-auto pb-12 flex justify-end">
 
                     <button type="button"
                         @click="
@@ -473,7 +476,7 @@
             }
         "
                         wire:loading.attr="disabled" wire:target="saveChapter"
-                        class="px-4 py-1.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white dark:text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5 disabled:opacity-50">
+                        class="px-4 py-2 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white dark:text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5 disabled:opacity-50">
                         <span wire:loading.remove wire:target="saveChapter"><i class="fas fa-save"></i> Simpan</span>
                         <span wire:loading wire:target="saveChapter">Menyimpan...</span>
                     </button>
@@ -901,15 +904,17 @@
 </div>
 
 <style>
-    /* Hilangkan Scrollbar secara Total pada Container Editor/Chat */
-    .no-scrollbar {
+    /* Hilangkan Scrollbar secara Total pada Container Editor/Chat & Quill */
+    .no-scrollbar,
+    #chapter-editor-root .ql-editor {
         -ms-overflow-style: none;
         /* IE and Edge */
         scrollbar-width: none;
         /* Firefox */
     }
 
-    .no-scrollbar::-webkit-scrollbar {
+    .no-scrollbar::-webkit-scrollbar,
+    #chapter-editor-root .ql-editor::-webkit-scrollbar {
         display: none;
         /* Chrome, Safari, Opera */
     }
@@ -929,16 +934,19 @@
         touch-action: pan-x pan-y;
     }
 
+    /* FIX QUILL: Kunci tinggi Quill Editor agar TIDAK DINAMIS, berikan scrollbar internal */
     #chapter-editor-root .ql-container.ql-snow {
-        height: auto;
-        overflow: visible;
+        height: 420px !important;
+        max-height: 60vh !important;
+        overflow: hidden;
     }
 
     #chapter-editor-root .ql-editor {
-        height: auto;
-        min-height: 350px;
-        overflow-y: visible;
-        padding-bottom: 6rem;
+        height: 100% !important;
+        min-height: 100% !important;
+        overflow-y: auto !important;
+        overscroll-behavior-y: contain !important;
+        padding-bottom: 3rem;
     }
 
     .ql-image-resize-module {
