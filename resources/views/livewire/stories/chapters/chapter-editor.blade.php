@@ -61,7 +61,7 @@
         );
     },
     scrollStep(direction) {
-        // Cek apakah mode aktif adalah Quill editor atau Canvas biasa
+        // Otomatis mendeteksi target scroll apakah Quill Editor atau Canvas Chat
         const quillEditor = document.querySelector('#chapter-editor-root .ql-editor');
         const canvas = document.getElementById('editor-canvas');
         const targetEl = quillEditor || canvas;
@@ -69,6 +69,16 @@
         if (targetEl) {
             const amount = direction === 'up' ? -300 : 300;
             targetEl.scrollBy({ top: amount, behavior: 'smooth' });
+        }
+    },
+    scrollToTop() {
+        const canvas = document.getElementById('editor-canvas');
+
+        if (canvas) {
+            canvas.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
     },
     destroy() {
@@ -95,7 +105,6 @@
             </div>
         </div>
         <div class="flex gap-1">
-
             <select wire:model="status"
                 class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-semibold focus:outline-none focus:border-brand-500"
                 {{ $chapter->status === 'published' ? 'disabled' : '' }}>
@@ -400,8 +409,9 @@
                         </div>
                     @endforelse
 
+                    <!-- Tombol Navigasi Naik/Turun & Ke Paling Atas (Chat Mode) -->
                     <div
-                        class="absolute right-2 bottom-10 z-30 flex flex-col gap-1.5 opacity-50 hover:opacity-100 transition-opacity">
+                        class="absolute right-3 bottom-20 z-30 flex flex-col gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
                         <button type="button" @click="scrollStep('up')"
                             class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
                             title="Naik 300px">
@@ -411,6 +421,11 @@
                             class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
                             title="Turun 300px">
                             <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <button type="button" @click="scrollToTop()"
+                            class="w-9 h-9 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-brand-500"
+                            title="Ke Paling Atas">
+                            <i class="fa-solid fa-arrow-up"></i>
                         </button>
                     </div>
 
@@ -478,8 +493,9 @@
                         </div>
                     </div>
 
+                    <!-- Tombol Navigasi Naik/Turun & Ke Paling Atas (Quill Mode) -->
                     <div
-                        class="absolute right-2 top-28 z-30 flex flex-col gap-1.5 opacity-50 hover:opacity-100 transition-opacity">
+                        class="absolute right-3 top-28 z-30 flex flex-col gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
                         <button type="button" @click="scrollStep('up')"
                             class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
                             title="Naik 300px">
@@ -489,6 +505,15 @@
                             class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
                             title="Turun 300px">
                             <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+
+                    <div
+                        class="absolute right-3 bottom-5 z-30 flex flex-col gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                        <button type="button" @click="scrollToTop()"
+                            class="w-9 h-9 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-brand-500"
+                            title="Ke Paling Atas">
+                            <i class="fa-solid fa-arrow-up"></i>
                         </button>
                     </div>
                 </div>
@@ -881,7 +906,6 @@
         min-height: 100% !important;
         overflow-y: auto !important;
         overscroll-behavior-y: contain !important;
-        padding-bottom: 3rem;
     }
 
     .ql-image-resize-module {
