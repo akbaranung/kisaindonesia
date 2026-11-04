@@ -1,4 +1,40 @@
-<div id="chapter-editor-root"
+<div id="chapter-editor-root" x-data="{
+    startX: 0,
+    startY: 0,
+    initPtrGuard() {
+        const root = this.$el;
+
+        root.addEventListener('touchstart', (e) => {
+            this.startX = e.touches[0].clientX;
+            this.startY = e.touches[0].clientY;
+            e.stopPropagation();
+        }, { passive: true });
+
+        root.addEventListener('touchmove', (e) => {
+            e.stopPropagation(); // cegah handler pull-to-refresh di layout/global
+            const dx = e.touches[0].clientX - this.startX;
+            const dy = e.touches[0].clientY - this.startY;
+            if (dy <= 0 || Math.abs(dx) > Math.abs(dy)) return;
+
+            // Masih ada area yang bisa discroll ke atas? biarkan scroll normal
+            let el = e.target,
+                canScrollUp = false;
+            while (el && el !== root.parentElement) {
+                const oy = getComputedStyle(el).overflowY;
+                if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight && el.scrollTop > 0) {
+                    canScrollUp = true;
+                    break;
+                }
+                el = el.parentElement;
+            }
+            if (!canScrollUp && e.cancelable) e.preventDefault();
+        }, { passive: false });
+
+        ['touchend', 'touchcancel'].forEach(t =>
+            root.addEventListener(t, (e) => e.stopPropagation(), { passive: true })
+        );
+    }
+}" x-init="initPtrGuard()"
     class="fixed inset-0 z-40 flex w-full flex-col overscroll-none bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased overflow-hidden transition-colors duration-200">
     <header
         class="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 flex items-center justify-between shrink-0 z-20">
@@ -105,7 +141,7 @@
     <!-- ========================================== -->
     <!-- 2. MAIN CANVAS AREA (SCROLLABLE)           -->
     <!-- ========================================== -->
-    <div class="flex-1 overflow-y-auto overscroll-y-contain touch-pan-y p-4 space-y-4">
+    <div class="flex-1 overflow-y-auto overscroll-y-contain touch-pan-y p-4 pb-24 space-y-4">
         <!-- Flash Messages -->
         <div class="max-w-xl mx-auto space-y-2">
             @if (session()->has('message'))
@@ -778,6 +814,8 @@
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-y;
+        padding-bottom: 6rem;
+        scroll-padding-bottom: 6rem;
     }
 
     .ql-image-resize-module {
