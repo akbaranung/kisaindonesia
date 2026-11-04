@@ -488,14 +488,35 @@
                                     $wire.set('regularContent', html, false);
                                 });
                     
+                                // Otomatis scroll halaman agar editor berada di atas keyboard saat fokus
                                 window.quillEditor.root.addEventListener('focus', () => {
                                     setTimeout(() => {
-                                        const quillRoot = window.quillEditor.root;
-                                        if (quillRoot) {
-                                            quillRoot.scrollTop = quillRoot.scrollHeight;
+                                        const editorContainer = document.querySelector('#chapter-editor-root .ql-container');
+                                        if (editorContainer) {
+                                            editorContainer.scrollIntoView({
+                                                behavior: 'smooth',
+                                                block: 'nearest'
+                                            });
                                         }
                                     }, 300);
                                 });
+                    
+                                if (window.visualViewport) {
+                                    let lastHeight = window.visualViewport.height;
+                                    window.visualViewport.addEventListener('resize', () => {
+                                        // Jika tinggi viewport mengecil (artinya keyboard muncul)
+                                        if (window.visualViewport.height < lastHeight) {
+                                            setTimeout(() => {
+                                                const quillRoot = window.quillEditor.root;
+                                                if (quillRoot) {
+                                                    // Hanya scroll bagian dalam Quill ke teks paling bawah agar pas di atas keyboard
+                                                    quillRoot.scrollTop = quillRoot.scrollHeight;
+                                                }
+                                            }, 100);
+                                        }
+                                        lastHeight = window.visualViewport.height;
+                                    });
+                                }
                             });
                         }
                     }" x-init="initQuill()" wire:ignore
