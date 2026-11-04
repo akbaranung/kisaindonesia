@@ -1,8 +1,16 @@
 <div id="chapter-editor-root" x-data="{
     startX: 0,
     startY: 0,
+    prevHtmlOverscroll: '',
+    prevBodyOverscroll: '',
     initPtrGuard() {
         const root = this.$el;
+
+        // Cegah pull-to-refresh browser pada level dokumen (sama seperti story-reader)
+        this.prevHtmlOverscroll = document.documentElement.style.overscrollBehaviorY;
+        this.prevBodyOverscroll = document.body.style.overscrollBehaviorY;
+        document.documentElement.style.overscrollBehaviorY = 'none';
+        document.body.style.overscrollBehaviorY = 'none';
 
         root.addEventListener('touchstart', (e) => {
             this.startX = e.touches[0].clientX;
@@ -33,6 +41,10 @@
         ['touchend', 'touchcancel'].forEach(t =>
             root.addEventListener(t, (e) => e.stopPropagation(), { passive: true })
         );
+    },
+    destroy() {
+        document.documentElement.style.overscrollBehaviorY = this.prevHtmlOverscroll;
+        document.body.style.overscrollBehaviorY = this.prevBodyOverscroll;
     }
 }" x-init="initPtrGuard()"
     class="fixed inset-0 z-40 flex w-full flex-col overscroll-none bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased overflow-hidden transition-colors duration-200">
@@ -141,7 +153,8 @@
     <!-- ========================================== -->
     <!-- 2. MAIN CANVAS AREA (SCROLLABLE)           -->
     <!-- ========================================== -->
-    <div class="flex-1 overflow-y-auto overscroll-y-contain touch-pan-y p-4 pb-24 space-y-4">
+    <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;"
+        class="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 pb-24 space-y-4">
         <!-- Flash Messages -->
         <div class="max-w-xl mx-auto space-y-2">
             @if (session()->has('message'))
