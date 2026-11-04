@@ -6,7 +6,6 @@
     initPtrGuard() {
         const root = this.$el;
 
-        // Cegah pull-to-refresh browser / WebView pada level dokumen
         this.prevHtmlOverscroll = document.documentElement.style.overscrollBehaviorY;
         this.prevBodyOverscroll = document.body.style.overscrollBehaviorY;
         document.documentElement.style.overscrollBehaviorY = 'none';
@@ -24,10 +23,8 @@
             const dx = e.touches[0].clientX - this.startX;
             const dy = e.touches[0].clientY - this.startY;
 
-            // Abaikan jika gerakan lebih ke arah horizontal (swipe samping)
             if (Math.abs(dx) > Math.abs(dy)) return;
 
-            // Cari kontainer scrollable terdekat tempat jari menyentuh
             let el = e.target;
             let scrollableParent = null;
 
@@ -45,13 +42,16 @@
                 const scrollHeight = scrollableParent.scrollHeight;
                 const clientHeight = scrollableParent.clientHeight;
 
-                // Jika pengguna berada di posisi paling ATAS dan menarik ke bawah (pull-down)
-                // ATAU di posisi paling BAWAH dan mendorong ke atas -> Kunci agar APK tidak reload/bounce
-                if ((scrollTop <= 0 && dy > 0) || (scrollTop + clientHeight >= scrollHeight - 1 && dy < 0)) {
+                if (scrollTop <= 2 && dy > 0) {
                     if (e.cancelable) e.preventDefault();
+                    return;
+                }
+
+                if (scrollTop + clientHeight >= scrollHeight - 2 && dy < 0) {
+                    if (e.cancelable) e.preventDefault();
+                    return;
                 }
             } else {
-                // Sentuhan di luar area scroll (seperti header/footer) dilarang memicu scroll dokumen
                 if (e.cancelable) e.preventDefault();
             }
         }, { passive: false });
@@ -59,6 +59,14 @@
         ['touchend', 'touchcancel'].forEach(t =>
             root.addEventListener(t, (e) => e.stopPropagation(), { passive: true })
         );
+    },
+    scrollStep(direction) {
+        const canvas = document.getElementById('editor-canvas');
+        if (canvas) {
+            // Menggeser sejauh 300 piksel ke atas atau ke bawah secara mulus (smooth)
+            const amount = direction === 'up' ? -300 : 300;
+            canvas.scrollBy({ top: amount, behavior: 'smooth' });
+        }
     },
     destroy() {
         document.documentElement.style.overscrollBehaviorY = this.prevHtmlOverscroll;
@@ -93,7 +101,6 @@
             </select>
 
             <div x-data="{ showConfirmModal: false }">
-                <!-- Tombol Simpan (Trigger) -->
                 <button type="button"
                     @click="
             if ($wire.status === 'published' && '{{ $chapter->status }}' !== 'published') {
@@ -108,7 +115,6 @@
                     <span wire:loading wire:target="saveChapter">Menyimpan...</span>
                 </button>
 
-                <!-- Modal Konfirmasi Publikasi -->
                 <template x-teleport="body">
                     <div x-show="showConfirmModal" x-cloak x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
@@ -169,13 +175,13 @@
     </header>
 
     <!-- ========================================== -->
-    <!-- 2. MAIN CANVAS AREA (SCROLLABLE)           -->
+    <!-- 2. MAIN CANVAS AREA (SCROLLABLE & NO BAR)  -->
     <!-- ========================================== -->
     <div class="relative flex-1 min-h-0 flex flex-col">
         <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;"
             x-ref="canvas" id="editor-canvas"
-            class="{{ $type === 'chat' ? 'chat-scroll-hidden pr-6' : 'editor-scroll' }} flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 pb-24 space-y-4">
-            <!-- Flash Messages -->
+            class="no-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y p-4 pb-24 space-y-4">
+
             <div class="max-w-xl mx-auto space-y-2">
                 @if (session()->has('message'))
                     <div
@@ -191,7 +197,6 @@
                     </div>
                 @endif
             </div>
-
 
             <!-- Input Judul & Cover Bab -->
             <div class="max-w-xl mx-auto space-y-3">
@@ -264,16 +269,13 @@
                                     : 'https://ui-avatars.com/api/?name=' . urlencode($charName) . '&background=random';
                         @endphp
 
-                        <!-- A. Tipe Pesan TEKS -->
                         @if (($b['message_type'] ?? 'text') === 'text')
                             <div class="space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
                                 <div
                                     class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                    {{-- Avatar --}}
                                     <img src="{{ $avatar }}"
                                         class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
 
-                                    {{-- Gelembung Pesan --}}
                                     <div
                                         class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
                                         <span
@@ -291,16 +293,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- B. Tipe Pesan GAMBAR -->
                         @elseif(($b['message_type'] ?? '') === 'image')
                             <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
                                 <div
                                     class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                    {{-- Avatar --}}
                                     <img src="{{ $avatar }}"
                                         class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
 
-                                    {{-- Gelembung Pesan --}}
                                     <div
                                         class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
                                         <span
@@ -332,7 +331,6 @@
                                 </div>
 
                             </div>
-                            <!-- C. Tipe Pesan LOG PANGGILAN -->
                         @elseif(($b['message_type'] ?? '') === 'call')
                             <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
                                 <div
@@ -371,7 +369,6 @@
                             </div>
                         @endif
 
-                        <!-- Aksi Quick Edit & Hapus Row -->
                         @php
                             if ($isRight) {
                                 $position = 'justify-end';
@@ -382,7 +379,6 @@
                             }
                         @endphp
 
-
                         <div
                             class="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 pt-0.5 {{ $position }}">
                             <button type="button" wire:click="editBubble({{ $index }})"
@@ -391,8 +387,6 @@
                             <button type="button" wire:click="deleteBubble({{ $index }})"
                                 class="hover:text-rose-500 dark:hover:text-rose-400 font-semibold transition">Hapus</button>
                         </div>
-
-
 
                     @empty
                         <div class="py-20 text-center space-y-2">
@@ -404,10 +398,8 @@
                     @endforelse
 
                 </div>
-                <!-- TAMPILAN CANVAS REGULER / NOVEL / PUISI -->
             @else
                 <div class="max-w-xl mx-auto pt-2">
-                    <!-- Quill Editor Wrapper dengan $nextTick -->
                     <div x-data="{
                         initQuill() {
                             this.$nextTick(() => {
@@ -473,80 +465,28 @@
 
         </div>
 
-        @if ($type === 'chat')
-            {{-- Scrollbar kustom yang bisa diseret --}}
-            <div x-data="{
-                el: null,
-                visible: false,
-                dragging: false,
-                thumbH: 40,
-                thumbTop: 0,
-                startY: 0,
-                startScroll: 0,
-                init() {
-                    this.el = document.getElementById('editor-canvas');
-                    if (!this.el) return;
-                    const upd = () => this.update();
-                    this.el.addEventListener('scroll', upd, { passive: true });
-                    window.addEventListener('resize', upd);
-                    new ResizeObserver(upd).observe(this.el);
-                    new MutationObserver(upd).observe(this.el, { childList: true, subtree: true, attributes: true });
-                    this.$nextTick(upd);
-                },
-                update() {
-                    if (!this.el || !this.$refs.track) return;
-                    const sh = this.el.scrollHeight,
-                        ch = this.el.clientHeight;
-                    this.visible = sh > ch + 4;
-                    if (!this.visible) return;
-                    const trackH = this.$refs.track.clientHeight;
-                    this.thumbH = Math.max(40, trackH * ch / sh);
-                    const maxTop = Math.max(1, trackH - this.thumbH);
-                    this.thumbTop = maxTop * (this.el.scrollTop / Math.max(1, sh - ch));
-                },
-                startDrag(e) {
-                    this.dragging = true;
-                    this.startY = e.clientY;
-                    this.startScroll = this.el.scrollTop;
-                    e.currentTarget.setPointerCapture(e.pointerId);
-                },
-                onDrag(e) {
-                    if (!this.dragging) return;
-                    const trackH = this.$refs.track.clientHeight;
-                    const scrollable = this.el.scrollHeight - this.el.clientHeight;
-                    const ratio = scrollable / Math.max(1, trackH - this.thumbH);
-                    this.el.scrollTop = this.startScroll + (e.clientY - this.startY) * ratio;
-                },
-                endDrag(e) {
-                    this.dragging = false;
-                    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
-                },
-                jumpTo(e) {
-                    const ratio = (e.clientY - rect.top - this.thumbH / 2) / Math.max(1, rect.height - this.thumbH);
-                    this.el.scrollTop = Math.min(1, Math.max(0, ratio)) * (this.el.scrollHeight - this.el.clientHeight);
-                }
-            }" x-show="visible" x-cloak
-                class="absolute right-0 top-2 bottom-2 w-6 z-30 select-none" style="touch-action: none;">
-                <div x-ref="track" @pointerdown.self.prevent="jumpTo($event)" class="absolute inset-0">
-                    <div @pointerdown.stop.prevent="startDrag($event)" @pointermove="onDrag($event)"
-                        @pointerup="endDrag($event)" @pointercancel="endDrag($event)"
-                        :style="'height:' + thumbH + 'px; transform: translateY(' + thumbTop + 'px); touch-action: none;'"
-                        class="absolute right-0 w-6 flex justify-end pr-1 cursor-grab active:cursor-grabbing">
-                        <div class="h-full rounded-full transition-[width,background-color] duration-150"
-                            :class="dragging ? 'w-2 bg-brand-500' : 'w-1.5 bg-slate-400/80 dark:bg-slate-500/80'"></div>
-                    </div>
-                </div>
-            </div>
-        @endif
+        <!-- TOMBOL FLOATING NAVIGASI CEPAT (NAIK & TURUN) -->
+        <div
+            class="absolute right-3 bottom-5 z-30 flex flex-col gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+            <button type="button" @click="scrollStep('up')"
+                class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
+                title="Naik 300px">
+                <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button type="button" @click="scrollStep('down')"
+                class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
+                title="Turun 300px">
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+        </div>
+
     </div>
 
     @if ($type === 'chat')
-
         <div x-data="{ showTypePicker: false }"
             class="shrink-0 p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
 
             @if ($message_type !== 'center_text')
-                <!-- 1. QUICK LIVE MANAGEMENT KARAKTER BAR -->
                 <div
                     class="flex items-center justify-between gap-2 pb-2.5 mb-2 border-b border-slate-200 dark:border-slate-800/80">
                     <div class="flex items-center gap-1.5 overflow-x-auto py-0.5 scrollbar-none">
@@ -579,13 +519,11 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="m16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                     </svg>
-
                                 </button>
                             </div>
                         @endforeach
                     </div>
 
-                    <!-- Tombol Quick Add Karakter -->
                     <button type="button" wire:click="openAddCharacterModal"
                         class="px-2.5 py-1 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/30 text-brand-600 dark:text-brand-400 font-bold text-[11px] rounded-xl shrink-0 flex items-center gap-1 transition">
                         <span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -606,7 +544,6 @@
                 </div>
             @endif
 
-            <!-- 2. STATUS SEDANG EDIT BUBBLE -->
             @if ($editingIndex !== null)
                 <div
                     class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-800/60">
@@ -633,7 +570,6 @@
                         @endif
                     </div>
 
-                    <!-- Tombol Batal/Hapus Preview Gambar -->
                     <button type="button" wire:click="removeImagePreview"
                         class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md hover:bg-rose-600 transition">
                         ✕
@@ -643,7 +579,7 @@
                 </div>
             @endif
 
-            <!-- 3. INPUT FORM CHAT -->
+            <!-- 3. INPUT FORM CHAT (DINAMIS / AUTO-RESIZE) -->
             <div class="space-y-1" x-data="{
                 resize(el) {
                     el.style.height = 'auto';
@@ -652,7 +588,6 @@
             }">
                 <form wire:submit.prevent="saveBubble" class="flex items-end gap-2">
 
-                    <!-- Tombol Plus (+) untuk Buka Popup Tipe Pesan -->
                     <button type="button" @click="showTypePicker = true"
                         class="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl shrink-0 transition flex items-center justify-center active:scale-95 mb-0.5"
                         title="Pilih Tipe Pesan">
@@ -662,15 +597,12 @@
                         </svg>
                     </button>
 
-                    <!-- A. Tipe Pesan TEKS (Dinamis / Auto-Resize) -->
                     @if ($message_type === 'text')
                         <textarea wire:model="message" x-init="resize($el)" @input="resize($el)" rows="1"
                             placeholder="Ketik pesan chat..."
                             class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600 resize-none max-h-32 overflow-y-auto leading-relaxed"></textarea>
-
-                        <!-- B. Tipe Pesan GAMBAR -->
                     @elseif($message_type === 'image')
-                        <div class="flex-1 flex items-center gap-1.5 min-w-0">
+                        <div class="flex-1 flex items-center gap-1.5 min-w-0 mb-0.5">
                             <label
                                 class="px-2.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-600 dark:text-slate-300 cursor-pointer hover:border-brand-500 transition shrink-0 flex items-center gap-1">
                                 <span>📷</span>
@@ -682,10 +614,8 @@
                             <input type="text" wire:model="message" placeholder="Caption (opsional)..."
                                 class="flex-1 min-w-0 px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
                         </div>
-
-                        <!-- C. Tipe Pesan PANGGILAN -->
                     @elseif($message_type === 'call')
-                        <div class="flex-1 grid grid-cols-2 gap-1.5 min-w-0">
+                        <div class="flex-1 grid grid-cols-2 gap-1.5 min-w-0 mb-0.5">
                             <select wire:model="call_type"
                                 class="px-2 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:border-brand-500 truncate">
                                 <option value="incoming">📲 Masuk</option>
@@ -695,15 +625,12 @@
                             <input type="text" wire:model="call_duration" placeholder="Durasi (02:45)"
                                 class="px-2.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600">
                         </div>
-
-                        <!-- D. Tipe Pesan TEKS TENGAH (Auto-Resize) -->
                     @elseif($message_type === 'center_text')
                         <textarea wire:model="message" x-init="resize($el)" @input="resize($el)" rows="1"
                             placeholder="Tulis narasi / keterangan waktu (cth: 'Keesokan Harinya')..."
                             class="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-brand-600 dark:text-brand-300 italic focus:outline-none focus:border-brand-500 placeholder-slate-400 dark:placeholder-slate-600 resize-none max-h-32 overflow-y-auto leading-relaxed"></textarea>
                     @endif
 
-                    <!-- Tombol Kirim / Update -->
                     <button type="submit"
                         class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white dark:text-slate-950 font-bold text-xs rounded-xl shrink-0 transition flex items-center gap-1 shadow-md shadow-brand-500/10 mb-0.5">
                         <span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -715,6 +642,22 @@
                     </button>
 
                 </form>
+                @error('message')
+                    <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block pt-0.5">⚠️
+                        {{ $message }}</span>
+                @enderror
+                @error('image_upload')
+                    <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block pt-0.5">⚠️
+                        {{ $message }}</span>
+                @enderror
+                @error('call_type')
+                    <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block pt-0.5">⚠️
+                        {{ $message }}</span>
+                @enderror
+                @error('call_duration')
+                    <span class="text-[10px] text-rose-500 dark:text-rose-400 font-bold block pt-0.5">⚠️
+                        {{ $message }}</span>
+                @enderror
             </div>
 
             <!-- 4. POPUP ACTION SHEET PILIHAN TIPE PESAN -->
@@ -768,7 +711,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
                                 </svg>
-
                             </span>
                             <span class="text-[11px] font-bold">Gambar</span>
                         </button>
@@ -797,9 +739,7 @@
         </div>
     @endif
 
-    <!-- ========================================== -->
-    <!-- 4. MODAL LIVE MANAGEMENT KARAKTER          -->
-    <!-- ========================================== -->
+    <!-- MODAL LIVE MANAGEMENT KARAKTER -->
     @if ($isCharacterModalOpen)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
             <div
@@ -815,8 +755,6 @@
                 </div>
 
                 <form wire:submit.prevent="saveQuickCharacter" class="space-y-3.5">
-
-                    <!-- Avatar Upload -->
                     <div class="flex items-center gap-3">
                         <label
                             class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center cursor-pointer overflow-hidden shrink-0 hover:border-brand-500 transition relative group">
@@ -845,7 +783,6 @@
                         </div>
                     </div>
 
-                    <!-- Posisi Chat Default -->
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Posisi
                             Chat Default</label>
@@ -855,8 +792,7 @@
                                 <input type="radio" wire:model="char_position" value="left"
                                     class="text-brand-500 focus:ring-0">
                                 <span class="text-xs font-bold text-slate-700 dark:text-slate-200"><i
-                                        class="fa-solid fa-caret-left"></i>
-                                    Kiri</span>
+                                        class="fa-solid fa-caret-left"></i> Kiri</span>
                             </label>
                             <label
                                 class="flex items-center gap-1.5 p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition {{ $char_position === 'right' ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : '' }}">
@@ -868,7 +804,6 @@
                         </div>
                     </div>
 
-                    <!-- Actions -->
                     <div
                         class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
                         <button type="button" wire:click="closeCharacterModal"
@@ -890,7 +825,19 @@
 </div>
 
 <style>
-    /* Matikan pull-to-refresh / overscroll di level dokumen saat editor terbuka */
+    /* Hilangkan Scrollbar secara Total pada Container Editor/Chat */
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+        /* Chrome, Safari, Opera */
+    }
+
     html,
     body {
         overscroll-behavior-y: none !important;
@@ -906,7 +853,6 @@
         touch-action: pan-x pan-y;
     }
 
-    /* Quill: tinggi mengikuti isi, scroll ditangani container utama */
     #chapter-editor-root .ql-container.ql-snow {
         height: auto;
         overflow: visible;
@@ -917,30 +863,6 @@
         min-height: 350px;
         overflow-y: visible;
         padding-bottom: 6rem;
-    }
-
-    /* Chat: scrollbar native disembunyikan, diganti scrollbar kustom yang bisa diseret */
-    #chapter-editor-root .chat-scroll-hidden {
-        scrollbar-width: none;
-    }
-
-    #chapter-editor-root .chat-scroll-hidden::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Scrollbar tipis yang terlihat di container utama (Quill) */
-    #chapter-editor-root .editor-scroll {
-        scrollbar-width: thin;
-        scrollbar-color: #94a3b8 transparent;
-    }
-
-    #chapter-editor-root .editor-scroll::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    #chapter-editor-root .editor-scroll::-webkit-scrollbar-thumb {
-        background-color: #94a3b8;
-        border-radius: 9999px;
     }
 
     .ql-image-resize-module {
@@ -1011,10 +933,6 @@
 
     .dark .ql-snow .ql-stroke {
         stroke: #94a3b8 !important;
-    }
-
-    .ql-snow .ql-fill {
-        fill: #64748b !important;
     }
 
     .dark .ql-snow .ql-fill {
