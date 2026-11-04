@@ -184,9 +184,6 @@
         </div>
     </header>
 
-    <!-- ========================================== -->
-    <!-- 2. MAIN CANVAS AREA (SCROLLABLE & NO BAR)  -->
-    <!-- ========================================== -->
     <div class="relative flex-1 min-h-0 flex flex-col">
         <div style="overscroll-behavior: contain; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;"
             x-ref="canvas" id="editor-canvas" x-init="$nextTick(() => {
@@ -498,7 +495,7 @@
                                         if (editorContainer) {
                                             editorContainer.scrollIntoView({
                                                 behavior: 'smooth',
-                                                block: 'center'
+                                                block: 'nearest'
                                             });
                                         }
                                     }, 300);
