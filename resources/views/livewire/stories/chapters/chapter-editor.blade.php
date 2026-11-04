@@ -485,6 +485,16 @@
                                     let html = window.quillEditor.root.innerHTML;
                                     $wire.set('regularContent', html, false);
                                 });
+                    
+                                // TAMBAHAN: Otomatis scroll ke bawah saat Quill mendapatkan focus (keyboard muncul)
+                                window.quillEditor.root.addEventListener('focus', () => {
+                                    setTimeout(() => {
+                                        window.quillEditor.root.scrollTo({
+                                            top: window.quillEditor.root.scrollHeight,
+                                            behavior: 'smooth'
+                                        });
+                                    }, 300); // Penundaan (delay) sejenak agar animasi kemunculan keyboard perangkat selesai
+                                });
                             });
                         }
                     }" x-init="initQuill()" wire:ignore
