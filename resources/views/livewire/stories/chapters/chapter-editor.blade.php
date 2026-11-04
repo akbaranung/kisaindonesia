@@ -488,15 +488,11 @@
                                     $wire.set('regularContent', html, false);
                                 });
                     
-                                // Otomatis scroll halaman agar editor berada di atas keyboard saat fokus
                                 window.quillEditor.root.addEventListener('focus', () => {
                                     setTimeout(() => {
-                                        const editorContainer = document.querySelector('#chapter-editor-root .ql-container');
-                                        if (editorContainer) {
-                                            editorContainer.scrollIntoView({
-                                                behavior: 'smooth',
-                                                block: 'nearest'
-                                            });
+                                        const quillRoot = window.quillEditor.root;
+                                        if (quillRoot) {
+                                            quillRoot.scrollTop = quillRoot.scrollHeight;
                                         }
                                     }, 300);
                                 });
