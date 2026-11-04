@@ -465,9 +465,9 @@
                     </div>
                 </div>
 
-                <div x-data="{ showConfirmModal: false }" class="max-w-xl mx-auto pb-12 flex justify-end">
+                <div x-data="{ showConfirmModal: false }" class="max-w-xl mx-auto flex justify-end">
 
-                    <button type="button"
+                    {{-- <button type="button"
                         @click="
             if ($wire.status === 'published' && '{{ $chapter->status }}' !== 'published') {
                 showConfirmModal = true;
@@ -479,7 +479,7 @@
                         class="px-4 py-2 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white dark:text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 transition flex items-center gap-1.5 disabled:opacity-50">
                         <span wire:loading.remove wire:target="saveChapter"><i class="fas fa-save"></i> Simpan</span>
                         <span wire:loading wire:target="saveChapter">Menyimpan...</span>
-                    </button>
+                    </button> --}}
 
                     <template x-teleport="body">
                         <div x-show="showConfirmModal" x-cloak x-transition:enter="transition ease-out duration-200"
@@ -936,8 +936,8 @@
 
     /* FIX QUILL: Kunci tinggi Quill Editor agar TIDAK DINAMIS, berikan scrollbar internal */
     #chapter-editor-root .ql-container.ql-snow {
-        height: 420px !important;
-        max-height: 60vh !important;
+        height: 90vh !important;
+        max-height: 90vh !important;
         overflow: hidden;
     }
 
