@@ -1,21 +1,34 @@
-<div class="w-full max-w-6xl mx-auto px-4 py-6 mb-20">
-    {{-- Header --}}
-    <div class="flex items-center justify-between gap-4 mb-6">
-        <div class="flex flex-col gap-1">
-            <h1 class="text-2xl font-black text-slate-800 dark:text-slate-100">Jelajahi Semua Cerita</h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Temukan ribuan cerita menarik dari berbagai genre dan
-                penulis pilihan.</p>
+<div class="w-full max-w-6xl mx-auto pb-6 mb-20">
+    <header
+        class="sticky mb-2 top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-4 py-3.5 flex items-center justify-between gap-3 transition-colors">
+        <div class="flex items-center gap-3">
+            <a href="{{ url('/') }}" wire:navigate
+                class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </a>
+            <div>
+                <h1 class="font-black text-base text-slate-900 dark:text-slate-100 tracking-tight">Jelajahi Semua Cerita
+                </h1>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Temukan ribuan cerita menarik dari
+                    berbagai genre dan
+                    penulis pilihan.</p>
+            </div>
         </div>
+
+        {{-- Tombol Toggle Dark/Light Mode --}}
         <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark Mode"
-            class="p-2.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800">
-            <i class="fa-solid fa-sun block dark:hidden text-amber-500 text-sm"></i>
+            class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
             <i class="fa-solid fa-moon hidden dark:block text-amber-300 text-sm"></i>
+            <i class="fa-solid fa-sun block dark:hidden text-amber-500 text-sm"></i>
         </button>
-    </div>
+    </header>
+
 
     {{-- Filter & Search Bar --}}
     <div
-        class="flex flex-col p-2.5 gap-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-6">
+        class="px-4 flex flex-col p-2.5 gap-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-2xs mb-6">
         <div class="relative w-full">
             <input type="text" wire:model.live.debounce.1000ms="search" placeholder="Cari judul atau penulis..."
                 class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
