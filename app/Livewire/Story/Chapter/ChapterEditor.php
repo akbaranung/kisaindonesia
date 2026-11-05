@@ -25,6 +25,7 @@ class ChapterEditor extends Component
 
     // form temporary state
     public $editingIndex = null;
+    public ?int $insertAfterIndex = null;
     public $character_id = null;
     public $message_type = 'text'; // text|image|call
     public $message = '';
@@ -85,6 +86,18 @@ class ChapterEditor extends Component
         if ($this->characters->isNotEmpty()) {
             $this->character_id = $this->characters->first()->id;
         }
+    }
+
+    public function startInsertAfter(int $index)
+    {
+        if (!isset($this->bubbles[$index])) return;
+        $this->resetBubbleForm();
+        $this->insertAfterIndex = $index;
+    }
+
+    public function cancelInsert()
+    {
+        $this->insertAfterIndex = null;
     }
 
     public function saveBubble()
@@ -159,6 +172,9 @@ class ChapterEditor extends Component
 
             if ($this->editingIndex !== null) {
                 $this->bubbles[$this->editingIndex] = $bubbleData;
+            } elseif ($this->insertAfterIndex !== null) {
+                array_splice($this->bubbles, $this->insertAfterIndex + 1, 0, [$bubbleData]);
+                $this->insertAfterIndex++;
             } else {
                 $this->bubbles[] = $bubbleData;
             }
@@ -174,6 +190,7 @@ class ChapterEditor extends Component
     public function editBubble(int $index)
     {
         if (!isset($this->bubbles[$index])) return;
+        $this->insertAfterIndex = null;
 
         $bubble = $this->bubbles[$index];
         $this->editingIndex       = $index;
@@ -190,6 +207,7 @@ class ChapterEditor extends Component
     public function deleteBubble(int $index)
     {
         if (!isset($this->bubbles[$index])) return;
+        $this->insertAfterIndex = null;
 
         $bubble = $this->bubbles[$index];
 

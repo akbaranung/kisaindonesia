@@ -1,21 +1,94 @@
-<div
-    class="w-full max-w-5xl mx-auto px-2 py-8 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+<div x-data="{ showCoverPreview: false }"
+    class="w-full max-w-5xl mx-auto pb-8 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+    <header
+        class="sticky mb-2 top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-4 py-3.5 flex items-center justify-between gap-3 transition-colors">
+        <div class="flex items-center gap-3">
+            <a href="{{ url('/') }}" wire:navigate
+                class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </a>
+            <div>
+                <h1 class="font-black text-base text-slate-900 dark:text-slate-100 tracking-tight">Profile Pena</h1>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Halaman profile Pena
+                    {{ $penName->name }}</p>
+            </div>
+        </div>
+
+        {{-- Tombol Toggle Dark/Light Mode --}}
+        <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark Mode"
+            class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-moon hidden dark:block text-amber-300 text-sm"></i>
+            <i class="fa-solid fa-sun block dark:hidden text-amber-500 text-sm"></i>
+        </button>
+    </header>
     {{-- 1. HEADER PROFIL NAMA PENA --}}
     <div
-        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 md:p-8 shadow-sm mb-8">
+        class="px-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 md:p-8 shadow-sm mb-8">
         <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
             {{-- Avatar Nama Pena --}}
             <div
                 class="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-brand-100 dark:bg-brand-950 flex-shrink-0 border-4 border-slate-50 dark:border-slate-800 shadow-inner flex items-center justify-center">
                 @if ($penName->avatar)
                     <img src="{{ asset('storage/' . $penName->avatar) }}" alt="{{ $penName->name }}"
-                        class="w-full h-full object-cover">
+                        class="w-full h-full object-cover" @click="showCoverPreview = true"
+                        oncontextmenu="return false;" ondragstart="return false;">
+                    <div @click="showCoverPreview = true" oncontextmenu="return false;" ondragstart="return false;"
+                        class="absolute inset-0 z-10 cursor-pointer"></div>
                 @else
                     <span class="text-3xl font-black text-brand-600 dark:text-brand-400">
                         {{ strtoupper(substr($penName->name, 0, 1)) }}
                     </span>
                 @endif
             </div>
+
+            @if ($penName->avatar)
+                <!-- MODAL PREVIEW COVER PROTECTED -->
+                <template x-teleport="body">
+                    <div x-show="showCoverPreview" x-cloak x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0" @keydown.window.escape="showCoverPreview = false"
+                        @keydown.window.ctrl.s.prevent @keydown.window.ctrl.p.prevent oncontextmenu="return false;"
+                        ondragstart="return false;"
+                        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 print:hidden select-none">
+
+                        <div class="fixed inset-0" @click="showCoverPreview = false"></div>
+
+                        <div class="relative z-10 max-w-sm w-full flex flex-col items-center gap-3">
+                            <div class="w-full flex items-center justify-between text-slate-300 px-2">
+                                <span class="text-xs font-bold flex items-center gap-1.5 text-slate-400">
+                                    <i class="fa-solid fa-shield-halved text-brand-400"></i> Preview Image
+                                </span>
+                                <button type="button" @click="showCoverPreview = false"
+                                    class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm font-bold transition">
+                                    ✕
+                                </button>
+                            </div>
+
+                            <div
+                                class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 max-h-[75vh] select-none">
+                                <img src="{{ asset('storage/' . $penName->avatar) }}" alt="{{ $penName->name }}"
+                                    oncontextmenu="return false;" ondragstart="return false;"
+                                    class="max-h-[75vh] w-auto object-contain select-none">
+
+                                <div class="absolute inset-0 z-20 pointer-events-auto flex items-center justify-center overflow-hidden"
+                                    oncontextmenu="return false;" ondragstart="return false;">
+                                    <div
+                                        class="opacity-20 rotate-[-30deg] text-white font-extrabold text-xs tracking-widest text-center select-none pointer-events-none whitespace-nowrap">
+                                        KISA INDONESIA • PROTECTED PREVIEW
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-[10px] text-slate-400 font-medium text-center">
+                                🔒 Cover dilindungi hak cipta &amp; tidak dapat diunduh.
+                            </p>
+                        </div>
+                    </div>
+                </template>
+            @endif
 
             {{-- Detail Profil --}}
             <div class="flex-1 text-center md:text-left">
@@ -61,7 +134,7 @@
 
     {{-- 2. KATALOG CERITA NAMA PENA --}}
     <div
-        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 mb-6 shadow-sm">
+        class="px-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 mb-6 shadow-sm">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
             {{-- Input Search --}}
             <div class="lg:col-span-5 relative">
@@ -136,8 +209,8 @@
             <div
                 class="bg-white dark:bg-slate-900 rounded-2xl p-12 text-center border border-dashed border-slate-200 dark:border-slate-800">
                 <svg xmlns="http://www.w3.org/2000/svg"
-                    class="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-3" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
+                    class="h-12 w-12 mx-auto text-slate-300 dark:text-slate-600 mb-3" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
@@ -182,7 +255,8 @@
                                 </h3>
 
                                 {{-- Sinopsis Singkat --}}
-                                <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
+                                <p
+                                    class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
                                     {{ $story->synopsis }}
                                 </p>
                             </div>

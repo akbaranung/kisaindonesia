@@ -271,137 +271,154 @@
                 <div class="max-w-xl mx-auto space-y-4 pb-36">
 
                     @forelse($bubbles as $index => $b)
-                        @php
-                            $char = $characters->firstWhere('id', $b['character_id'] ?? null);
-                            $isRight = ($char->default_position ?? 'left') === 'right';
-                            $isLeft = ($char->default_position ?? 'right') === 'left';
-                            $isCenter = $b['message_type'] === 'center_text';
-                            $charName = $char ? $char->name : 'Unknown';
-                            $avatar =
-                                $char && $char->avatar_path
-                                    ? asset('storage/' . $char->avatar_path)
-                                    : 'https://ui-avatars.com/api/?name=' . urlencode($charName) . '&background=random';
-                        @endphp
+                        <div wire:key="bubble-{{ $b['id'] ?? $index }}" id="bubble-{{ $b['id'] ?? $index }}"
+                            class="space-y-4">
+                            @php
+                                $char = $characters->firstWhere('id', $b['character_id'] ?? null);
+                                $isRight = ($char->default_position ?? 'left') === 'right';
+                                $isLeft = ($char->default_position ?? 'right') === 'left';
+                                $isCenter = $b['message_type'] === 'center_text';
+                                $charName = $char ? $char->name : 'Unknown';
+                                $avatar =
+                                    $char && $char->avatar_path
+                                        ? asset('storage/' . $char->avatar_path)
+                                        : 'https://ui-avatars.com/api/?name=' .
+                                            urlencode($charName) .
+                                            '&background=random';
+                            @endphp
 
-                        @if (($b['message_type'] ?? 'text') === 'text')
-                            <div class="space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
-                                <div
-                                    class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                    <img src="{{ $avatar }}"
-                                        class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
-
+                            @if (($b['message_type'] ?? 'text') === 'text')
+                                <div class="space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
                                     <div
-                                        class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
-                                        <span
-                                            class="text-[10px] font-black text-slate-500 dark:text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
-                                        @if (!$isRight && !empty($row['character_name']))
-                                            <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
-                                                {{ $row['character_name'] }}
-                                            </span>
-                                        @endif
+                                        class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                        <img src="{{ $avatar }}"
+                                            class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
 
                                         <div
-                                            class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/80 dark:border-slate-800' }}">
-                                            <p class="whitespace-pre-line">{{ $b['message'] ?? '' }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @elseif(($b['message_type'] ?? '') === 'image')
-                            <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
-                                <div
-                                    class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                    <img src="{{ $avatar }}"
-                                        class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
-
-                                    <div
-                                        class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
-                                        <span
-                                            class="text-[10px] font-black text-slate-500 dark:text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
-                                        @if (!$isRight && !empty($row['character_name']))
-                                            <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
-                                                {{ $row['character_name'] }}
-                                            </span>
-                                        @endif
-
-                                        <div
-                                            class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'border border-brand-500 text-slate-950 rounded-br-xs' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/80 dark:border-slate-800' }}">
-                                            @if (isset($b['image_upload']) && $b['image_upload'])
-                                                <img src="{{ $b['image_upload']->temporaryUrl() }}"
-                                                    class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
-                                            @elseif(!empty($b['image_url'] ?? ($b['existing_image_url'] ?? null)))
-                                                <img src="{{ Storage::url($b['image_url'] ?? $b['existing_image_url']) }}"
-                                                    class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
+                                            class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
+                                            <span
+                                                class="text-[10px] font-black text-slate-500 dark:text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
+                                            @if (!$isRight && !empty($row['character_name']))
+                                                <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
+                                                    {{ $row['character_name'] }}
+                                                </span>
                                             @endif
-                                            <p class="whitespace-pre-line">
-                                                @if (!empty($b['caption'] ?? $b['message']))
-                                                    <p
-                                                        class="p-2 text-xs text-slate-600 dark:text-slate-300 leading-normal">
-                                                        {{ $b['caption'] ?? $b['message'] }}</p>
-                                                @endif
-                                            </p>
+
+                                            <div
+                                                class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'bg-brand-500 text-slate-950 rounded-br-xs' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/80 dark:border-slate-800' }}">
+                                                <p class="whitespace-pre-line">{{ $b['message'] ?? '' }}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                            </div>
-                        @elseif(($b['message_type'] ?? '') === 'call')
-                            <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
-                                <div
-                                    class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
-                                    <img src="{{ $avatar }}"
-                                        class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
+                            @elseif(($b['message_type'] ?? '') === 'image')
+                                <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
                                     <div
-                                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-sm text-slate-800 dark:text-slate-100">
-                                        @if (($b['call_type'] ?? '') === 'missed')
-                                            <span
-                                                class="text-rose-500 dark:text-rose-400 font-bold flex items-center gap-1">📵
-                                                Panggilan
-                                                Tak Terjawab</span>
-                                        @elseif(($b['call_type'] ?? '') === 'incoming')
-                                            <span
-                                                class="text-emerald-500 dark:text-emerald-400 font-bold flex items-center gap-1">📲
-                                                Panggilan Masuk</span>
-                                        @else
-                                            <span
-                                                class="text-brand-600 dark:text-brand-400 font-bold flex items-center gap-1">📞
-                                                Panggilan
-                                                Keluar</span>
-                                        @endif
+                                        class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                        <img src="{{ $avatar }}"
+                                            class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
 
-                                        <span
-                                            class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">({{ $b['call_duration'] ?? '00:00' }})</span>
+                                        <div
+                                            class="max-w-[80%] flex flex-col {{ $isRight ? 'items-end' : 'items-start' }}">
+                                            <span
+                                                class="text-[10px] font-black text-slate-500 dark:text-slate-600 px-0.5 mb-0.5">{{ $char->name }}</span>
+                                            @if (!$isRight && !empty($row['character_name']))
+                                                <span class="text-[10px] font-extrabold text-slate-400 mb-1 ml-1">
+                                                    {{ $row['character_name'] }}
+                                                </span>
+                                            @endif
+
+                                            <div
+                                                class="p-3.5 px-4 rounded-2xl text-xs font-medium leading-relaxed shadow-2xs break-words {{ $isRight ? 'border border-brand-500 text-slate-950 rounded-br-xs' : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-bl-xs border border-slate-200/80 dark:border-slate-800' }}">
+                                                @if (isset($b['image_upload']) && $b['image_upload'])
+                                                    <img src="{{ $b['image_upload']->temporaryUrl() }}"
+                                                        class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
+                                                @elseif(!empty($b['image_url'] ?? ($b['existing_image_url'] ?? null)))
+                                                    <img src="{{ Storage::url($b['image_url'] ?? $b['existing_image_url']) }}"
+                                                        class="max-w-[200px] sm:max-w-xs rounded-xl object-cover">
+                                                @endif
+                                                <p class="whitespace-pre-line">
+                                                    @if (!empty($b['caption'] ?? $b['message']))
+                                                        <p
+                                                            class="p-2 text-xs text-slate-600 dark:text-slate-300 leading-normal">
+                                                            {{ $b['caption'] ?? $b['message'] }}</p>
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            @elseif(($b['message_type'] ?? '') === 'call')
+                                <div class=" space-y-1 {{ $isRight ? 'text-right' : 'text-left' }}">
+                                    <div
+                                        class="flex items-end gap-2.5 my-1 {{ $isRight ? 'flex-row-reverse' : 'flex-row' }}">
+                                        <img src="{{ $avatar }}"
+                                            class="w-6 h-6 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0">
+                                        <div
+                                            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-sm text-slate-800 dark:text-slate-100">
+                                            @if (($b['call_type'] ?? '') === 'missed')
+                                                <span
+                                                    class="text-rose-500 dark:text-rose-400 font-bold flex items-center gap-1">📵
+                                                    Panggilan
+                                                    Tak Terjawab</span>
+                                            @elseif(($b['call_type'] ?? '') === 'incoming')
+                                                <span
+                                                    class="text-emerald-500 dark:text-emerald-400 font-bold flex items-center gap-1">📲
+                                                    Panggilan Masuk</span>
+                                            @else
+                                                <span
+                                                    class="text-brand-600 dark:text-brand-400 font-bold flex items-center gap-1">📞
+                                                    Panggilan
+                                                    Keluar</span>
+                                            @endif
+
+                                            <span
+                                                class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">({{ $b['call_duration'] ?? '00:00' }})</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @elseif (($b['message_type'] ?? '') === 'center_text')
-                            <div class="flex flex-col items-center justify-center my-4 group">
-                                <div
-                                    class="px-3 py-1 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-full text-[11px] text-slate-600 dark:text-slate-400 font-medium italic text-center max-w-[85%] shadow-sm">
-                                    {{ $b['message'] ?? '' }}
+                            @elseif (($b['message_type'] ?? '') === 'center_text')
+                                <div class="flex flex-col items-center justify-center my-4 group">
+                                    <div
+                                        class="px-3 py-1 bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-full text-[11px] text-slate-600 dark:text-slate-400 font-medium italic text-center max-w-[85%] shadow-sm">
+                                        {{ $b['message'] ?? '' }}
+                                    </div>
                                 </div>
+                            @endif
+
+                            @php
+                                if ($isRight) {
+                                    $position = 'justify-end';
+                                } elseif ($isLeft) {
+                                    $position = 'justify-start';
+                                } elseif ($isCenter) {
+                                    $position = 'justify-center';
+                                }
+                            @endphp
+
+                            <div
+                                class="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 pt-0.5 {{ $position }}">
+                                <button type="button" wire:click="editBubble({{ $index }})"
+                                    class="hover:text-brand-600 dark:hover:text-brand-400 font-semibold transition">Edit</button>
+                                <span>•</span>
+                                <button type="button" wire:click="startInsertAfter({{ $index }})"
+                                    class="hover:text-brand-500 font-semibold transition">Sisipkan</button>
+                                <span>•</span>
+                                <button type="button" wire:click="deleteBubble({{ $index }})"
+                                    class="hover:text-rose-500 dark:hover:text-rose-400 font-semibold transition">Hapus</button>
                             </div>
-                        @endif
 
-                        @php
-                            if ($isRight) {
-                                $position = 'justify-end';
-                            } elseif ($isLeft) {
-                                $position = 'justify-start';
-                            } elseif ($isCenter) {
-                                $position = 'justify-center';
-                            }
-                        @endphp
-
-                        <div
-                            class="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 pt-0.5 {{ $position }}">
-                            <button type="button" wire:click="editBubble({{ $index }})"
-                                class="hover:text-brand-600 dark:hover:text-brand-400 font-semibold transition">Edit</button>
-                            <span>•</span>
-                            <button type="button" wire:click="deleteBubble({{ $index }})"
-                                class="hover:text-rose-500 dark:hover:text-rose-400 font-semibold transition">Hapus</button>
+                            @if ($insertAfterIndex === $index)
+                                <div class="flex items-center gap-2 py-1">
+                                    <div class="flex-1 border-t-2 border-dashed border-brand-400"></div>
+                                    <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400">
+                                        Bubble baru masuk di sini
+                                    </span>
+                                    <div class="flex-1 border-t-2 border-dashed border-brand-400"></div>
+                                </div>
+                            @endif
                         </div>
-
                     @empty
                         <div class="py-20 text-center space-y-2">
                             <span class="text-3xl">💬</span>
@@ -625,6 +642,20 @@
                     <button type="button" wire:click="resetBubbleForm"
                         class="text-[10px] text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-200">
                         <i class="fas fa-times"></i> Batal
+                    </button>
+                </div>
+            @endif
+
+            @if ($insertAfterIndex !== null)
+                <div
+                    class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-800/60">
+                    <span
+                        class="text-[10px] font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 px-2 py-0.5 rounded-lg border border-brand-200 dark:border-brand-500/20">
+                        <i class="fas fa-arrow-turn-down"></i> Menyisipkan setelah Bubble #{{ $insertAfterIndex + 1 }}
+                    </span>
+                    <button type="button" wire:click="cancelInsert"
+                        class="text-[10px] text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-200">
+                        <i class="fas fa-times"></i> Selesai
                     </button>
                 </div>
             @endif
