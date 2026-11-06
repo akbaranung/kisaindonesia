@@ -85,7 +85,7 @@ class SubmitCarouselModal extends Component
             $user->decrement('kisa_bean_balance', $totalCost);
 
             $admin = User::where('email', 'admin@kisaindonesia.id')->firstOrFail();
-            $admin->increment('earned_beans', $totalCost);
+            $admin->increment('kisa_bean_balance', $totalCost);
 
             // Buat Catatan Transaksi (Jika ada tabel coin_transactions)
             $refGroup = 'ADS-' . date('Ymd') . '-' . strtoupper(Str::random(6));

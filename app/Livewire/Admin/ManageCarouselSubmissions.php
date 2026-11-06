@@ -91,7 +91,7 @@ class ManageCarouselSubmissions extends Component
             $submission->user->increment('kisa_bean_balance', $submission->cost_in_beans);
 
             $admin = User::where('email', 'admin@kisaindonesia.id')->firstOrFail();
-            $admin->decrement('earned_beans', $submission->cost_in_beans);
+            $admin->decrement('kisa_bean_balance', $submission->cost_in_beans);
 
             $transactionUser->update([
                 'status' => 'failed'
