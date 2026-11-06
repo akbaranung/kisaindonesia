@@ -2,7 +2,7 @@
     {{-- 📱 TOP NAVIGATION BAR --}}
     <div
         class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs z-50 mb-3 transition-colors">
-        <a href="{{ url('/') }}" wire:navigate
+        <a href="{{ url()->previous() }}" wire:navigate
             class="text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center gap-1 transition bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-xl">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
