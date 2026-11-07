@@ -67,19 +67,19 @@
             </select>
         </div>
 
-        <!-- Filter Pilihan Editor -->
         <div>
-            <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Pilihan Editor</label>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Badge / Section</label>
             <div class="flex gap-2">
-                <select wire:model.live="editorChoice"
+                <select wire:model.live="selectedBadge"
                     class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-brand-400">
-                    <option value="">Semua</option>
-                    <option value="1">Ya (Bintang)</option>
-                    <option value="0">Tidak</option>
+                    <option value="">Semua Badge</option>
+                    @foreach ($badges as $b)
+                        <option value="{{ $b->id }}">{{ $b->name }}</option>
+                    @endforeach
                 </select>
 
                 <!-- Tombol Reset Filter -->
-                @if ($search || $category || $type || $editorChoice)
+                @if ($search || $category || $type || $selectedBadge)
                     <button type="button" wire:click="resetFilters"
                         class="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs rounded-xl font-bold transition"
                         title="Reset Filter">
@@ -103,8 +103,7 @@
                     <th class="p-3 text-center">Views Periode Ini</th>
                     <th class="p-3">Email</th>
                     <th class="p-3">Kategori</th>
-                    <th class="p-3 text-center">Pilihan Editor</th>
-                    <th class="p-3 text-center">Urutan</th>
+                    <th class="p-3 text-center">Badge & Section Spesial</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60">
@@ -133,33 +132,31 @@
                             </span>
                         </td>
 
-                        <!-- KOLOM TOGGLE PILIHAN EDITOR -->
-                        <td class="p-3 text-center">
-                            <button type="button" wire:click="toggleEditorChoice({{ $story->id }})"
-                                wire:loading.attr="disabled"
-                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $story->is_editor_choice ? 'bg-brand-500' : 'bg-slate-700' }}"
-                                role="switch" aria-checked="{{ $story->is_editor_choice ? 'true' : 'false' }}">
+                        <td class="p-3">
+                            <div class="flex flex-wrap items-center justify-center gap-1.5">
+                                @foreach ($badges as $badge)
+                                    @php
+                                        $hasBadge = $story->badges->contains('id', $badge->id);
+                                        $pivotOrder = $hasBadge ? $story->badges->find($badge->id)->pivot->order : 0;
+                                    @endphp
 
-                                <span class="sr-only">Toggle Pilihan Editor</span>
+                                    <div
+                                        class="flex items-center gap-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
+                                        <button type="button"
+                                            wire:click="toggleBadge({{ $story->id }}, {{ $badge->id }})"
+                                            class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition {{ $hasBadge ? 'bg-brand-500 text-slate-950' : 'text-slate-400 hover:text-slate-200' }}">
+                                            {{ $badge->name }}
+                                        </button>
 
-                                <!-- Indicator Circle -->
-                                <span
-                                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 shadow ring-0 transition duration-200 ease-in-out flex items-center justify-center {{ $story->is_editor_choice ? 'translate-x-5' : 'translate-x-0' }}">
-                                    @if ($story->is_editor_choice)
-                                        <span class="text-[9px] text-brand-400">★</span>
-                                    @endif
-                                </span>
-                            </button>
-                        </td>
-                        <td class="p-3 text-center">
-                            @if ($story->is_editor_choice)
-                                <input type="number" value="{{ $story->editor_choice_order }}"
-                                    wire:change="updateEditorChoiceOrder({{ $story->id }}, $event.target.value)"
-                                    min="1"
-                                    class="w-14 px-2 py-1 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-center text-slate-100 focus:outline-none focus:border-brand-400">
-                            @else
-                                <span class="text-[10px] text-slate-600">-</span>
-                            @endif
+                                        @if ($hasBadge)
+                                            <input type="number" value="{{ $pivotOrder }}"
+                                                wire:change="updateBadgeOrder({{ $story->id }}, {{ $badge->id }}, $event.target.value)"
+                                                title="Urutan Tampil"
+                                                class="w-8 px-1 py-0.5 bg-slate-900 border border-slate-700 rounded text-[10px] font-bold text-center text-slate-100 focus:outline-none focus:border-brand-400">
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
                         </td>
                     </tr>
                 @empty

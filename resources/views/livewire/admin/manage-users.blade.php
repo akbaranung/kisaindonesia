@@ -124,11 +124,11 @@
                             </td>
 
                             <td class="p-3 text-slate-500">
-                                {{ $user->kisa_bean_balance }}
+                                {{ $user->earned_beans }}
                             </td>
 
                             <td class="p-3 text-slate-500">
-                                {{ $user->earned_beans }}
+                                {{ $user->kisa_bean_balance }}
                             </td>
 
                             <!-- Actions -->

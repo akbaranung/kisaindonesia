@@ -111,4 +111,9 @@ class Story extends Model
     {
         return $this->hasOne(StoryContract::class)->latest();
     }
+
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'story_badge')->withPivot('order')->withTimestamps();
+    }
 }

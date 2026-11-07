@@ -42,10 +42,23 @@ class Home extends Component
             ->take(6)
             ->get();
 
-        $editorChoices = Story::with(['author', 'genre'])
-            ->where('is_editor_choice', true)
-            ->orderByRaw('is_editor_choice DESC, editor_choice_order ASC, created_at DESC')
-            ->get();
+        $editorChoices = Story::whereHas('badges', function ($q) {
+            $q->where('slug', 'editor-choice');
+        })
+            ->with(['author', 'genre', 'badges'])
+            ->get()
+            ->sortBy(function ($story) {
+                return $story->badges->firstWhere('slug', 'editor-choice')->pivot->order;
+            });
+
+        $recommendedStories = Story::whereHas('badges', function ($q) {
+            $q->where('slug', 'recommended');
+        })
+            ->with(['author', 'genre', 'badges'])
+            ->get()
+            ->sortBy(function ($story) {
+                return $story->badges->firstWhere('slug', 'recommended')->pivot->order;
+            });
 
         $latestStories = Story::with(['penName', 'genre'])
             ->where('status', 'published')
@@ -64,6 +77,7 @@ class Home extends Component
             'popularStories' => $popularStories,
             'recentChapters' => $recentChapters,
             'latestStories' => $latestStories,
+            'recommendedStories' => $recommendedStories,
             'user' => Auth::user()
         ]);
     }

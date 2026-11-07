@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Badge;
 use App\Models\Genre;
 use App\Models\Story;
 use Illuminate\Support\Facades\DB;
@@ -15,13 +16,13 @@ class StoryManager extends Component
     public string $search = '';
     public string $category = '';
     public string $type = '';
-    public string $editorChoice = '';
+    public string $selectedBadge = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'category' => ['except' => ''],
         'type' => ['except' => ''],
-        'editorChoice' => ['except' => ''],
+        'selectedBadge' => ['except' => ''],
     ];
 
     public function updatingSearch()
@@ -39,39 +40,39 @@ class StoryManager extends Component
         $this->resetPage();
     }
 
-    public function updatingEditorChoice()
+    public function updatingSelectedBadge()
     {
         $this->resetPage();
     }
 
     public function resetFilters()
     {
-        $this->reset(['search', 'category', 'type', 'editorChoice']);
+        $this->reset(['search', 'category', 'type', 'selectedBadge']);
         $this->resetPage();
     }
 
-    public function toggleEditorChoice(int $storyId)
+    public function toggleBadge(int $storyId, int $badgeId)
     {
-        $story = Story::findOrFail($storyId);
-        $story->is_editor_choice = !$story->is_editor_choice;
-
-        // JIka dinonaktifkan, reset urutannya ke 0
-        if (!$story->is_editor_choice) {
-            $story->editor_choice_order = 0;
+        $story = Story::findOrfail($storyId);
+        if ($story->badges()->where('badge_id', $badgeId)->exists()) {
+            $story->badges()->detach($badgeId);
+            $msg = "Badge berhasil dihapus dari cerita.";
+        } else {
+            $story->badges()->attach($badgeId, ['order' => 0]);
+            $msg = "Badge berhasil ditambahkan ke cerita.";
         }
 
-        $story->save();
-
-        session()->flash('message', "Status Pilihan Editor untuk '{$story->title}' berhasil diperbarui.");
+        session()->flash('message', $msg);
     }
 
-    public function updateEditorChoiceOrder(int $storyId, $order)
+    public function updateBadgeOrder(int $storyId, int $badgeId, $order)
     {
         $story = Story::findOrFail($storyId);
-        $story->editor_choice_order = max(0, (int) $order);
-        $story->save();
+        $story->badges()->updateExistingPivot($badgeId, [
+            'order' => max(0, (int) $order)
+        ]);
 
-        session()->flash('message', "Urutan Pilihan Editor '{$story->title}' berhasil diubah ke urutan {$story->editor_choice_order}.");
+        session()->flash('message', "Urutan berhasil diperbarui.");
     }
 
     public function resetAllPeriodicViews()
@@ -106,7 +107,9 @@ class StoryManager extends Component
     public function render()
     {
         $categories = Genre::orderBy('name')->get();
-        $stories = Story::with(['author', 'genre'])
+        $badges = Badge::orderBy('name')->get();
+
+        $stories = Story::with(['author', 'genre', 'badges'])
             // Search Judul atau Penulis
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
@@ -124,13 +127,18 @@ class StoryManager extends Component
             ->when($this->type, function ($query) {
                 $query->where('monetization_type', $this->type === 'premium');
             })
-            // Filter Pilihan Editor
-            ->when($this->editorChoice !== '', function ($query) {
-                $query->where('is_editor_choice', $this->editorChoice === '1');
+            ->when($this->selectedBadge, function ($query) {
+                $query->whereHas('badges', function ($bQuery) {
+                    $bQuery->where('badges.id', $this->selectedBadge);
+                });
             })
-            ->orderByRaw('is_editor_choice DESC, editor_choice_order ASC, created_at DESC')
+            ->latest()
             ->paginate(10);
 
-        return view('livewire.admin.story-manager', ['stories' => $stories, 'categories' => $categories])->layout('layouts.admin');
+        return view('livewire.admin.story-manager', [
+            'stories' => $stories,
+            'categories' => $categories,
+            'badges' => $badges,
+        ])->layout('layouts.admin');
     }
 }
