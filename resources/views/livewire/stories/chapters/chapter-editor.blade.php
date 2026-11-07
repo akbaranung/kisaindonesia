@@ -870,6 +870,7 @@
                                 <span class="text-lg"><i class="fas fa-camera"></i></span>
                             @endif
                             <input type="file" wire:model="char_avatar_upload" accept="image/*" class="hidden">
+
                         </label>
 
                         <div class="flex-1 min-w-0">
@@ -883,7 +884,12 @@
                                     class="text-[9px] text-rose-500 dark:text-rose-400 block font-bold mt-0.5">{{ $message }}</span>
                             @enderror
                         </div>
+
                     </div>
+                    @error('char_avatar_upload')
+                        <span
+                            class="text-[9px] text-rose-500 dark:text-rose-400 block font-bold mt-0.5">{{ $message }}</span>
+                    @enderror
 
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Posisi
