@@ -46,7 +46,7 @@
 
     {{-- ================= SEKSYEN 3: KATEGORI & URUTAN LIST REAL-DATA ================= --}}
     <div class="p-2">
-        @if (!$editorChoices))
+        @if ($editorChoices->isNotEmpty())
             <section class="space-y-4">
                 <div class="flex items-center justify-between mb-3">
                     <div>
@@ -163,7 +163,7 @@
             </section>
         @endif
 
-        @if (!$recommendedStories))
+        @if ($recommendedStories->isNotEmpty())
             <section class="space-y-4">
                 <div class="flex items-center justify-between mb-3">
                     <div>
@@ -399,5 +399,6 @@
                 @endforeach
             </div>
         </section>
+
     </div>
 </div>
