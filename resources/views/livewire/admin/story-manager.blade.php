@@ -98,6 +98,7 @@
                 <tr>
                     <th class="p-3">No.</th>
                     <th class="p-3">Judul Cerita</th>
+                    <th class="p-3">Status</th>
                     <th class="p-3">Penulis</th>
                     <th class="p-3 text-center">Total Views</th>
                     <th class="p-3 text-center">Views Periode Ini</th>
@@ -114,6 +115,20 @@
                         </td>
                         <td class="p-3 font-semibold text-slate-200">
                             {{ $story->title }}
+                        </td>
+                        <td class="p-3 font-semibold text-slate-200">
+                            @php
+                                if ($story->status === 'draft') {
+                                    $color = 'amber';
+                                } elseif ($story->status === 'published') {
+                                    $color = 'brand';
+                                }
+                            @endphp
+                            <span
+                                class="px-2 py-0.5 rounded-md bg-{{ $color }}-500/10 hover:bg-{{ $color }}-500/20 border border-{{ $color }}-500/30 text-{{ $color }}-400 text-[10px]">
+                                {{ $story->status }}
+                            </span>
+
                         </td>
                         <td class="p-3 text-slate-400">
                             {{ $story->author->name ?? '-' }}
