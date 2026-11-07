@@ -73,13 +73,16 @@ class CategoryDetail extends Component
         }
 
         // 1. Query Pilihan Editor khusus parent kategori ini
-        $editorChoices = Story::with(['penName', 'genre'])
+        $editorChoices = Story::whereHas('badges', function ($q) {
+            $q->where('slug', 'editor-choice');
+        })
             ->where('status', 'published')
-            ->where('is_editor_choice', true)
             ->whereIn('category', $allParentGenreIds)
-            ->latest()
-            ->take(6)
-            ->get();
+            ->with(['author', 'genre', 'badges', 'penName'])
+            ->get()
+            ->sortBy(function ($story) {
+                return $story->badges->firstWhere('slug', 'editor-choice')->pivot->order;
+            });
 
         // 2. Query Cerita dengan Filter & Searching
         $query = Story::query()

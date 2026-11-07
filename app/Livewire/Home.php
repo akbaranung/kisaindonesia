@@ -45,6 +45,7 @@ class Home extends Component
         $editorChoices = Story::whereHas('badges', function ($q) {
             $q->where('slug', 'editor-choice');
         })
+            ->where('status', 'published')
             ->with(['author', 'genre', 'badges'])
             ->get()
             ->sortBy(function ($story) {
@@ -54,6 +55,7 @@ class Home extends Component
         $recommendedStories = Story::whereHas('badges', function ($q) {
             $q->where('slug', 'recommended');
         })
+            ->where('status', 'published')
             ->with(['author', 'genre', 'badges'])
             ->get()
             ->sortBy(function ($story) {

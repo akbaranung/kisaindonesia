@@ -150,6 +150,10 @@
                                 </h3>
 
                                 <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
+                                    {{ $story->genre->name ?? 'Uncategorized' }}
+                                </span>
+
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
                                     <a href="{{ route('pen-name.show', [$story->penName->id]) }}"
                                         class="hover:underline">{{ '@' . $story->penName?->name ?? 'Penulis Kisa' }}</a>
                                 </span>
@@ -267,6 +271,10 @@
                                     {{ $story->title }}
                                 </a>
                             </h3>
+
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
+                                {{ $story->genre->name ?? 'Uncategorized' }}
+                            </span>
 
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
                                 <a href="{{ route('pen-name.show', [$story->penName->id]) }}"
