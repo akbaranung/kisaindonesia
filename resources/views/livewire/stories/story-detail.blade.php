@@ -120,13 +120,17 @@
 
         {{-- Judul & Penulis --}}
         <h1 class="text-lg font-black text-slate-800 dark:text-slate-100 leading-tight px-4">{{ $story->title }}</h1>
+        <span class="text-[15px] my-2 text-slate-400 dark:text-slate-500 font-medium line-clamp-1">
+            {{ $story->genre->name ?? 'Uncategorized' }}
+        </span>
         <div class="flex gap-2 items-center text-brand-600 dark:text-brand-400 font-bold">
             <div
                 class="w-8 h-8 rounded-full overflow-hidden bg-brand-100 dark:bg-slate-800 flex-shrink-0 border-4 border-slate-50 dark:border-slate-800 shadow-inner flex items-center justify-center">
                 <img src="{{ $story->penName->profile_photo_url }}" alt="{{ $story->penName->name }}"
                     class="w-full h-full object-cover">
             </div>
-            <a href="{{ route('pen-name.show', $story->penName->id) }}" class="flex items-center gap-1 hover:underline">
+            <a href="{{ route('pen-name.show', $story->penName->id) }}"
+                class="flex items-center gap-1 hover:underline">
                 <span>{{ $story->penName->name }}</span>
                 <span><i class="fa-solid fa-chevron-right text-xs"></i></span>
             </a>
