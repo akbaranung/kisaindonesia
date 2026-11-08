@@ -1,4 +1,22 @@
-<div x-data="{ showCoverPreview: false }" class="">
+<div x-data="{
+    showCoverPreview: false,
+    copied: false,
+    shareStory() {
+        const shareData = {
+            title: '{{ addslashes($story->title) }}',
+            text: 'Cerita {{ addslashes($story->title) }}',
+            url: window.location.href
+        };
+
+        if (navigator.share) {
+            navigator.share(shareData).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            this.copied = true;
+            setTimeout(() => this.copied = false, 2500);
+        }
+    },
+}" class="">
     {{-- 📱 TOP NAVIGATION BAR --}}
     <div
         class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs z-50 mb-3 transition-colors">
@@ -10,6 +28,13 @@
         </a>
 
         <div class="flex items-center gap-2">
+            <button @click="shareStory()" title="Bagikan Cerita Ini"
+                class="p-2 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition rounded-xl hover:bg-brand-50 dark:hover:bg-brand-950/40 active:scale-90">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684" />
+                </svg>
+            </button>
             {{-- Tombol Toggle Mode Terang/Gelap --}}
             <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark Mode"
                 class="p-2 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">

@@ -3,6 +3,7 @@
 namespace App\Livewire\Story;
 
 use App\Models\Category;
+use App\Models\Chapter;
 use App\Models\Genre;
 use App\Models\Story;
 use Livewire\Component;
@@ -91,9 +92,15 @@ class StoryIndex extends Component
             ->when($this->selectedMonetization, function ($query) {
                 $query->where('monetization_type', $this->selectedMonetization);
             })
-            ->when($this->sortBy === 'latest', fn($q) => $q->latest())
+            ->when($this->sortBy === 'latest', fn($q) => $q->orderByDesc(
+                Chapter::select('created_at')
+                    ->whereColumn('story_id', 'stories.id')
+                    ->latest()
+                    ->limit(1)
+            ))
             ->when($this->sortBy === 'popular', fn($q) => $q->orderByDesc('views_count'))
             ->when($this->sortBy === 'title', fn($q) => $q->orderBy('title', 'asc'));
+
 
         $totalStories = $query->count();
         $stories = $query->take($this->perPage)->get();
