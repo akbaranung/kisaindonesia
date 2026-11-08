@@ -34,8 +34,6 @@
                     <img src="{{ asset('storage/' . $penName->avatar) }}" alt="{{ $penName->name }}"
                         class="w-full h-full object-cover" @click="showCoverPreview = true"
                         oncontextmenu="return false;" ondragstart="return false;">
-                    <div @click="showCoverPreview = true" oncontextmenu="return false;" ondragstart="return false;"
-                        class="absolute inset-0 z-10 cursor-pointer"></div>
                 @else
                     <span class="text-3xl font-black text-brand-600 dark:text-brand-400">
                         {{ strtoupper(substr($penName->name, 0, 1)) }}
