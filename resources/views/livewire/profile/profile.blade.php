@@ -74,7 +74,7 @@
                 <a href="{{ route('library') }}"
                     class="flex flex-col items-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 transition hover:bg-white dark:hover:bg-slate-800 hover:shadow-2xs">
                     <span
-                        class="text-lg font-black text-brand-600 dark:text-brand-400">{{ number_format($user->savedStories->where('status', 'published')->count(), 0, ',', '.') }}</span>
+                        class="text-lg font-black text-brand-600 dark:text-brand-400">{{ number_format($user->savedStories->where('status', 'published')->where('is_blocked', false)->count(), 0, ',', '.') }}</span>
                     <span
                         class="text-[9px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-tighter">Library</span>
                 </a>

@@ -2,7 +2,8 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h1 class="text-xl font-bold text-slate-100">Kelola Cerita</h1>
-            <p class="text-xs text-slate-400 mt-1">Atur status publikasi, pilihan editor, serta cari cerita platform.</p>
+            <p class="text-xs text-slate-400 mt-1">Atur status publikasi, blokir cerita, pilihan editor, serta cari
+                cerita platform.</p>
         </div>
 
         @if (auth()->check() && auth()->user()->email === 'admin@kisaindonesia.id')
@@ -68,6 +69,16 @@
         </div>
 
         <div>
+            <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Status Blokir</label>
+            <select wire:model.live="statusFilter"
+                class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-brand-400">
+                <option value="">Semua Status</option>
+                <option value="active">Aktif (Normal)</option>
+                <option value="blocked">Diblokir</option>
+            </select>
+        </div>
+
+        <div>
             <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Badge / Section</label>
             <div class="flex gap-2">
                 <select wire:model.live="selectedBadge"
@@ -105,6 +116,9 @@
                     <th class="p-3">Email</th>
                     <th class="p-3">Kategori</th>
                     <th class="p-3 text-center">Badge & Section Spesial</th>
+                    @if (auth()->check() && auth()->user()->email === 'admin@kisaindonesia.id')
+                        <th class="p-3 text-center">Aksi</th>
+                    @endif
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60">
@@ -173,6 +187,27 @@
                                 @endforeach
                             </div>
                         </td>
+                        @if (auth()->check() && auth()->user()->email === 'admin@kisaindonesia.id')
+                            <td class="p-3 text-center">
+                                @if ($story->is_blocked)
+                                    <button type="button" wire:click="toggleBlockStory({{ $story->id }})"
+                                        wire:confirm="Buka blokir cerita '{{ $story->title }}'?"
+                                        class="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 mx-auto"
+                                        title="Buka Blokir">
+                                        <i class="fa-solid fa-lock-open"></i>
+                                        <span>Buka Blokir</span>
+                                    </button>
+                                @else
+                                    <button type="button" wire:click="toggleBlockStory({{ $story->id }})"
+                                        wire:confirm="Yakin ingin memblokir cerita '{{ $story->title }}'?"
+                                        class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 mx-auto"
+                                        title="Blokir Cerita">
+                                        <i class="fa-solid fa-ban"></i>
+                                        <span>Blokir</span>
+                                    </button>
+                                @endif
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr>

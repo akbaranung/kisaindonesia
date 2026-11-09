@@ -40,7 +40,8 @@ class MyLibrary extends Component
         // Query mengambil daftar cerita yang di-bookmark user
         $query = $user->savedStories()
             ->with(['author', 'genre'])
-            ->where('status', 'published');
+            ->where('status', 'published')
+            ->where('is_blocked', false);
 
         // Fitur pencarian lokal di dalam My Library
         if (!empty($this->search)) {
@@ -56,6 +57,9 @@ class MyLibrary extends Component
         if ($user) {
             $continueReading = ReadHistory::with(['chapter.story.penName'])
                 ->where('user_id', $user->id)
+                ->whereHas('chapter.story', function ($query) {
+                    $query->where('is_blocked', false);
+                })
                 ->latest('updated_at')
                 ->take(6)
                 ->get();

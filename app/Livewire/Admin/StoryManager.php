@@ -17,12 +17,14 @@ class StoryManager extends Component
     public string $category = '';
     public string $type = '';
     public string $selectedBadge = '';
+    public string $statusFilter = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
         'category' => ['except' => ''],
         'type' => ['except' => ''],
         'selectedBadge' => ['except' => ''],
+        'statusFilter' => ['except' => '']
     ];
 
     public function updatingSearch()
@@ -45,10 +47,25 @@ class StoryManager extends Component
         $this->resetPage();
     }
 
+    public function updatingStatusFilter()
+    {
+        $this->resetPage();
+    }
+
     public function resetFilters()
     {
-        $this->reset(['search', 'category', 'type', 'selectedBadge']);
+        $this->reset(['search', 'category', 'type', 'selectedBadge', 'statusFilter']);
         $this->resetPage();
+    }
+
+    public function toggleBlockStory(int $storyId)
+    {
+        $story = Story::findOrFail($storyId);
+        $story->is_blocked = !$story->is_blocked;
+        $story->save();
+
+        $statusText = $story->is_blocked ? 'diblokir' : 'dibuka blokirnya';
+        session()->flash('message', "Cerita '{$story->title}' berhasil {$statusText}.");
     }
 
     public function toggleBadge(int $storyId, int $badgeId)
@@ -131,6 +148,13 @@ class StoryManager extends Component
                 $query->whereHas('badges', function ($bQuery) {
                     $bQuery->where('badges.id', $this->selectedBadge);
                 });
+            })
+            ->when($this->statusFilter !== '', function ($query) {
+                if ($this->statusFilter === 'blocked') {
+                    $query->where('is_blocked', true);
+                } elseif ($this->statusFilter === 'active') {
+                    $query->where('is_blocked', false);
+                }
             })
             ->latest()
             ->paginate(10);

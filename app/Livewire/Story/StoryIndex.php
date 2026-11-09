@@ -74,6 +74,7 @@ class StoryIndex extends Component
     {
         $query = Story::query()
             ->where('status', 'published')
+            ->where('is_blocked', false)
             ->with(['penName'])
             ->withCount(['chapters' => function ($q) {
                 $q->where('status', 'published');

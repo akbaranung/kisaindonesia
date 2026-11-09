@@ -63,7 +63,7 @@
                         $contract && $contract->contract_version >= $latestContractVersion && !$isContractExpired;
                 @endphp
                 <div
-                    class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-4 shadow-2xl dark:shadow-none transition-colors">
+                    class="bg-white dark:bg-slate-900 border {{ $story->is_blocked ? 'border-rose-500/40 bg-rose-500/5' : 'border-slate-100 dark:border-slate-800' }} rounded-3xl p-4 shadow-2xl dark:shadow-none transition-colors">
                     <div class="flex gap-4 items-center">
                         <div
                             class="w-16 h-22 bg-slate-50 dark:bg-slate-800 rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100 dark:border-slate-700 flex items-center justify-center">
@@ -87,13 +87,20 @@
                                 {{ $story->synopsis ?? 'Tidak ada sinopsis' }}
                             </p>
                             <div class="flex flex-wrap items-center gap-1.5 mt-2">
-                                <span
-                                    class="text-[9px] px-2 py-0.5 rounded-lg font-bold
-                                {{ $story->status === 'published'
-                                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
-                                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700' }}">
-                                    {{ ucfirst($story->status) }}
-                                </span>
+                                @if ($story->is_blocked)
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 flex items-center gap-1">
+                                        <i class="fa-solid fa-ban text-[8px]"></i> Diblokir oleh Admin
+                                    </span>
+                                @else
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold
+        {{ $story->status === 'published'
+            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
+            : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700' }}">
+                                        {{ ucfirst($story->status) }}
+                                    </span>
+                                @endif
                                 <span
                                     class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                                     {{ $story->chapters_count ?? $story->chapters()->count() }} Bab

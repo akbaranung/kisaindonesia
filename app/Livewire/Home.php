@@ -29,13 +29,14 @@ class Home extends Component
         $query = Story::query()
             ->with(['penName', 'genre'])
             ->where('status', 'published')
+            ->where('is_blocked', false)
             ->where('monetization_type', 'premium');
 
         if (auth()->check()) {
             auth()->user()->load('savedStories');
         }
 
-        $popularStories = Story::with(['penName'])->where('status', 'published')->where('monetization_type', 'premium')->orderByDesc('views_count')->take(10)->get();
+        $popularStories = Story::with(['penName'])->where('status', 'published')->where('monetization_type', 'premium')->where('is_blocked', false)->orderByDesc('views_count')->take(10)->get();
         $recentChapters = Chapter::with(['story.penName'])
             ->where('status', 'published')
             ->latest()
@@ -46,6 +47,7 @@ class Home extends Component
             $q->where('slug', 'editor-choice');
         })
             ->where('status', 'published')
+            ->where('is_blocked', false)
             ->with(['author', 'genre', 'badges'])
             ->get()
             ->sortBy(function ($story) {
@@ -56,6 +58,7 @@ class Home extends Component
             $q->where('slug', 'recommended');
         })
             ->where('status', 'published')
+            ->where('is_blocked', false)
             ->with(['author', 'genre', 'badges'])
             ->get()
             ->sortBy(function ($story) {
@@ -64,6 +67,7 @@ class Home extends Component
 
         $latestStories = Story::with(['penName', 'genre'])
             ->where('status', 'published')
+            ->where('is_blocked', false)
             ->orderByDesc(
                 Chapter::select('created_at')
                     ->whereColumn('story_id', 'stories.id')

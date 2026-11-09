@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,10 +23,14 @@ class Story extends Model
         'is_editor_choice',
         'is_mature',
         'periodic_views_count',
-        'vies_ranking'
+        'vies_ranking',
+        'is_blocked'
     ];
 
-    protected $casts = ['is_editor_choice' => 'boolean'];
+    protected $casts = [
+        'is_editor_choice' => 'boolean',
+        'is_blocked' => 'boolean',
+    ];
 
     use HasFactory;
 

@@ -20,7 +20,7 @@ class StoryDetail extends Component
 
     public function mount(Story $story, StoryViewService $viewService)
     {
-        if ($story->status !== 'published') {
+        if ($story->status !== 'published' or $story->is_blocked) {
             abort(404);
         }
 
@@ -72,7 +72,9 @@ class StoryDetail extends Component
 
     public function render()
     {
-        $isSaved = Auth::check() ? Auth::user()->savedStories()->where('story_id', $this->story->id)->exists() : false;
+        $isSaved = Auth::check()
+            ? Auth::user()->savedStories()->where('story_id', $this->story->id)->where('is_blocked', false)->exists()
+            : false;
 
         return view('livewire.stories.story-detail', [
             'isSaved' => $isSaved

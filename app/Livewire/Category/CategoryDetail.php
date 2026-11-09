@@ -77,6 +77,7 @@ class CategoryDetail extends Component
             $q->where('slug', 'editor-choice');
         })
             ->where('status', 'published')
+            ->where('is_blocked', false)
             ->whereIn('category', $allParentGenreIds)
             ->with(['author', 'genre', 'badges', 'penName'])
             ->get()
@@ -87,6 +88,7 @@ class CategoryDetail extends Component
         // 2. Query Cerita dengan Filter & Searching
         $query = Story::query()
             ->where('status', 'published')
+            ->where('is_blocked', false)
             ->whereIn('category', $genreIds)
             ->with(['penName', 'genre'])
             ->when($this->search, function ($q) {
