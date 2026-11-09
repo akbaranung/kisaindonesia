@@ -16,7 +16,9 @@
             setTimeout(() => this.copied = false, 2500);
         }
     },
-}" class="">
+}" @contextmenu.prevent @copy.prevent @cut.prevent @paste.prevent
+    style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;" class="select-none"
+    oncontextmenu="return false;" ondragstart="return false;">
     {{-- 📱 TOP NAVIGATION BAR --}}
     <div
         class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs z-50 mb-3 transition-colors">

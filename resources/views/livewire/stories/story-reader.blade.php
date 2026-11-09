@@ -187,7 +187,8 @@
         }
     }
 }" @contextmenu.prevent @copy.prevent @cut.prevent @paste.prevent
-    class="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col max-w-2xl w-full mx-auto border-x border-slate-100 dark:border-slate-800 shadow-xs relative transition-colors duration-200 overscroll-y-none">
+    style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;"
+    class="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col max-w-2xl w-full mx-auto border-x border-slate-100 dark:border-slate-800 shadow-xs relative transition-colors duration-200 overscroll-y-none select-none">
 
     {{-- Notification Toast saat Salin Tautan --}}
     <div x-show="copied" x-cloak x-transition:enter="transition ease-out duration-300 transform"
@@ -807,3 +808,15 @@
 
     </main>
 </div>
+
+<style>
+    .select-none,
+    .select-none * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-user-drag: none !important;
+    }
+</style>
