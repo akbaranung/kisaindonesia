@@ -141,7 +141,7 @@ class ManagePremiumRequests extends Component
 
     public function render()
     {
-        $query = PremiumStoryRequest::with(['user', 'story', 'processor'])
+        $query = PremiumStoryRequest::with(['user', 'story.contract', 'processor'])
             ->where(function ($q) {
                 $q->whereHas('story', function ($storyQuery) {
                     $storyQuery->where('title', 'like', '%' . $this->search . '%');

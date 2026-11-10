@@ -57,6 +57,7 @@
                         <th class="p-3">Penulis</th>
                         <th class="p-3">Judul Cerita</th>
                         <th class="p-3">Tanggal Pengajuan</th>
+                        <th class="p-3">TTD Kontrak</th>
                         <th class="p-3">Status</th>
                         <th class="p-3 text-right">Aksi</th>
                     </tr>
@@ -79,6 +80,16 @@
                             <!-- Tanggal -->
                             <td class="p-3 text-slate-500">
                                 {{ $req->created_at->format('d M Y, H:i') }}
+                            </td>
+
+                            <td class="p-3">
+                                @if ($req->story && $req->story->contract && $req->story->contract->signed_at)
+                                    <span class="text-emerald-400 font-medium">
+                                        {{ \Carbon\Carbon::parse($req->story->contract->signed_at)->format('d M Y, H:i') }}
+                                    </span>
+                                @else
+                                    <span class="text-rose-400/80 italic">Belum TTD</span>
+                                @endif
                             </td>
 
                             <!-- Status Badge -->
@@ -199,10 +210,18 @@
 
                     <!-- Sinopsis -->
                     <div>
-                        <span class="text-slate-400 font-bold block mb-1">Sinopsis:</span>
+                        <span class="text-slate-400 font-bold block mb-1">Blurb:</span>
                         <p
                             class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/60 leading-relaxed text-slate-300">
                             {{ $selectedRequest->story->synopsis ?? 'Tidak ada sinopsis.' }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <span class="text-slate-400 font-bold block mb-1">Sinopsis:</span>
+                        <p
+                            class="p-3 bg-slate-800/60 rounded-xl border border-slate-700/60 leading-relaxed text-slate-300">
+                            {{ $selectedRequest->author_notes ?? 'Tidak ada sinopsis.' }}
                         </p>
                     </div>
 
