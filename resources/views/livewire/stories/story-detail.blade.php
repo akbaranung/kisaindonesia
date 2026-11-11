@@ -34,16 +34,27 @@
     <meta name="twitter:image" content="{{ $shareImage }}" />
 @endpush
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <div x-data="{
     showCoverPreview: false,
     copied: false,
     isGeneratingShare: false,
     cardFile: null, // cache gambar kartu supaya tap berikutnya instan
 
+    // html2canvas dimuat hanya saat dibutuhkan (share di HP), tanpa tag script di luar root Livewire
+    loadHtml2canvas() {
+        if (window.html2canvas) return Promise.resolve();
+        return new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+            s.onload = resolve;
+            s.onerror = () => reject(new Error('Gagal memuat html2canvas'));
+            document.head.appendChild(s);
+        });
+    },
+
     async buildCardFile() {
         if (this.cardFile) return this.cardFile;
+        await this.loadHtml2canvas();
 
         const cardElement = document.getElementById('share-card-element');
         if (!cardElement) throw new Error('Elemen #share-card-element tidak ditemukan');
