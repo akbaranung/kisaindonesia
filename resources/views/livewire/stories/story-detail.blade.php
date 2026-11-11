@@ -1,24 +1,200 @@
+@push('heads')
+    @php
+        // Pastikan variabel $story tersedia di halaman detail
+        $shareTitle = isset($story)
+            ? $story->title . ' - Kisa Indonesia'
+            : 'Kisa Indonesia - Platform Membaca & Menulis';
+        $shareDescription = isset($story)
+            ? Str::limit(strip_tags($story->synopsis), 120)
+            : 'Baca cerita seru dan interaktif.';
+        $shareImage = isset($story)
+            ? route('stories.og', ['story' => $story->slug, 'v' => optional($story->updated_at)->timestamp])
+            : asset('default-banner.jpg');
+        $shareUrl = url()->current();
+    @endphp
+
+    <!-- Standard Meta Tags -->
+    <title>{{ $shareTitle }}</title>
+    <meta name="description" content="{{ $shareDescription }}">
+
+    <!-- Open Graph / Facebook / WhatsApp / Telegram -->
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="{{ $shareUrl }}" />
+    <meta property="og:title" content="{{ $shareTitle }}" />
+    <meta property="og:description" content="{{ $shareDescription }}" />
+    <meta property="og:image" content="{{ $shareImage }}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="{{ $shareUrl }}" />
+    <meta name="twitter:title" content="{{ $shareTitle }}" />
+    <meta name="twitter:description" content="{{ $shareDescription }}" />
+    <meta name="twitter:image" content="{{ $shareImage }}" />
+@endpush
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <div x-data="{
     showCoverPreview: false,
     copied: false,
-    shareStory() {
-        const shareData = {
-            title: '{{ addslashes($story->title) }}',
-            text: 'Cerita {{ addslashes($story->title) }}',
-            url: window.location.href
-        };
+    isGeneratingShare: false,
+    cardFile: null, // cache gambar kartu supaya tap berikutnya instan
 
-        if (navigator.share) {
-            navigator.share(shareData).catch(() => {});
-        } else {
-            navigator.clipboard.writeText(window.location.href);
-            this.copied = true;
-            setTimeout(() => this.copied = false, 2500);
-        }
+    async buildCardFile() {
+        if (this.cardFile) return this.cardFile;
+
+        const cardElement = document.getElementById('share-card-element');
+        if (!cardElement) throw new Error('Elemen #share-card-element tidak ditemukan');
+
+        const canvas = await html2canvas(cardElement, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#0f172a',
+            onclone: (clonedDoc) => {
+                const clonedEl = clonedDoc.getElementById('share-card-element');
+                if (clonedEl) clonedEl.style.color = '#ffffff';
+            }
+        });
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        this.cardFile = new File([blob], 'Kisa-{{ Str::slug($story->title) }}.png', { type: 'image/png' });
+        return this.cardFile;
     },
+
+    flashCopied() {
+        this.copied = true;
+        setTimeout(() => this.copied = false, 3500);
+    },
+
+    async shareStory() {
+        if (this.isGeneratingShare) return;
+        this.isGeneratingShare = true;
+
+        const shareUrl = window.location.href;
+        const title = '{{ addslashes($story->title) }}';
+        const text = '✨ Sedang membaca ' + title + ' di Kisa Indonesia. Yuk, ikuti kisah serunya di sini!';
+
+        try {
+            // 1) Perangkat yang bisa share file (umumnya HP): kirim gambar + link sebagai caption
+            const probe = new File([''], 'x.png', { type: 'image/png' });
+            const canShareFile = navigator.canShare && navigator.canShare({ files: [probe] });
+
+            if (canShareFile) {
+                try {
+                    const imageFile = await this.buildCardFile();
+                    await navigator.share({
+                        title: title,
+                        text: text + '\n' + shareUrl, // link di dalam text, BUKAN di parameter url
+                        files: [imageFile]
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return; // user menutup panel share
+                    console.warn('Share file gagal, pakai fallback link:', err);
+                }
+            }
+
+            // 2) Fallback: share link saja (preview kartu muncul otomatis dari og:image)
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: title, text: text, url: shareUrl });
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                }
+            }
+
+            // 3) Desktop tanpa Web Share API: salin link
+            await navigator.clipboard.writeText(shareUrl);
+            this.flashCopied();
+
+        } catch (error) {
+            console.error('Gagal membagikan cerita:', error);
+            alert('Gagal membagikan cerita. Coba lagi ya.');
+        } finally {
+            this.isGeneratingShare = false;
+        }
+    }
+
 }" @contextmenu.prevent @copy.prevent @cut.prevent @paste.prevent
     style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;" class="select-none"
     oncontextmenu="return false;" ondragstart="return false;">
+
+    {{-- 🛑 PINDAHKAN TEMPLATE KARTU KE LUAR (DI SINI AMAN UNTUK HTML2CANVAS) --}}
+    <div style="position: absolute; left: -9999px; top: -9999px;">
+        <div id="share-card-element"
+            style="width: 400px; height: 500px; background: #0f172a; color: #ffffff; padding: 24px; border-radius: 24px; border: 1px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; text-align: center; user-select: none; font-family: sans-serif;">
+
+            {{-- Glow Accent (Ganti dengan Hex/RGBA agar aman) --}}
+            <div
+                style="position: absolute; top: -40px; left: -40px; width: 150px; height: 150px; background: rgba(99, 102, 241, 0.2); border-radius: 50%; filter: blur(40px);">
+            </div>
+            <div
+                style="position: absolute; bottom: -40px; right: -40px; width: 150px; height: 150px; background: rgba(245, 158, 11, 0.2); border-radius: 50%; filter: blur(40px);">
+            </div>
+
+            {{-- Header Watermark --}}
+            <div
+                style="position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; font-size: 10px; font-weight: 900; letter-spacing: 0.1em; color: #818cf8; text-transform: uppercase;">
+                <span>KISA INDONESIA</span>
+                <span style="color: #64748b;">• OFFICIAL READER</span>
+            </div>
+
+            {{-- Cover & Metadata --}}
+            <div
+                style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; margin: auto 0;">
+                <div
+                    style="width: 112px; height: 160px; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); border: 1px solid #334155; margin-bottom: 14px; transform: rotate(-2deg);">
+                    @if ($story->cover_path)
+                        <img src="{{ asset('storage/' . $story->cover_path) }}" crossorigin="anonymous"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    @else
+                        <div
+                            style="width: 100%; height: 100%; background: #1e293b; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                            📖</div>
+                    @endif
+                </div>
+
+                <h2
+                    style="font-size: 16px; font-weight: 900; color: #ffffff; line-height: 1.25; margin: 0 0 6px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 0 8px;">
+                    {{ $story->title }}
+                </h2>
+
+                <p style="font-size: 11px; font-weight: 700; color: #fbbf24; margin: 0 0 12px 0;">
+                    ✍️ {{ $story->penName->name ?? 'Penulis' }}
+                </p>
+
+                <div
+                    style="padding: 4px 12px; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(51, 65, 85, 0.8); border-radius: 9999px; font-size: 10px; color: #cbd5e1; font-weight: 500;">
+                    {{ $story->genre->name ?? 'Fiksi' }} •
+                    {{ $story->chapters->where('status', 'published')->count() }} Bab
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div
+                style="position: relative; z-index: 10; padding-top: 12px; border-top: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #94a3b8; font-weight: 500;">
+                <span>Baca selengkapnya di</span>
+                <span
+                    style="font-weight: 900; color: #ffffff; background: #4f46e5; padding: 4px 10px; border-radius: 8px;">kisaindonesia.id</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- TOAST NOTIFIKASI SUKSES UNTUK DESKTOP --}}
+    <div x-show="copied" x-cloak x-transition
+        class="fixed bottom-5 right-5 z-50 bg-slate-900 border border-slate-700 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5">
+        <span class="text-emerald-400 text-base">✓</span>
+        <div>
+            <p class="font-black">Berhasil!</p>
+            <p class="text-[10px] text-slate-400 font-normal">Tautan disalin. Tempel di chat untuk menampilkan kartu
+                pratinjau.</p>
+        </div>
+    </div>
+
     {{-- 📱 TOP NAVIGATION BAR --}}
     <div
         class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs z-50 mb-3 transition-colors">
@@ -30,12 +206,21 @@
         </a>
 
         <div class="flex items-center gap-2">
-            <button @click="shareStory()" title="Bagikan Cerita Ini"
-                class="p-2 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition rounded-xl hover:bg-brand-50 dark:hover:bg-brand-950/40 active:scale-90">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684" />
-                </svg>
+            <button @click="shareStory()" :disabled="isGeneratingShare" title="Bagikan Cerita Ini"
+                class="p-2 text-slate-500 dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition rounded-xl hover:bg-brand-50 dark:hover:bg-brand-950/40 active:scale-90 relative disabled:opacity-50">
+
+                <!-- Spinner Loading saat Generate Gambar -->
+                <template x-if="isGeneratingShare">
+                    <i class="fa-solid fa-spinner animate-spin text-sm text-brand-500"></i>
+                </template>
+
+                <!-- Icon Share Biasa -->
+                <template x-if="!isGeneratingShare">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684" />
+                    </svg>
+                </template>
             </button>
             {{-- Tombol Toggle Mode Terang/Gelap --}}
             <button onclick="toggleTheme()" type="button" aria-label="Toggle Dark Mode"
@@ -205,12 +390,13 @@
     </div>
     {{-- 📝 BLOK SINOPSIS --}}
     @if ($tab === 'synopsis')
-        <div class="border-b-2 border-slate-100 dark:border-slate-800 pb-4">
+        <div class="border-b-2 border-slate-100 dark:border-slate-800 pb-4 select-none" oncontextmenu="return false;"
+            ondragstart="return false;">
             <h2
                 class="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-2 px-0.5">
                 Blurb</h2>
-            <p
-                class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-900/60 p-3.5 rounded-2xl border border-slate-100/80 dark:border-slate-800 text-justify">
+            <p style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;"
+                class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50/50 dark:bg-slate-900/60 p-3.5 rounded-2xl border border-slate-100/80 dark:border-slate-800 text-justify select-none">
                 {{ $story->synopsis ?? 'Belum ada sinopsis resmi yang dibagikan oleh penulis untuk kisah ini, Bro.' }}
             </p>
         </div>

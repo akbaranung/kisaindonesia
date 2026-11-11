@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Author\ContractPdfController;
 use App\Http\Controllers\Duitku\DuitkuController;
+use App\Http\Controllers\StoryOgImageController;
 use App\Livewire\PrivacyPolicy;
 use App\Http\Middleware\CheckMenuAccess;
 use App\Livewire\Admin\CoinPackageIndex;
@@ -67,6 +68,7 @@ Route::get('/stories', StoryIndex::class)->name('stories.index');
 Route::get('/categories', CategoryIndex::class)->name('categories.index');
 Route::get('/categories/{id}', CategoryDetail::class)->name('categories.show');
 Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
+Route::get('/stories/{story:slug}/og.jpg', [StoryOgImageController::class, 'show'])->name('stories.og');
 
 // tampilan pemberitahuan verifikasi
 Route::get('/email/verify', VerifyEmail::class)->name('verification.notice');
