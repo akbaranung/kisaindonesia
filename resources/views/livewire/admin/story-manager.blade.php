@@ -116,9 +116,7 @@
                     <th class="p-3">Email</th>
                     <th class="p-3">Kategori</th>
                     <th class="p-3 text-center">Badge & Section Spesial</th>
-                    @if (auth()->check() && auth()->user()->email === 'admin@kisaindonesia.id')
-                        <th class="p-3 text-center">Aksi</th>
-                    @endif
+                    <th class="p-3 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60">
@@ -128,7 +126,19 @@
                             {{ $stories->firstItem() + $index }}
                         </td>
                         <td class="p-3 font-semibold text-slate-200">
-                            {{ $story->title }}
+                            <div class="flex items-center gap-2">
+                                <button type="button" wire:click="openDetailModal({{ $story->id }})"
+                                    class="text-left font-semibold text-slate-100 hover:text-brand-400 transition"
+                                    title="Lihat Detail Pembelian Bab Berbayar">
+                                    {{ $story->title }}
+                                </button>
+                                @if ($story->monetization_type === 'premium')
+                                    <span
+                                        class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 shrink-0">
+                                        Premium
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="p-3 font-semibold text-slate-200">
                             @php
@@ -187,31 +197,41 @@
                                 @endforeach
                             </div>
                         </td>
-                        @if (auth()->check() && auth()->user()->email === 'admin@kisaindonesia.id')
-                            <td class="p-3 text-center">
-                                @if ($story->is_blocked)
-                                    <button type="button" wire:click="toggleBlockStory({{ $story->id }})"
-                                        wire:confirm="Buka blokir cerita '{{ $story->title }}'?"
-                                        class="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 mx-auto"
-                                        title="Buka Blokir">
-                                        <i class="fa-solid fa-lock-open"></i>
-                                        <span>Buka Blokir</span>
-                                    </button>
-                                @else
-                                    <button type="button" wire:click="toggleBlockStory({{ $story->id }})"
-                                        wire:confirm="Yakin ingin memblokir cerita '{{ $story->title }}'?"
-                                        class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 mx-auto"
-                                        title="Blokir Cerita">
-                                        <i class="fa-solid fa-ban"></i>
-                                        <span>Blokir</span>
-                                    </button>
+                        <td class="p-3 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <!-- Tombol Detail Bab Berbayar -->
+                                <button type="button" wire:click="openDetailModal({{ $story->id }})"
+                                    class="px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
+                                    title="Lihat Detail Pembelian Bab Berbayar">
+                                    <i class="fa-solid fa-coins"></i>
+                                    <span>Detail Bab</span>
+                                </button>
+
+                                @if (auth()->check() && auth()->user()->email === 'admin@kisaindonesia.id')
+                                    @if ($story->is_blocked)
+                                        <button type="button" wire:click="toggleBlockStory({{ $story->id }})"
+                                            wire:confirm="Buka blokir cerita '{{ $story->title }}'?"
+                                            class="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
+                                            title="Buka Blokir">
+                                            <i class="fa-solid fa-lock-open"></i>
+                                            <span>Buka</span>
+                                        </button>
+                                    @else
+                                        <button type="button" wire:click="toggleBlockStory({{ $story->id }})"
+                                            wire:confirm="Yakin ingin memblokir cerita '{{ $story->title }}'?"
+                                            class="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
+                                            title="Blokir Cerita">
+                                            <i class="fa-solid fa-ban"></i>
+                                            <span>Blokir</span>
+                                        </button>
+                                    @endif
                                 @endif
-                            </td>
-                        @endif
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="p-6 text-center text-slate-500">Tidak ada data cerita.</td>
+                        <td colspan="10" class="p-6 text-center text-slate-500">Tidak ada data cerita.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -221,4 +241,182 @@
     <div class="mt-4">
         {{ $stories->links('vendor.livewire.custom-pagination') }}
     </div>
+
+    <!-- Modal Detail Pembelian Bab Berbayar -->
+    @if ($showDetailModal && !empty($selectedStoryData))
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-4 flex items-center justify-center"
+            x-data @keydown.window.escape="$wire.closeDetailModal()">
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-fade-in my-auto"
+                @click.away="$wire.closeDetailModal()">
+
+                <!-- Header Modal -->
+                <div
+                    class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between gap-4 shrink-0 bg-slate-900">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-coins text-amber-400"></i>
+                            <span>{{ $selectedStoryData['title'] }}</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Penulis: <span
+                                class="text-slate-300 font-medium">{{ $selectedStoryData['author_name'] }}</span> •
+                            Kategori: <span
+                                class="text-slate-300 font-medium">{{ $selectedStoryData['genre_name'] }}</span>
+                        </p>
+                    </div>
+
+                    <button type="button" wire:click="closeDetailModal"
+                        class="p-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition shrink-0"
+                        title="Tutup (Esc)">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+
+                        <!-- 4 Kartu Ringkasan Sederhana -->
+                        <div
+                            class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-4 bg-slate-950/50 border-b border-slate-800 shrink-0">
+                            <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl text-center">
+                                <span class="text-[11px] text-slate-400 font-medium block">Bab Berbayar</span>
+                                    <span class="text-base font-bold text-slate-100 mt-1 block">
+                                        {{ $purchaseSummary['total_paid_chapters'] ?? 0 }} <span
+                                            class="text-xs font-normal text-slate-500">Bab</span>
+                                    </span>
+                            </div>
+
+                                <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl text-center">
+                                    <span class="text-[11px] text-slate-400 font-medium block">Sudah Dibeli</span>
+                                        <span class="text-base font-bold text-emerald-400 mt-1 block">
+                                            {{ $purchaseSummary['purchased_paid_chapters_count'] ?? 0 }} <span
+                                                class="text-xs font-normal text-slate-500">Bab</span>
+                                        </span>
+                                </div>
+
+                                    <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl text-center">
+                                        <span class="text-[11px] text-slate-400 font-medium block">Total
+                                            Pembelian</span>
+                                            <span class="text-base font-bold text-blue-400 mt-1 block">
+                                                {{ number_format($purchaseSummary['total_purchases'] ?? 0) }} <span
+                                                    class="text-xs font-normal text-slate-500">Kali</span>
+                                            </span>
+                                    </div>
+
+                                    <div class="bg-slate-900/90 border border-slate-800 p-2.5 rounded-xl text-center">
+                                        <span class="text-[11px] text-slate-400 font-medium block">Total Koin</span>
+                                        <span
+                                            class="text-base font-bold text-amber-400 mt-1 block flex items-center justify-center gap-1">
+                                            <i class="fa-solid fa-coins text-xs"></i>
+                                            <span>{{ number_format($purchaseSummary['total_beans'] ?? 0) }}</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Toolbar Sederhana: Toggle & Search -->
+                                <div
+                                    class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                                    <label
+                                        class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none">
+                                        <input type="checkbox" wire:model.live="onlyPaidChapters"
+                                            class="rounded bg-slate-800 border-slate-700 text-brand-500 focus:ring-brand-400 focus:ring-offset-slate-900">
+                                        <span>Hanya Bab Berbayar</span>
+                                    </label>
+
+                                    <div class="relative w-48 sm:w-56">
+                                        <input type="text" wire:model.live.debounce.250ms="modalSearch"
+                                            placeholder="Cari judul/nomor bab..."
+                                            class="w-full pl-7 pr-7 py-1 bg-slate-950/60 border border-slate-700 rounded-lg text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-brand-400">
+                                        @if ($modalSearch)
+                                            <button type="button" wire:click="$set('modalSearch', '')"
+                                                class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs">✕</button>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Tabel Daftar Bab Sederhana -->
+                                <div class="flex-1 min-h-0 overflow-y-auto">
+                                    <table class="w-full text-xs text-left text-slate-300">
+                                        <thead
+                                            class="bg-slate-800/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 sticky top-0 z-10 backdrop-blur-md">
+                                            <tr>
+                                                <th class="p-3 text-center w-16">Bab</th>
+                                                <th class="p-3">Judul Bab</th>
+                                                <th class="p-3 text-center w-20">Harga</th>
+                                                <th class="p-3 text-center w-28">Dibeli Pembaca</th>
+                                                <th class="p-3 text-right w-28">Total Koin</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-800/60">
+                                            @forelse ($filteredChapterPurchases as $chap)
+                                                <tr class="hover:bg-slate-800/40 transition">
+                                                    <td class="p-3 text-center font-bold text-slate-300">
+                                                        Bab {{ $chap['order_number'] }}
+                                                    </td>
+                                                    <td class="p-3 font-medium text-slate-200">
+                                                        {{ $chap['title'] }}
+                                                    </td>
+                                                    <td class="p-3 text-center">
+                                                        @if ($chap['is_paid'])
+                                                            <span
+                                                                class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-[10px]">
+                                                                {{ $chap['bean_price'] }} Bean
+                                                            </span>
+                                                        @else
+                                                            <span
+                                                                class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 text-[10px]">
+                                                                Gratis
+                                                            </span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="p-3 text-center">
+                                                        @if ($chap['purchases_count'] > 0)
+                                                            <span
+                                                                class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs">
+                                                                {{ $chap['purchases_count'] }} kali dibeli
+                                                            </span>
+                                                        @else
+                                                            <span class="text-slate-500 text-xs">
+                                                                0 kali
+                                                            </span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="p-3 text-right">
+                                                        @if ($chap['total_beans'] > 0)
+                                                            <span
+                                                                class="font-bold text-amber-400 text-xs inline-flex items-center gap-1 justify-end">
+                                                                <i class="fa-solid fa-coins text-[10px]"></i>
+                                                                <span>{{ number_format($chap['total_beans']) }}</span>
+                                                            </span>
+                                                        @else
+                                                            <span class="text-slate-500 text-xs">0</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="5" class="p-6 text-center text-slate-500">
+                                                        Tidak ada bab yang sesuai.
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Footer Modal -->
+                                <div
+                                    class="p-3.5 border-t border-slate-800 flex items-center justify-between gap-3 shrink-0 bg-slate-900">
+                                    <span class="text-xs text-slate-400">
+                                        Total: <strong
+                                            class="text-slate-200">{{ count($filteredChapterPurchases) }}</strong> bab
+                                    </span>
+
+                                    <button type="button" wire:click="closeDetailModal"
+                                        class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-xl transition">
+                                        Tutup
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+    @endif
 </div>

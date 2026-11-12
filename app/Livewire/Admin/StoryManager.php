@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Badge;
 use App\Models\Genre;
 use App\Models\Story;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -18,6 +19,15 @@ class StoryManager extends Component
     public string $type = '';
     public string $selectedBadge = '';
     public string $statusFilter = '';
+
+    // Modal Detail Pembelian Bab
+    public bool $showDetailModal = false;
+    public ?int $selectedStoryId = null;
+    public array $selectedStoryData = [];
+    public array $purchaseSummary = [];
+    public array $chapterPurchases = [];
+    public bool $onlyPaidChapters = true;
+    public string $modalSearch = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -121,10 +131,113 @@ class StoryManager extends Component
         session()->flash('message', 'Data periodic_views_count berhasil diisi sesuai nilai views_count terkini.');
     }
 
+    public function openDetailModal(int $storyId)
+    {
+        $this->selectedStoryId = $storyId;
+        $this->modalSearch = '';
+        $this->onlyPaidChapters = true;
+        $this->loadPurchaseDetails();
+
+        if (($this->purchaseSummary['total_paid_chapters'] ?? 0) === 0) {
+            $this->onlyPaidChapters = false;
+        }
+
+        $this->showDetailModal = true;
+    }
+
+    public function closeDetailModal()
+    {
+        $this->showDetailModal = false;
+        $this->selectedStoryId = null;
+        $this->selectedStoryData = [];
+        $this->purchaseSummary = [];
+        $this->chapterPurchases = [];
+        $this->modalSearch = '';
+    }
+
+    public function loadPurchaseDetails()
+    {
+        if (!$this->selectedStoryId) {
+            return;
+        }
+
+        $story = Story::with(['author', 'genre'])->findOrFail($this->selectedStoryId);
+
+        $this->selectedStoryData = [
+            'id' => $story->id,
+            'title' => $story->title,
+            'author_name' => $story->author->name ?? 'Anonim',
+            'genre_name' => $story->genre->name ?? 'Uncategorized',
+        ];
+
+        $chapters = DB::table('chapters')
+            ->where('story_id', $this->selectedStoryId)
+            ->orderBy('order_number', 'asc')
+            ->get();
+
+        $chapterIds = $chapters->pluck('id')->toArray();
+
+        // Agregasi jumlah pembelian & total bean per bab sekali query (sangat ringan)
+        $purchaseStats = DB::table('user_purchased_chapters')
+            ->whereIn('chapter_id', $chapterIds)
+            ->select('chapter_id', DB::raw('COUNT(*) as total_purchases'), DB::raw('SUM(beans_spent) as total_beans'))
+            ->groupBy('chapter_id')
+            ->get()
+            ->keyBy('chapter_id');
+
+        $paidChapters = $chapters->filter(function ($chap) {
+            return (bool) $chap->is_premium || (int) $chap->bean_price > 0;
+        });
+
+        $purchasedPaidChaptersCount = $paidChapters->filter(function ($chap) use ($purchaseStats) {
+            return $purchaseStats->has($chap->id);
+        })->count();
+
+        $totalPurchases = (int) $purchaseStats->sum('total_purchases');
+        $totalBeans = (int) $purchaseStats->sum('total_beans');
+
+        $this->purchaseSummary = [
+            'total_chapters' => $chapters->count(),
+            'total_paid_chapters' => $paidChapters->count(),
+            'purchased_paid_chapters_count' => $purchasedPaidChaptersCount,
+            'total_purchases' => $totalPurchases,
+            'total_beans' => $totalBeans,
+        ];
+
+        $this->chapterPurchases = $chapters->map(function ($chap) use ($purchaseStats) {
+            $stat = $purchaseStats->get($chap->id);
+            $isPaid = (bool) $chap->is_premium || (int) $chap->bean_price > 0;
+
+            return [
+                'id' => $chap->id,
+                'order_number' => $chap->order_number,
+                'title' => $chap->title,
+                'is_paid' => $isPaid,
+                'bean_price' => (int) $chap->bean_price,
+                'purchases_count' => $stat ? (int) $stat->total_purchases : 0,
+                'total_beans' => $stat ? (int) $stat->total_beans : 0,
+            ];
+        })->toArray();
+    }
+
     public function render()
     {
         $categories = Genre::orderBy('name')->get();
         $badges = Badge::orderBy('name')->get();
+
+        $filteredChapterPurchases = collect($this->chapterPurchases);
+
+        if ($this->onlyPaidChapters) {
+            $filteredChapterPurchases = $filteredChapterPurchases->where('is_paid', true);
+        }
+
+        if (!empty(trim($this->modalSearch))) {
+            $search = strtolower(trim($this->modalSearch));
+            $filteredChapterPurchases = $filteredChapterPurchases->filter(function ($item) use ($search) {
+                return str_contains(strtolower($item['title'] ?? ''), $search) ||
+                    str_contains((string) ($item['order_number'] ?? ''), $search);
+            });
+        }
 
         $stories = Story::with(['author', 'genre', 'badges'])
             // Search Judul atau Penulis
@@ -163,6 +276,7 @@ class StoryManager extends Component
             'stories' => $stories,
             'categories' => $categories,
             'badges' => $badges,
+            'filteredChapterPurchases' => $filteredChapterPurchases->values(),
         ])->layout('layouts.admin');
     }
 }
