@@ -166,49 +166,51 @@
         @if ($recommendedStories->isNotEmpty())
             @php
                 /*
-                 * BENTO ACAK (STABIL) - COVER ONLY
-                 * Ukuran: large (2x2), tall (1x2), wide (2x1), small (1x1).
+                 * BENTO ACAK (STABIL) - SEMUA KARTU PORTRAIT
+                 * Hanya 2 ukuran supaya proporsi cover tetap sama (sekitar 3:4):
+                 *   large = 2x2, small = 1x1. Tidak ada kartu landscape maupun yang terlalu panjang.
                  * Pola dipilih berdasarkan ID cerita, jadi tidak berubah saat Livewire re-render.
                  */
                 $sizeClasses = [
                     'large' => 'col-span-2 row-span-2',
-                    'tall' => 'row-span-2',
-                    'wide' => 'col-span-2',
                     'small' => '',
                 ];
 
                 $variants = [
-                    ['large', 'small', 'small', 'tall'],
-                    ['tall', 'wide', 'small', 'small'],
-                    ['small', 'small', 'large', 'tall'],
-                    ['wide', 'tall', 'small', 'small'],
-                    ['large', 'wide', 'small', 'small'],
-                    ['tall', 'small', 'small', 'large'],
+                    ['large', 'small', 'small'], // besar kiri, 2 kecil kanan
+                    ['small', 'small', 'large'], // 2 kecil kiri, besar kanan
+                    ['large', 'small', 'small', 'small', 'small'], // besar kiri, 4 kecil kanan
+                    ['small', 'small', 'small', 'small', 'large'], // 4 kecil kiri, besar kanan
                 ];
 
-                // Blok terakhir yang isinya kurang dari 4
+                // Sisa cerita di akhir yang tidak cukup untuk satu pola penuh
                 $fallbacks = [
-                    1 => ['tall'],
-                    2 => ['tall', 'tall'],
-                    3 => ['tall', 'small', 'small'],
+                    1 => ['large'],
+                    2 => ['small', 'small'],
+                    3 => ['large', 'small', 'small'],
+                    4 => ['small', 'small', 'small', 'small'],
                 ];
 
+                $stories = $recommendedStories->values();
                 $blocks = [];
+                $offset = 0;
                 $prevPick = -1;
 
-                foreach ($recommendedStories->values()->chunk(4) as $chunk) {
-                    if ($chunk->count() === 4) {
-                        $pick = crc32((string) $chunk->first()->id) % count($variants);
-                        if ($pick === $prevPick) {
-                            $pick = ($pick + 1) % count($variants);
-                        }
-                        $prevPick = $pick;
-                        $sizes = $variants[$pick];
-                    } else {
-                        $sizes = $fallbacks[$chunk->count()];
+                while ($offset < $stories->count()) {
+                    $remaining = $stories->count() - $offset;
+                    $pick = crc32((string) $stories[$offset]->id) % count($variants);
+                    if ($pick === $prevPick) {
+                        $pick = ($pick + 1) % count($variants);
                     }
 
-                    $blocks[] = ['stories' => $chunk->values(), 'sizes' => $sizes];
+                    $sizes = count($variants[$pick]) <= $remaining ? $variants[$pick] : $fallbacks[$remaining];
+
+                    $prevPick = $pick;
+                    $blocks[] = [
+                        'stories' => $stories->slice($offset, count($sizes))->values(),
+                        'sizes' => $sizes,
+                    ];
+                    $offset += count($sizes);
                 }
             @endphp
 
@@ -234,9 +236,13 @@
                         <div
                             class="grid grid-rows-2 grid-flow-col-dense auto-cols-[7.5rem] gap-3 h-[21rem] shrink-0 snap-start">
                             @foreach ($block['stories'] as $i => $story)
+                                @php $isLarge = $block['sizes'][$i] === 'large'; @endphp
+
                                 <a href="{{ route('stories.read', $story->slug) }}" wire:navigate
-                                    aria-label="{{ $story->title }}" title="{{ $story->title }}"
+                                    aria-label="{{ $story->title }}"
                                     class="{{ $sizeClasses[$block['sizes'][$i]] }} group relative overflow-hidden rounded-2xl bg-slate-800 shadow-md ring-1 ring-slate-800/60 transition focus-visible:outline-2 focus-visible:outline-brand-500">
+
+                                    {{-- Cover --}}
                                     @if ($story->cover_path)
                                         <img src="{{ asset('storage/' . $story->cover_path) }}"
                                             alt="{{ $story->title }}" loading="lazy"
@@ -247,6 +253,38 @@
                                             <i class="fa-solid fa-book"></i>
                                         </div>
                                     @endif
+
+                                    {{-- Gradient bawah agar teks terbaca --}}
+                                    <div
+                                        class="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent pointer-events-none">
+                                    </div>
+
+                                    {{-- Kategori --}}
+                                    <span
+                                        class="absolute top-2 left-2 max-w-[calc(100%-1rem)] truncate px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-brand-600/90 text-white">
+                                        {{ $story->genre->name ?? 'Fiksi' }}
+                                    </span>
+
+                                    {{-- Judul, rating, views --}}
+                                    <div class="absolute inset-x-0 bottom-0 p-2.5">
+                                        <h3
+                                            class="font-black text-white leading-snug line-clamp-2 {{ $isLarge ? 'text-base' : 'text-[11px]' }}">
+                                            {{ $story->title }}
+                                        </h3>
+
+                                        <div class="mt-1 flex items-center gap-2 text-[10px] font-bold text-slate-200">
+                                            @if ($story->average_rating > 0)
+                                                <span class="flex items-center gap-1">
+                                                    <i class="fa-solid fa-star text-amber-400"></i>
+                                                    {{ $story->average_rating }}
+                                                </span>
+                                            @endif
+                                            <span class="flex items-center gap-1 text-slate-300">
+                                                <i class="fa-regular fa-eye"></i>
+                                                {{ number_format_short($story->views_count ?? 0) }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </a>
                             @endforeach
                         </div>
