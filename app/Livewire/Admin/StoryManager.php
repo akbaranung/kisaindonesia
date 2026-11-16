@@ -259,7 +259,7 @@ class StoryManager extends Component
     public function rejectPublishStory()
     {
         $this->validate([
-            'publishRejectionReason' => 'required|string|min:10|max:500',
+            'publishRejectionReason' => 'required|string|min:10',
         ], [
             'publishRejectionReason.required' => 'Alasan penolakan wajib diisi agar penulis tahu bagian mana yang harus diperbaiki.',
             'publishRejectionReason.min' => 'Alasan penolakan minimal 10 karakter.',
