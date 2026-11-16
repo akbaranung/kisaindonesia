@@ -48,6 +48,8 @@ class MyStories extends Component
     public $parentGenres = [];
     public $subGenres = [];
 
+    protected $listeners = ['storyStatusUpdated' => '$refresh'];
+
     public function downloadContractPdf(Story $story)
     {
 

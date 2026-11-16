@@ -1,6 +1,8 @@
 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
     <!-- Icon Lonceng & Badge Counter -->
-    <button @click="open = !open" class="relative p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition focus:outline-none" aria-label="Notifikasi">
+    <button @click="open = !open"
+        class="relative p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition focus:outline-none"
+        aria-label="Notifikasi">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -16,15 +18,19 @@
 
     <!-- Dropdown Menu Notifikasi -->
     <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-150"
-        x-transition:enter-start="transform opacity-0 scale-95 -translate-y-1" x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-100" x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+        x-transition:enter-start="transform opacity-0 scale-95 -translate-y-1"
+        x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
         x-transition:leave-end="transform opacity-0 scale-95 -translate-y-1"
         class="absolute right-0 z-50 w-80 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-colors"
         style="display: none;">
 
         <!-- Header Dropdown -->
-        <div class="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-850 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800">
-            <span class="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Notifikasi</span>
+        <div
+            class="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-850 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800">
+            <span
+                class="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider">Notifikasi</span>
             @if ($unreadCount > 0)
                 <button wire:click="markAllAsRead"
                     class="text-[11px] text-brand-600 dark:text-brand-400 hover:underline font-semibold focus:outline-none">
@@ -84,6 +90,13 @@
                         <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mt-0.5 leading-relaxed">
                             {{ $data['message'] ?? 'Ada notifikasi baru.' }}
                         </p>
+
+                        @if (!empty($data['rejection_reason']))
+                            <p
+                                class="text-[11px] text-rose-500 dark:text-rose-400 mt-1 font-medium bg-rose-500/10 p-1.5 rounded-lg border border-rose-500/20">
+                                Catatan: "{{ $data['rejection_reason'] }}"
+                            </p>
+                        @endif
                         <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block font-medium">
                             {{ $notification->created_at->diffForHumans() }}
                         </span>
@@ -99,6 +112,14 @@
                     Belum ada notifikasi
                 </div>
             @endforelse
+        </div>
+
+        <div class="p-3 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 text-center">
+            <a href="{{ route('notifications.index') }}" wire:navigate
+                class="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline inline-flex items-center gap-1.5 transition">
+                <span>Lihat Semua Notifikasi</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
         </div>
     </div>
 </div>

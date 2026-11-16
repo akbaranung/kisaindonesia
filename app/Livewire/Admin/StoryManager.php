@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Badge;
 use App\Models\Genre;
 use App\Models\Story;
+use App\Notifications\PublishStatusUpdatedNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -28,6 +29,11 @@ class StoryManager extends Component
     public array $chapterPurchases = [];
     public bool $onlyPaidChapters = true;
     public string $modalSearch = '';
+
+    // Properti manage publish cerita
+    public bool $showRejectPublishModal = false;
+    public ?int $rejectingStoryId = null;
+    public string $publishRejectionReason = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -220,6 +226,59 @@ class StoryManager extends Component
         })->toArray();
     }
 
+    public function approvePublishStory(int $storyId)
+    {
+        $story = Story::findOrFail($storyId);
+        $story->update([
+            'status' => 'published',
+            'rejection_reason' => null,
+        ]);
+
+        if ($story->author) {
+            $story->author->notify(new PublishStatusUpdatedNotification('approved'));
+        }
+
+        session()->flash('message', "Cerita '{$story->title}' berhasil disetujui dan resmi dipublikasikan!");
+    }
+
+    public function openRejectPublishModal(int $storyId)
+    {
+        $this->rejectingStoryId = $storyId;
+        $this->publishRejectionReason = '';
+        $this->resetErrorBag();
+        $this->showRejectPublishModal = true;
+    }
+
+    public function closeRejectPublishModal()
+    {
+        $this->showRejectPublishModal = false;
+        $this->rejectingStoryId = null;
+        $this->publishRejectionReason = '';
+    }
+
+    public function rejectPublishStory()
+    {
+        $this->validate([
+            'publishRejectionReason' => 'required|string|min:10|max:500',
+        ], [
+            'publishRejectionReason.required' => 'Alasan penolakan wajib diisi agar penulis tahu bagian mana yang harus diperbaiki.',
+            'publishRejectionReason.min' => 'Alasan penolakan minimal 10 karakter.',
+        ]);
+
+        $story = Story::findOrFail($this->rejectingStoryId);
+        $story->update([
+            'status' => 'rejected',
+            'rejection_reason' => $this->publishRejectionReason,
+        ]);
+
+        if ($story->author) {
+            $story->author->notify(new PublishStatusUpdatedNotification('rejected', $this->publishRejectionReason));
+        }
+
+        session()->flash('message', "Pengajuan publish cerita '{$story->title}' telah ditolak beserta alasannya.");
+        $this->closeRejectPublishModal();
+    }
+
     public function render()
     {
         $categories = Genre::orderBy('name')->get();
@@ -267,6 +326,8 @@ class StoryManager extends Component
                     $query->where('is_blocked', true);
                 } elseif ($this->statusFilter === 'active') {
                     $query->where('is_blocked', false);
+                } else {
+                    $query->where('status', $this->statusFilter);
                 }
             })
             ->latest()

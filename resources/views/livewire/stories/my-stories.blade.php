@@ -92,13 +92,25 @@
                                         class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 flex items-center gap-1">
                                         <i class="fa-solid fa-ban text-[8px]"></i> Diblokir oleh Admin
                                     </span>
+                                @elseif ($story->status === 'published')
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                                        Published
+                                    </span>
+                                @elseif ($story->status === 'pending_review')
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                        Review Publish
+                                    </span>
+                                @elseif ($story->status === 'rejected')
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                        Publish Ditolak
+                                    </span>
                                 @else
                                     <span
-                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold
-        {{ $story->status === 'published'
-            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
-            : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700' }}">
-                                        {{ ucfirst($story->status) }}
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                        Draft
                                     </span>
                                 @endif
                                 <span
@@ -224,6 +236,14 @@
                                 </button>
                             </div>
                         </div>
+                        @if ($story->status === 'rejected' && $story->rejection_reason)
+                            <div
+                                class="mt-3 p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-600 dark:text-rose-300">
+                                <span class="font-black block mb-0.5"><i class="fa-solid fa-triangle-exclamation"></i>
+                                    Publish Ditolak:</span>
+                                <p class="leading-relaxed">{{ $story->rejection_reason }}</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @empty

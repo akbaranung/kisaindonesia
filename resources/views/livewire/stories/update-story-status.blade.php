@@ -1,31 +1,28 @@
 <div class="inline-flex items-center">
-    @if ($status === 'published' || strtolower($status) === 'published')
-        <button wire:click="setStatus('draft')" wire:loading.attr="disabled"
-            onclick="confirm('Sembunyikan cerita ini dari publik?') || event.stopImmediatePropagation()"
-            title="Klik untuk ubah ke Draft"
-            class="px-2 py-0.5 text-[9px] rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-bold transition-all flex items-center gap-1.5 disabled:opacity-50">
-            <span wire:loading.remove wire:target="setStatus('draft')">
-                <span>Draft Cerita</span>
-            </span>
-            <span wire:loading wire:target="setStatus('draft')" class="flex items-center gap-1">
-                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-            </span>
-        </button>
+    @if ($story->status === 'published')
+        <span
+            class="text-[9px] px-2.5 py-1 rounded-xl font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <i class="fa-regular fa-circle-check"></i> PUBLISHED
+        </span>
+    @elseif ($story->status === 'pending_review')
+        <span
+            class="text-[9px] px-2.5 py-1 rounded-xl font-black bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
+            <i class="fa-solid fa-hourglass-half"></i> REVIEW ADMIN
+        </span>
     @else
-        <button wire:click="setStatus('published')" wire:loading.attr="disabled" title="Klik untuk publikasikan"
-            class="px-2 py-0.5 text-[9px] rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50">
-            <span wire:loading.remove wire:target="setStatus('published')">
-                <span>Publish Cerita</span>
-            </span>
-            <span wire:loading wire:target="setStatus('published')" class="flex items-center gap-1">
-                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-            </span>
-        </button>
+        {{-- Status 'draft' atau 'rejected' --}}
+        @if ($canSubmit)
+            <button type="button" wire:click="submitForReview"
+                wire:confirm="Ajukan cerita ini untuk dipublikasikan? Admin akan memeriksa cerita Anda terlebih dahulu."
+                class="text-[9px] px-2.5 py-1.5 rounded-xl font-black bg-slate-900 hover:bg-brand-600 dark:bg-brand-600 dark:hover:bg-brand-500 text-white transition shadow-xs cursor-pointer">
+                {{ $story->status === 'rejected' ? '<i class="fa-solid fa-rotate"></i> Ajukan Publish Ulang' : '<i class="fa-regular fa-paper-plane"></i> Ajukan Publish' }}
+            </button>
+        @else
+            <button type="button" disabled
+                title="Minimal 5 bab untuk mengajukan publish (Saat ini: {{ $chapterCount }}/5 Bab)"
+                class="text-[9px] px-2.5 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700 cursor-not-allowed">
+                <i class="fa-solid fa-lock"></i> Publish ({{ $chapterCount }}/5 Bab)
+            </button>
+        @endif
     @endif
 </div>

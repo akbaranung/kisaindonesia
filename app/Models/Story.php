@@ -24,7 +24,8 @@ class Story extends Model
         'is_mature',
         'periodic_views_count',
         'vies_ranking',
-        'is_blocked'
+        'is_blocked',
+        'rejection_reason',
     ];
 
     protected $casts = [
