@@ -174,6 +174,7 @@ class StoryManager extends Component
             'title' => $story->title,
             'author_name' => $story->author->name ?? 'Anonim',
             'genre_name' => $story->genre->name ?? 'Uncategorized',
+            'cover_path' => $story->cover_path,
         ];
 
         $chapters = DB::table('chapters')
@@ -222,6 +223,7 @@ class StoryManager extends Component
                 'bean_price' => (int) $chap->bean_price,
                 'purchases_count' => $stat ? (int) $stat->total_purchases : 0,
                 'total_beans' => $stat ? (int) $stat->total_beans : 0,
+                'cover_path' => $chap->cover_path ?? null,
             ];
         })->toArray();
     }

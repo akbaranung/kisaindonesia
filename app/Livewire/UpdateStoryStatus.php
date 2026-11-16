@@ -18,7 +18,7 @@ class UpdateStoryStatus extends Component
 
     public function submitForReview()
     {
-        $chapterCount = $this->story->chapters()->count();
+        $chapterCount = $this->story->chapters()->where('status', 'published')->count();
         if ($chapterCount < 5) {
             session()->flash('error', 'Cerita minimal harus memiliki 5 bab sebelum diajukan untuk publish!');
             return;
@@ -82,7 +82,7 @@ class UpdateStoryStatus extends Component
 
     public function render()
     {
-        $chapterCount = $this->story->chapters_count ?? $this->story->chapters()->count();
+        $chapterCount = $this->story->chapters_count ?? $this->story->chapters()->where('status', 'published')->count();
         return view('livewire.stories.update-story-status', [
             'chapterCount' => $chapterCount,
             'canSubmit' => $chapterCount >= 5,

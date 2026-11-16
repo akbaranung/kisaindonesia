@@ -356,17 +356,31 @@
                 <!-- Header Modal -->
                 <div
                     class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between gap-4 shrink-0 bg-slate-900">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
-                            <i class="fa-solid fa-coins text-amber-400"></i>
-                            <span>{{ $selectedStoryData['title'] }}</span>
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">
-                            Penulis: <span
-                                class="text-slate-300 font-medium">{{ $selectedStoryData['author_name'] }}</span> •
-                            Kategori: <span
-                                class="text-slate-300 font-medium">{{ $selectedStoryData['genre_name'] }}</span>
-                        </p>
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <!-- Cover Cerita Utama -->
+                        <div
+                            class="w-12 h-16 rounded-xl bg-slate-800 border border-slate-700 overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                            @if (!empty($selectedStoryData['cover_path']))
+                                <img src="{{ asset('storage/' . $selectedStoryData['cover_path']) }}"
+                                    class="w-full h-full object-cover" alt="Cover">
+                            @else
+                                <span class="text-xs text-slate-500 font-bold">No Cover</span>
+                            @endif
+                        </div>
+
+                        <div class="min-w-0">
+                            <h2 class="text-base font-bold text-slate-100 flex items-center gap-2 truncate">
+                                <i class="fa-solid fa-coins text-amber-400 shrink-0"></i>
+                                <span class="truncate">{{ $selectedStoryData['title'] }}</span>
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-0.5 truncate">
+                                Penulis: <span
+                                    class="text-slate-300 font-medium">{{ $selectedStoryData['author_name'] }}</span>
+                                •
+                                Kategori: <span
+                                    class="text-slate-300 font-medium">{{ $selectedStoryData['genre_name'] }}</span>
+                            </p>
+                        </div>
                     </div>
 
                     <button type="button" wire:click="closeDetailModal"
@@ -454,7 +468,19 @@
                                         Bab {{ $chap['order_number'] }}
                                     </td>
                                     <td class="p-3 font-medium text-slate-200">
-                                        {{ $chap['title'] }}
+                                        <div class="flex items-center gap-2.5">
+                                            <!-- Thumbnail Cover Per Bab -->
+                                            <div
+                                                class="w-8 h-10 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden shrink-0 flex items-center justify-center">
+                                                @if (!empty($chap['cover_path']))
+                                                    <img src="{{ asset('storage/' . $chap['cover_path']) }}"
+                                                        class="w-full h-full object-cover" alt="Bab">
+                                                @else
+                                                    <span class="text-[8px] text-slate-500">No Img</span>
+                                                @endif
+                                            </div>
+                                            <span class="truncate">{{ $chap['title'] }}</span>
+                                        </div>
                                     </td>
                                     <td class="p-3 text-center">
                                         @if ($chap['is_paid'])
