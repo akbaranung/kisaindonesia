@@ -176,19 +176,18 @@
                     'small' => '',
                 ];
 
+                // Kartu large selalu di posisi paling depan (kiri) pada setiap blok
                 $variants = [
                     ['large', 'small', 'small'], // besar kiri, 2 kecil kanan
-                    ['small', 'small', 'large'], // 2 kecil kiri, besar kanan
                     ['large', 'small', 'small', 'small', 'small'], // besar kiri, 4 kecil kanan
-                    ['small', 'small', 'small', 'small', 'large'], // 4 kecil kiri, besar kanan
                 ];
 
                 // Sisa cerita di akhir yang tidak cukup untuk satu pola penuh
                 $fallbacks = [
                     1 => ['large'],
-                    2 => ['small', 'small'],
+                    2 => ['large', 'large'],
                     3 => ['large', 'small', 'small'],
-                    4 => ['small', 'small', 'small', 'small'],
+                    4 => ['large', 'small', 'small'], // sisa 1 cerita jadi blok large berikutnya
                 ];
 
                 $stories = $recommendedStories->values();
@@ -234,7 +233,7 @@
                 <div class="flex items-start gap-3 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
                     @foreach ($blocks as $block)
                         <div
-                            class="grid grid-rows-2 grid-flow-col-dense auto-cols-[7.5rem] gap-3 h-[21rem] shrink-0 snap-start">
+                            class="grid grid-rows-2 grid-flow-col-dense auto-cols-[5.5rem] gap-3 h-[18.25rem] shrink-0 snap-start">
                             @foreach ($block['stories'] as $i => $story)
                                 @php $isLarge = $block['sizes'][$i] === 'large'; @endphp
 
@@ -259,11 +258,39 @@
                                         class="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent pointer-events-none">
                                     </div>
 
-                                    {{-- Kategori --}}
-                                    <span
-                                        class="absolute top-2 left-2 max-w-[calc(100%-1rem)] truncate px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-brand-600/90 text-white">
-                                        {{ $story->genre->name ?? 'Fiksi' }}
-                                    </span>
+                                    <div class="absolute inset-0 pointer-events-none">
+                                        <div class="flex items-center space-x-1.5 p-2">
+                                            <div class="absolute right-2">
+                                                @if ($story->monetization_type === 'premium')
+                                                    <span
+                                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-amber-500 text-white border border-amber-500 me-1">
+                                                        <i class="fa-solid fa-crown"></i>
+                                                    </span>
+                                                @endif
+                                                @if ($story->hasTypeChat())
+                                                    <span
+                                                        class="px-1 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
+                                                        <i class="fa-solid fa-comment-dots"></i>
+                                                    </span>
+                                                @elseif(!$story->hasTypeChat() && $story->type === 'novel')
+                                                    <span
+                                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
+                                                        <i class="fa-solid fa-pencil"></i>
+                                                    </span>
+                                                @elseif($story->type === 'puisi')
+                                                    <span
+                                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
+                                                        <i class="fa-solid fa-feather-pointed"></i>
+                                                    </span>
+                                                @elseif($story->type === 'non_fiksi')
+                                                    <span
+                                                        class="px-2 py-0.5 rounded-md text-[8px] font-bold bg-white/90 dark:bg-slate-900/90 text-brand-600 dark:text-brand-400 border border-white/60 dark:border-slate-700/60 shadow-xs">
+                                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     {{-- Judul, rating, views --}}
                                     <div class="absolute inset-x-0 bottom-0 p-2.5">
