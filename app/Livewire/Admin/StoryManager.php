@@ -161,6 +161,35 @@ class StoryManager extends Component
         $this->modalSearch = '';
     }
 
+    public function updateStoryStatus(int $storyId, string $status)
+    {
+        $allowed = ['draft', 'pending_review', 'published', 'rejected'];
+        if (!in_array($status, $allowed)) {
+            return;
+        }
+
+        $story = Story::findOrFail($storyId);
+        $story->update(['status' => $status]);
+
+        session()->flash('message', "Status cerita '{$story->title}' berhasil diubah ke " . ucfirst($status) . ".");
+    }
+
+    public function updateChapterStatus(int $chapterId, string $status)
+    {
+        $allowed = ['draft', 'published'];
+        if (!in_array($status, $allowed)) {
+            return;
+        }
+
+        $chapter = \App\Models\Chapter::findOrFail($chapterId);
+        $chapter->update(['status' => $status]);
+
+        // Refresh data detail bab di dalam modal
+        $this->loadPurchaseDetails();
+
+        session()->flash('message', "Status Bab '{$chapter->title}' berhasil diubah ke " . ucfirst($status) . ".");
+    }
+
     public function loadPurchaseDetails()
     {
         if (!$this->selectedStoryId) {
@@ -219,6 +248,7 @@ class StoryManager extends Component
                 'id' => $chap->id,
                 'order_number' => $chap->order_number,
                 'title' => $chap->title,
+                'status' => $chap->status,
                 'is_paid' => $isPaid,
                 'bean_price' => (int) $chap->bean_price,
                 'purchases_count' => $stat ? (int) $stat->total_purchases : 0,

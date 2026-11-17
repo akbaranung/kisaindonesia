@@ -163,29 +163,14 @@
                             </div>
                         </td>
                         <td class="p-3 font-semibold text-slate-200">
-                            <div class="flex flex-col items-start gap-1">
-                                @if ($story->status === 'published')
-                                    <span
-                                        class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
-                                        Published
-                                    </span>
-                                @elseif ($story->status === 'pending_review')
-                                    <span
-                                        class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold animate-pulse">
-                                        ⏳ Review Publish
-                                    </span>
-                                @elseif ($story->status === 'rejected')
-                                    <span
-                                        class="px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-bold"
-                                        title="{{ $story->rejection_reason }}">
-                                        ✕ Ditolak
-                                    </span>
-                                @else
-                                    <span
-                                        class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-400 text-[10px] font-bold">
-                                        Draft
-                                    </span>
-                                @endif
+                            <div class="flex flex-col items-start gap-1.5">
+                                <select wire:change="updateStoryStatus({{ $story->id }}, $event.target.value)"
+                                    class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold focus:outline-none focus:border-brand-400">
+                                    <option value="draft" {{ $story->status === 'draft' ? 'selected' : '' }}>Draft
+                                    </option>
+                                    <option value="published" {{ $story->status === 'published' ? 'selected' : '' }}>
+                                        Published</option>
+                                </select>
 
                                 @if ($story->is_blocked)
                                     <span
@@ -453,19 +438,20 @@
                         <thead
                             class="bg-slate-800/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 sticky top-0 z-10 backdrop-blur-md">
                             <tr>
-                                <th class="p-3 text-center w-16">Bab</th>
-                                <th class="p-3">Judul Bab</th>
+                                <th class="p-3 text-center w-14">Bab</th>
+                                <th class="p-3">Judul Bab & Cover</th>
+                                <th class="p-3 text-center w-28">Status Bab</th>
                                 <th class="p-3 text-center w-20">Harga</th>
-                                <th class="p-3 text-center w-28">Dibeli Pembaca</th>
-                                <th class="p-3 text-right w-28">Total Koin</th>
-                                <th class="p-3 text-center w-24">Baca</th>
+                                <th class="p-3 text-center w-24">Pembelian</th>
+                                <th class="p-3 text-center w-28">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-800/60">
                             @forelse ($filteredChapterPurchases as $chap)
-                                <tr class="hover:bg-slate-800/40 transition">
+                                <tr class="hover:bg-slate-800/40 transition"
+                                    wire:key="modal-chap-{{ $chap['id'] }}">
                                     <td class="p-3 text-center font-bold text-slate-300">
-                                        Bab {{ $chap['order_number'] }}
+                                        {{ $chap['order_number'] }}
                                     </td>
                                     <td class="p-3 font-medium text-slate-200">
                                         <div class="flex items-center gap-2.5">
@@ -479,8 +465,22 @@
                                                     <span class="text-[8px] text-slate-500">No Img</span>
                                                 @endif
                                             </div>
-                                            <span class="truncate">{{ $chap['title'] }}</span>
+                                            <span
+                                                class="truncate max-w-[180px] sm:max-w-xs">{{ $chap['title'] }}</span>
                                         </div>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        <!-- Dropdown Ubah Status Bab -->
+                                        <select
+                                            wire:change="updateChapterStatus({{ $chap['id'] }}, $event.target.value)"
+                                            class="px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-[11px] font-bold focus:outline-none focus:border-brand-400
+                            {{ $chap['status'] === 'published' ? 'text-emerald-400' : 'text-amber-400' }}">
+                                            <option value="draft"
+                                                {{ $chap['status'] === 'draft' ? 'selected' : '' }}>Draft</option>
+                                            <option value="published"
+                                                {{ $chap['status'] === 'published' ? 'selected' : '' }}>Published
+                                            </option>
+                                        </select>
                                     </td>
                                     <td class="p-3 text-center">
                                         @if ($chap['is_paid'])
@@ -496,33 +496,22 @@
                                         @endif
                                     </td>
                                     <td class="p-3 text-center">
-                                        @if ($chap['purchases_count'] > 0)
-                                            <span
-                                                class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs">
-                                                {{ $chap['purchases_count'] }} kali dibeli
-                                            </span>
-                                        @else
-                                            <span class="text-slate-500 text-xs">
-                                                0 kali
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="p-3 text-right">
-                                        @if ($chap['total_beans'] > 0)
-                                            <span
-                                                class="font-bold text-amber-400 text-xs inline-flex items-center gap-1 justify-end">
-                                                <i class="fa-solid fa-coins text-[10px]"></i>
-                                                <span>{{ number_format($chap['total_beans']) }}</span>
-                                            </span>
-                                        @else
-                                            <span class="text-slate-500 text-xs">0</span>
-                                        @endif
+                                        <span
+                                            class="text-slate-300 font-semibold">{{ $chap['purchases_count'] }}x</span>
+                                        <span
+                                            class="text-slate-500 text-[10px]">({{ number_format($chap['total_beans']) }}
+                                            koin)</span>
                                     </td>
                                     <td class="p-3 text-center">
-                                        <a href="{{ route('admin.chapters.preview', $chap['id']) }}" target="_blank"
-                                            class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold rounded-lg transition inline-flex items-center gap-1">
-                                            <span><i class="fa-solid fa-eye"></i></span> Baca
-                                        </a>
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            <!-- Tombol Baca / Preview -->
+                                            <a href="{{ route('admin.chapters.preview', $chap['id']) }}"
+                                                target="_blank"
+                                                class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold rounded-lg transition"
+                                                title="Baca Bab">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
