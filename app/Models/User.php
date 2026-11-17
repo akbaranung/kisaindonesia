@@ -157,6 +157,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(PenName::class)->where('is_default', true);
     }
 
+    public function conversation(): HasOne
+    {
+        return $this->hasOne(Conversation::class);
+    }
+
     public function menus()
     {
         return $this->belongsToMany(Menu::class, 'menu_user')->orderBy('order', 'asc');

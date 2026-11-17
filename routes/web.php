@@ -10,6 +10,7 @@ use App\Livewire\Admin\CoinPackageIndex;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\ManageCarouselSubmissions;
 use App\Livewire\Admin\ManageGenres;
+use App\Livewire\Admin\ManageMessages;
 use App\Livewire\Admin\ManagePremiumRequests;
 use App\Livewire\Admin\ManageUsers;
 use App\Livewire\Admin\StoryManager;
@@ -23,6 +24,7 @@ use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Auth\VerifyEmail;
 use App\Livewire\Author\SignContract;
 use App\Livewire\Author\WithdrawalIndex as AuthorWithdrawalIndex;
+use App\Livewire\Chat\UserChat;
 use App\Livewire\ContactSupport;
 use App\Livewire\FollowingFeed;
 use App\Livewire\FullNotificationList;
@@ -143,6 +145,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/topup/return', [DuitkuController::class, 'returnPage'])->name('topup.return');
     Route::get('/withdrawals', AuthorWithdrawalIndex::class)->name('withdrawals.index');
     Route::get('/my-promotions', MyPromotions::class)->name('promotions');
+    Route::get('/messages', UserChat::class)->name('messages.index');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -155,6 +158,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::middleware([CheckMenuAccess::class])->group(function () {
         Route::get('/dashboard', Dashboard::class)->name('dashboard');
+        Route::get('/messages', ManageMessages::class)->name('messages');
         Route::get('/genres', ManageGenres::class)->name('genres');
         Route::get('/users', ManageUsers::class)->name('users');
         Route::get('/stories', StoryManager::class)->name('stories');

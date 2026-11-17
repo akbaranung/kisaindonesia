@@ -44,10 +44,23 @@
         </div>
 
         <div class="flex flex-col gap-4">
-            <a href="{{ route('promotions') }}"
-                class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 rounded-xl transition shadow-xs pointer w-fit">
-                <span>🫘</span> Promo Hero Banner Saya
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('promotions') }}"
+                    class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 rounded-xl transition shadow-xs pointer w-fit">
+                    <span>🫘</span> Promo Hero Banner Saya
+                </a>
+
+                <a href="{{ route('messages.index') }}" wire:navigate
+                    class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-brand-500 dark:hover:border-brand-500 rounded-xl transition shadow-xs pointer w-fit">
+                    <i class="fa-solid fa-comments text-brand-500"></i>
+                    <span>Pesan ke Admin</span>
+                    @if (auth()->user()->conversation && auth()->user()->conversation->user_unread_count > 0)
+                        <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-500 text-white animate-pulse">
+                            {{ auth()->user()->conversation->user_unread_count }}
+                        </span>
+                    @endif
+                </a>
+            </div>
 
             @forelse($myStories as $story)
                 @php

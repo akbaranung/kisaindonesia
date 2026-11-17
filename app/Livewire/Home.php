@@ -33,7 +33,7 @@ class Home extends Component
             ->where('monetization_type', 'premium');
 
         if (auth()->check()) {
-            auth()->user()->load('savedStories');
+            auth()->user()->load(['savedStories', 'conversation']);
         }
 
         $popularStories = Story::with(['penName'])->where('status', 'published')->where('monetization_type', 'premium')->where('is_blocked', false)->orderByDesc('views_count')->take(10)->get();

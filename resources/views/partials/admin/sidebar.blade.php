@@ -32,6 +32,12 @@
                                 : auth()->user()->menus;
                     @endphp
                     @forelse ($userMenus as $menu)
+                        @php
+                            $badgeCount = 0;
+                            if ($menu->route_name === 'admin.messages') {
+                                $badgeCount = \App\Models\Conversation::sum('admin_unread_count');
+                            }
+                        @endphp
                         <li>
                             <a href="{{ route($menu->route_name) }}" wire:navigate
                                 class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all {{ request()->routeIs($menu->route_name) ? 'bg-brand-600 text-white shadow-lg shadow-brand-900/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200' }}">
@@ -39,6 +45,11 @@
                                     <i class="{{ $menu->icon }}"></i>
                                 @endif
                                 <span>{{ $menu->name }}</span>
+                                @if ($badgeCount > 0)
+                                    <span class="ml-auto px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-500 text-white animate-pulse">
+                                        {{ $badgeCount }}
+                                    </span>
+                                @endif
                             </a>
                         </li>
 

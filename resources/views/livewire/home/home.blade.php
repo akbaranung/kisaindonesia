@@ -19,6 +19,25 @@
                 </a>
             @endif
             @auth
+                @php
+                    $unreadMessagesCount = auth()->user()->conversation?->user_unread_count ?? 0;
+                @endphp
+                <a href="{{ route('messages.index') }}" wire:navigate
+                    class="relative p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition focus:outline-none"
+                    aria-label="Pesan ke Admin" title="Pesan ke Admin">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+
+                    @if ($unreadMessagesCount > 0)
+                        <span
+                            class="absolute top-1 right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-black leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-rose-500 rounded-full shadow-xs animate-pulse">
+                            {{ $unreadMessagesCount > 99 ? '99+' : $unreadMessagesCount }}
+                        </span>
+                    @endif
+                </a>
+
                 <livewire:notification-bell />
             @endauth
         </div>

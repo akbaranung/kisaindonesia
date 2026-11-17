@@ -339,6 +339,31 @@
                     </svg>
                 </button>
 
+                <a href="{{ route('messages.index') }}" wire:navigate
+                    class="group w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xs hover:border-brand-200 dark:hover:border-brand-600 transition">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 group-hover:bg-brand-50 dark:group-hover:bg-brand-950/40 text-slate-400 group-hover:text-brand-600 flex items-center justify-center transition">
+                            <i class="fa-solid fa-comments text-base"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="flex items-center gap-2">
+                                <span class="block text-sm font-bold text-slate-700 dark:text-slate-200">Pesan ke Admin</span>
+                                @if (auth()->user()->conversation && auth()->user()->conversation->user_unread_count > 0)
+                                    <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-500 text-white animate-pulse">
+                                        {{ auth()->user()->conversation->user_unread_count }} baru
+                                    </span>
+                                @endif
+                            </div>
+                            <span class="block text-[10px] text-slate-400 dark:text-slate-500">Obrolan langsung dengan tim Admin Kisa</span>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
                 <a href="{{ route('support') }}"
                     class="group w-full flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xs hover:border-brand-200 dark:hover:border-brand-600 transition">
                     <div class="flex items-center gap-4">
