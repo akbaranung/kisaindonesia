@@ -55,7 +55,8 @@
                     <i class="fa-solid fa-comments text-brand-500"></i>
                     <span>Pesan ke Admin</span>
                     @if (auth()->user()->conversation && auth()->user()->conversation->user_unread_count > 0)
-                        <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-500 text-white animate-pulse">
+                        <span
+                            class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-500 text-white animate-pulse">
                             {{ auth()->user()->conversation->user_unread_count }}
                         </span>
                     @endif
@@ -138,7 +139,7 @@
                                 @if ($isPending)
                                     <span
                                         class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
-                                        Menunggu Review
+                                        Ditinjau Editor
                                     </span>
                                 @elseif($isApproved)
                                     <span
