@@ -33,6 +33,10 @@
                     class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'pending' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
                     Pending
                 </button>
+                <button wire:click="$set('statusFilter', 'revisi')"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'revisi' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
+                    Perlu Revisi
+                </button>
                 <button wire:click="$set('statusFilter', 'approved')"
                     class="px-3 py-1.5 text-xs font-semibold rounded-lg transition {{ $statusFilter === 'approved' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200' }}">
                     Disetujui
@@ -104,9 +108,16 @@
                                         class="px-2.5 py-1 bg-brand-500/10 border border-brand-500/30 text-brand-400 font-bold rounded-lg text-[10px]">
                                         DISETUJUI
                                     </span>
+                                @elseif($req->status === 'revisi')
+                                    <span
+                                        class="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold rounded-lg text-[10px]"
+                                        title="{{ $req->rejection_reason }}">
+                                        PERLU REVISI
+                                    </span>
                                 @else
                                     <span
-                                        class="px-2.5 py-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold rounded-lg text-[10px]">
+                                        class="px-2.5 py-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold rounded-lg text-[10px]"
+                                        title="{{ $req->rejection_reason }}">
                                         DITOLAK
                                     </span>
                                 @endif
@@ -137,19 +148,30 @@
                                             class="flex items-center gap-2">
                                             Loading...
                                         </span>
-
                                     </button>
+
+                                    <button wire:click="openRevisiModal({{ $req->id }})"
+                                        wire:loading.attr="disabled" wire:target="openRevisiModal({{ $req->id }})"
+                                        class="px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold rounded-lg transition text-[11px]"
+                                        title="Minta Revisi">
+                                        <span wire:loading.remove wire:target="openRevisiModal({{ $req->id }})">📝
+                                            Revisi</span>
+                                        <span wire:loading wire:target="openRevisiModal({{ $req->id }})"
+                                            class="flex items-center gap-2">
+                                            Loading...
+                                        </span>
+                                    </button>
+
                                     <button wire:click="openRejectModal({{ $req->id }})"
                                         wire:loading.attr="disabled" wire:target="openRejectModal({{ $req->id }})"
                                         class="px-2.5 py-1.5 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold rounded-lg transition text-[11px]"
-                                        title="Tolak">
+                                        title="Tolak Permanen">
                                         <span wire:loading.remove wire:target="openRejectModal({{ $req->id }})">✕
                                             Reject</span>
                                         <span wire:loading wire:target="openRejectModal({{ $req->id }})"
                                             class="flex items-center gap-2">
                                             Loading...
                                         </span>
-
                                     </button>
                                 @endif
                             </td>
@@ -297,9 +319,16 @@
                         </div>
                     @endif
 
+                    @if ($selectedRequest->status === 'revisi' && $selectedRequest->rejection_reason)
+                        <div class="p-3 bg-amber-950/40 border border-amber-800/60 rounded-xl text-amber-300">
+                            <span class="font-bold block mb-1">Catatan Revisi dari Admin:</span>
+                            {{ $selectedRequest->rejection_reason }}
+                        </div>
+                    @endif
+
                     @if ($selectedRequest->status === 'rejected' && $selectedRequest->rejection_reason)
                         <div class="p-3 bg-rose-950/40 border border-rose-800/60 rounded-xl text-rose-300">
-                            <span class="font-bold block mb-1">Alasan Penolakan:</span>
+                            <span class="font-bold block mb-1">Alasan Penolakan Permanen:</span>
                             {{ $selectedRequest->rejection_reason }}
                         </div>
                     @endif
@@ -313,24 +342,59 @@
                         <button type="button" wire:click="openRejectModal({{ $selectedRequest->id }})"
                             wire:target="openRejectModal({{ $selectedRequest->id }})"
                             class="px-4 py-2 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold text-xs rounded-xl transition">
-                            <span wire:loading.remove wire:target="openRejectModal({{ $selectedRequest->id }})">✕
-                                Reject</span>
-                            <span wire:loading wire:target="openRejectModal({{ $selectedRequest->id }})"
-                                class="flex items-center gap-2">
-                                Loading...
-                            </span>
-                            <button type="button" wire:click="approve({{ $selectedRequest->id }})"
-                                wire:target="approve({{ $selectedRequest->id }})"
-                                class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition">
-                                <span wire:loading.remove wire:target="approve({{ $selectedRequest->id }})">✓
-                                    Approve & Monetize</span>
-                                <span wire:loading wire:target="approve({{ $selectedRequest->id }})"
-                                    class="flex items-center gap-2">
-                                    Loading...
-                                </span>
-                            </button>
+                            <span wire:loading.remove wire:target="openRejectModal({{ $selectedRequest->id }})">✕ Reject Permanen</span>
+                            <span wire:loading wire:target="openRejectModal({{ $selectedRequest->id }})" class="flex items-center gap-2">Loading...</span>
+                        </button>
+
+                        <button type="button" wire:click="openRevisiModal({{ $selectedRequest->id }})"
+                            wire:target="openRevisiModal({{ $selectedRequest->id }})"
+                            class="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold text-xs rounded-xl transition">
+                            <span wire:loading.remove wire:target="openRevisiModal({{ $selectedRequest->id }})">📝 Minta Revisi</span>
+                            <span wire:loading wire:target="openRevisiModal({{ $selectedRequest->id }})" class="flex items-center gap-2">Loading...</span>
+                        </button>
+
+                        <button type="button" wire:click="approve({{ $selectedRequest->id }})"
+                            wire:target="approve({{ $selectedRequest->id }})"
+                            class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs rounded-xl transition">
+                            <span wire:loading.remove wire:target="approve({{ $selectedRequest->id }})">✓ Approve & Monetize</span>
+                            <span wire:loading wire:target="approve({{ $selectedRequest->id }})" class="flex items-center gap-2">Loading...</span>
+                        </button>
                     @endif
                 </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- MODAL CATATAN REVISI -->
+    @if ($isRevisiModalOpen && $selectedRequest)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+            <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                    <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                        <span>📝</span> Minta Revisi Pengajuan Premium
+                    </h3>
+                    <button wire:click="closeModals" class="text-slate-400 hover:text-slate-200">✕</button>
+                </div>
+
+                <form wire:submit.prevent="revisi" class="space-y-4">
+                    <div>
+                        <p class="text-[11px] text-slate-400 mb-2">Penulis dapat melihat catatan ini dan <strong>dapat mengajukan ulang</strong> setelah melakukan perbaikan.</p>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Catatan Revisi untuk Penulis</label>
+                        <textarea wire:model="revisiReason" rows="4"
+                            placeholder="Misal: Mohon sesuaikan jumlah kata pada bab 6-8 agar memenuhi syarat 1000-1500 kata, lalu ajukan kembali."
+                            class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500"></textarea>
+                        @error('revisiReason')
+                            <span class="text-[10px] text-rose-400 font-bold block mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2">
+                        <button type="button" wire:click="closeModals"
+                            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition">Batal</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs rounded-xl transition">Kirim Catatan Revisi</button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif
@@ -340,16 +404,16 @@
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
             <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
                 <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-                    <h3 class="text-sm font-bold text-rose-400">Tolak Pengajuan Premium</h3>
+                    <h3 class="text-sm font-bold text-rose-400">Tolak Pengajuan Premium (Permanen)</h3>
                     <button wire:click="closeModals" class="text-slate-400 hover:text-slate-200">✕</button>
                 </div>
 
                 <form wire:submit.prevent="reject" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">Alasan Penolakan (akan dibaca
-                            oleh Penulis)</label>
+                        <p class="text-[11px] text-rose-400/90 mb-2">Perhatian: Penolakan ini bersifat permanen. Penulis <strong>tidak dapat mengajukan ulang</strong> cerita ini untuk monetisasi.</p>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Alasan Penolakan</label>
                         <textarea wire:model="rejectionReason" rows="3"
-                            placeholder="Misal: Cerita masih terlalu pendek (kurang dari 5 bab) atau tidak memenuhi standar kualitas."
+                            placeholder="Misal: Cerita melanggar syarat konten internal atau tidak layak dimonetisasi."
                             class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-rose-500"></textarea>
                         @error('rejectionReason')
                             <span class="text-[10px] text-rose-400 font-bold block mt-1">{{ $message }}</span>
@@ -360,8 +424,7 @@
                         <button type="button" wire:click="closeModals"
                             class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition">Batal</button>
                         <button type="submit"
-                            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl transition">Kirim
-                            Penolakan</button>
+                            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs rounded-xl transition">Kirim Penolakan</button>
                     </div>
                 </form>
             </div>

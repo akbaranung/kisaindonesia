@@ -18,19 +18,26 @@ class UpdateStoryStatus extends Component
 
     public function submitForReview()
     {
-        $chapterCount = $this->story->chapters()->where('status', 'published')->count();
-        if ($chapterCount < 5) {
-            session()->flash('error', 'Cerita minimal harus memiliki 5 bab sebelum diajukan untuk publish!');
+        if ($this->story->status === 'rejected') {
+            session()->flash('error', 'Pengajuan cerita ini telah ditolak oleh Admin secara permanen dan tidak dapat diajukan kembali.');
             return;
         }
 
-        if (in_array($this->story->status, ['draft', 'rejected'])) {
+        $chapterCount = $this->story->chapters()->where('status', 'published')->count();
+        if ($chapterCount < 5) {
+            session()->flash('error', 'Cerita minimal harus memiliki 5 bab yang diterbitkan sebelum diajukan untuk publish!');
+            return;
+        }
+
+        if (in_array($this->story->status, ['draft', 'revisi'])) {
             $this->story->update([
                 'status' => 'pending_review',
                 'rejection_reason' => null
             ]);
 
-            session()->flash('succcess', 'Pengajuan publish berhasil dikirim! Menunggu review Admin.');
+            $this->status = 'pending_review';
+
+            session()->flash('success', 'Pengajuan publish berhasil dikirim! Menunggu review Admin.');
             $this->dispatch('storyStatusUpdated');
         }
     }
@@ -85,7 +92,7 @@ class UpdateStoryStatus extends Component
         $chapterCount = $this->story->chapters_count ?? $this->story->chapters()->where('status', 'published')->count();
         return view('livewire.stories.update-story-status', [
             'chapterCount' => $chapterCount,
-            'canSubmit' => $chapterCount >= 5,
+            'canSubmit' => $chapterCount >= 5 && in_array($this->story->status, ['draft', 'revisi']),
         ]);
     }
 }

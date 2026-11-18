@@ -68,6 +68,8 @@
                     $latestRequest = $story->premiumRequests->first();
                     $isPending = $latestRequest && $latestRequest->status === 'pending';
                     $isApproved = $latestRequest && $latestRequest->status === 'approved';
+                    $isRevisi = $latestRequest && $latestRequest->status === 'revisi';
+                    $isRejected = $latestRequest && $latestRequest->status === 'rejected';
 
                     // Pengecekan status kontrak per cerita berdasarkan versi terbaru di settings dan masa berlaku 5 tahun
                     $latestContractVersion = (int) \App\Models\Setting::get('current_contract_version', 1);
@@ -116,9 +118,16 @@
                                         class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                         Review Publish
                                     </span>
+                                @elseif ($story->status === 'revisi')
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                        title="{{ $story->rejection_reason ? 'Catatan revisi: ' . $story->rejection_reason : '' }}">
+                                        Perlu Revisi
+                                    </span>
                                 @elseif ($story->status === 'rejected')
                                     <span
-                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                                        title="{{ $story->rejection_reason ? 'Alasan ditolak: ' . $story->rejection_reason : '' }}">
                                         Publish Ditolak
                                     </span>
                                 @else
@@ -145,6 +154,18 @@
                                     <span
                                         class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                         Pengajuan Disetujui
+                                    </span>
+                                @elseif($isRevisi)
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                        title="{{ $latestRequest->rejection_reason ? 'Catatan revisi: ' . $latestRequest->rejection_reason : '' }}">
+                                        Revisi Monetisasi
+                                    </span>
+                                @elseif($isRejected)
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                        title="{{ $latestRequest->rejection_reason ? 'Alasan ditolak: ' . $latestRequest->rejection_reason : '' }}">
+                                        Monetisasi Ditolak
                                     </span>
                                 @endif
                             </div>
@@ -211,6 +232,19 @@
                                         class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                         Disetujui
                                     </span>
+                                @elseif($isRevisi)
+                                    <a href="{{ route('monetization.apply', ['story_id' => $story->id]) }}"
+                                        wire:navigate
+                                        class="text-[9px] px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition flex items-center gap-1 shadow-sm"
+                                        title="{{ $latestRequest->rejection_reason ? 'Catatan revisi: ' . $latestRequest->rejection_reason : '' }}">
+                                        <span>Perbaiki Monetisasi</span>
+                                    </a>
+                                @elseif($isRejected)
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20"
+                                        title="{{ $latestRequest->rejection_reason ? 'Alasan ditolak: ' . $latestRequest->rejection_reason : '' }}">
+                                        Monetisasi Ditolak
+                                    </span>
                                 @elseif($story->monetization_type === 'free')
                                     <a href="{{ route('monetization.apply', ['story_id' => $story->id]) }}"
                                         wire:navigate
@@ -255,6 +289,14 @@
                                 class="mt-3 p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-600 dark:text-rose-300">
                                 <span class="font-black block mb-0.5"><i class="fa-solid fa-triangle-exclamation"></i>
                                     Publish Ditolak:</span>
+                                <p class="leading-relaxed">{{ $story->rejection_reason }}</p>
+                            </div>
+                        @endif
+                        @if ($story->status === 'revisi' && $story->rejection_reason)
+                            <div
+                                class="mt-3 p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-600 dark:text-amber-300">
+                                <span class="font-black block mb-0.5"><i class="fa-solid fa-triangle-exclamation"></i>
+                                    Revisi Publish:</span>
                                 <p class="leading-relaxed">{{ $story->rejection_reason }}</p>
                             </div>
                         @endif

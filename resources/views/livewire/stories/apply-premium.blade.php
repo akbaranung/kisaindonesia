@@ -178,19 +178,50 @@
                     sedang meninjau format bab cerita Anda.
                 </p>
             </div>
-        @elseif($selectedStory && $isEligible)
+        @elseif($existingRequest && $existingRequest->status === 'rejected')
+            {{-- STATUS DITOLAK PERMANEN (TIDAK BISA AJUKAN ULANG) --}}
             <div
-                class="bg-white dark:bg-slate-900 p-4 mb-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5">
-                @if ($existingRequest && $existingRequest->status === 'rejected')
-                    <div
-                        class="p-3 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-xl text-[11px] space-y-1">
-                        <span class="font-bold text-rose-800 dark:text-rose-300 block">⚠️ Pengajuan Sebelumnya
-                            Ditolak</span>
-                        <p class="text-rose-700 dark:text-rose-400">"{{ $existingRequest->rejection_reason }}"
-                        </p>
+                class="p-4 mb-5 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-2xl space-y-2.5">
+                <div class="flex items-center gap-2 font-bold text-rose-800 dark:text-rose-300 text-xs">
+                    <i class="fa-solid fa-circle-xmark text-rose-500 text-sm"></i>
+                    Pengajuan Monetisasi Ditolak (Permanen)
+                </div>
+                <p class="text-[11px] text-rose-700 dark:text-rose-400 leading-relaxed">
+                    Pengajuan untuk cerita ini telah <strong>ditolak secara permanen</strong> oleh Admin pada <strong class="text-rose-900 dark:text-rose-200">{{ $existingRequest->updated_at->format('d M Y, H:i') }}</strong> dan <strong>tidak dapat diajukan kembali</strong>.
+                </p>
+                @if ($existingRequest->rejection_reason)
+                    <div class="p-3 bg-rose-100/70 dark:bg-rose-900/40 rounded-xl text-[11px] text-rose-900 dark:text-rose-200 border border-rose-200 dark:border-rose-800">
+                        <span class="font-bold block mb-0.5">Alasan Penolakan Admin:</span>
+                        "{{ $existingRequest->rejection_reason }}"
                     </div>
                 @endif
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">
+                    Silakan ajukan karya cerita Anda lainnya yang telah memenuhi kualifikasi bab dan kualitas konten.
+                </p>
+            </div>
+        @elseif($selectedStory && $isEligible)
+            {{-- STATUS REVISI: TAMPILKAN BANNER CATATAN REVISI DI ATAS FORM --}}
+            @if ($existingRequest && $existingRequest->status === 'revisi')
+                <div
+                    class="p-4 mb-3 bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/80 rounded-2xl space-y-2">
+                    <div class="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-300 text-xs">
+                        <i class="fa-solid fa-pen-to-square text-amber-500"></i>
+                        Pengajuan Memerlukan Revisi
+                    </div>
+                    <p class="text-[11px] text-amber-900/90 dark:text-amber-200/90 leading-relaxed">
+                        Pengajuan Anda sebelumnya memerlukan beberapa perbaikan sebelum dapat disetujui. Silakan perbaiki cerita Anda, periksa data di bawah, lalu ajukan ulang.
+                    </p>
+                    @if ($existingRequest->rejection_reason)
+                        <div class="p-2.5 bg-amber-100/80 dark:bg-amber-900/50 rounded-xl text-[11px] text-amber-950 dark:text-amber-100 font-medium border border-amber-200 dark:border-amber-800">
+                            <span class="font-bold block mb-0.5 text-amber-900 dark:text-amber-200">Catatan Revisi dari Admin:</span>
+                            "{{ $existingRequest->rejection_reason }}"
+                        </div>
+                    @endif
+                </div>
+            @endif
 
+            <div
+                class="bg-white dark:bg-slate-900 p-4 mb-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-3.5">
                 <label class="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
                     <span
                         class="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 text-[10px] font-black flex items-center justify-center">2</span>
@@ -351,12 +382,14 @@
     @endif
 
     {{-- FLOATING BOTTOM BAR (MOBILE ACTION BUTTON) --}}
-    @if ($selectedStory && $isEligible && (!$existingRequest || $existingRequest->status !== 'pending'))
+    @if ($selectedStory && $isEligible && (!$existingRequest || $existingRequest->status === 'revisi'))
         <div
             class="fixed bottom-15 mt-3 inset-x-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-3 z-30 max-w-md mx-auto">
             <button wire:click="submitApplication" wire:loading.attr="disabled"
                 class="w-full py-3 bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white dark:text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2">
-                <span wire:loading.remove>🚀 Kirim Pengajuan Premium</span>
+                <span wire:loading.remove>
+                    {{ ($existingRequest && $existingRequest->status === 'revisi') ? '🔄 Kirim Ulang Pengajuan (Revisi)' : '🚀 Kirim Pengajuan Premium' }}
+                </span>
                 <span wire:loading>Memproses Pengajuan...</span>
             </button>
         </div>

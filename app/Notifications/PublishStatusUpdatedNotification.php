@@ -26,29 +26,50 @@ class PublishStatusUpdatedNotification extends Notification
 
     public function toArray($notifiable): array
     {
-        $isApproved = $this->status === 'approved';
+        $title = match ($this->status) {
+            'approved' => 'Publikasi Disetujui! 🎉',
+            'revisi' => 'Publikasi Perlu Revisi 📝',
+            default => 'Pengajuan Publish Ditolak ⚠️',
+        };
+
+        $message = match ($this->status) {
+            'approved' => 'Hore! Pengajuan publikasi cerita Anda telah disetujui dan resmi dipublikasikan.',
+            'revisi' => 'Pengajuan publikasi cerita Anda memerlukan revisi: ' . ($this->rejectionReason ?? 'Periksa catatan admin.'),
+            default => 'Pengajuan publikasi cerita Anda telah ditolak: ' . ($this->rejectionReason ?? 'Belum memenuhi kriteria.'),
+        };
+
         return [
             'type' => 'publish_status',
-            'title' => $isApproved ? 'Publikasi Disetujui! 🎉' : 'Pengajuan Ditolak ⚠️',
-            'message' => $isApproved
-                ? 'Hore! Pengajuan publikasi cerita Anda telah disetujui dan resmi dipublikasikan.'
-                : 'Pengajuan publikasi cerita Anda ditolak.',
+            'title' => $title,
+            'message' => $message,
+            'status' => $this->status,
             'rejection_reason' => $this->rejectionReason,
         ];
     }
 
     public function toMail(object $notifiable): MailMessage
     {
-        $isApproved = $this->status === 'approved';
-        $subject = $isApproved ? 'Selamat! Pengajuan Publish Cerita Anda Disetujui' : 'Update Pengajuan Publish Cerita';
+        $subject = match ($this->status) {
+            'approved' => 'Selamat! Pengajuan Publish Cerita Anda Disetujui',
+            'revisi' => 'Perlu Revisi: Pengajuan Publish Cerita',
+            default => 'Pemberitahuan: Pengajuan Publish Cerita Ditolak',
+        };
+
         $mail = (new MailMessage)->subject($subject)->greeting('Halo, ' . $notifiable->name . '!');
-        if ($isApproved) {
+
+        if ($this->status === 'approved') {
             $mail->line('Pengajuan publish cerita anda telah **DISETUJUI**.')
                 ->line('**PENTING : ** Harap diperhatikan bahwa persetujuan publish bersifat mengikat dan harus dilakukan sesuai dengan seluruh aturan serta regulasi internal KISA Indonesia yang berlaku.')
                 ->action('Buka Dashboard', route('my-stories'));
+        } elseif ($this->status === 'revisi') {
+            $mail->line('Pengajuan publish cerita Anda memerlukan **REVISI** sebelum dapat dipublikasikan.')
+                ->line('**Catatan Revisi dari Admin:** ' . ($this->rejectionReason ?? 'Harap tinjau kembali naskah cerita.'))
+                ->line('Anda dapat memperbaiki bab cerita dan mengajukan ulang melalui halaman kelola bab cerita.')
+                ->action('Buka Studio Cerita', route('my-stories'));
         } else {
-            $mail->line('Pengajuan publish cerita Anda saat ini **BELUM DISETUJUI**.')
-                ->line('Alasan: ' . ($this->rejectionReason ?? 'Belum memenuhi syarat.'));
+            $mail->line('Pengajuan publish cerita Anda telah **DITOLAK** dan tidak dapat diajukan kembali.')
+                ->line('**Alasan Penolakan:** ' . ($this->rejectionReason ?? 'Belum memenuhi syarat.'))
+                ->action('Buka Dashboard', route('my-stories'));
         }
 
         return $mail;

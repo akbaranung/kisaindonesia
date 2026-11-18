@@ -35,6 +35,10 @@ class StoryManager extends Component
     public ?int $rejectingStoryId = null;
     public string $publishRejectionReason = '';
 
+    public bool $showRevisiPublishModal = false;
+    public ?int $revisiStoryId = null;
+    public string $publishRevisiReason = '';
+
     protected $queryString = [
         'search' => ['except' => ''],
         'category' => ['except' => ''],
@@ -163,7 +167,7 @@ class StoryManager extends Component
 
     public function updateStoryStatus(int $storyId, string $status)
     {
-        $allowed = ['draft', 'pending_review', 'published', 'rejected'];
+        $allowed = ['draft', 'pending_review', 'published', 'revisi', 'rejected'];
         if (!in_array($status, $allowed)) {
             return;
         }
@@ -273,6 +277,44 @@ class StoryManager extends Component
         session()->flash('message', "Cerita '{$story->title}' berhasil disetujui dan resmi dipublikasikan!");
     }
 
+    public function openRevisiPublishModal(int $storyId)
+    {
+        $this->revisiStoryId = $storyId;
+        $this->publishRevisiReason = '';
+        $this->resetErrorBag();
+        $this->showRevisiPublishModal = true;
+    }
+
+    public function closeRevisiPublishModal()
+    {
+        $this->showRevisiPublishModal = false;
+        $this->revisiStoryId = null;
+        $this->publishRevisiReason = '';
+    }
+
+    public function revisiPublishStory()
+    {
+        $this->validate([
+            'publishRevisiReason' => 'required|string|min:5',
+        ], [
+            'publishRevisiReason.required' => 'Catatan revisi wajib diisi agar penulis tahu bagian mana yang harus diperbaiki.',
+            'publishRevisiReason.min' => 'Catatan revisi minimal 5 karakter.',
+        ]);
+
+        $story = Story::findOrFail($this->revisiStoryId);
+        $story->update([
+            'status' => 'revisi',
+            'rejection_reason' => $this->publishRevisiReason,
+        ]);
+
+        if ($story->author) {
+            $story->author->notify(new PublishStatusUpdatedNotification('revisi', $this->publishRevisiReason));
+        }
+
+        session()->flash('message', "Pengajuan publish cerita '{$story->title}' telah dikembalikan untuk revisi ke penulis.");
+        $this->closeRevisiPublishModal();
+    }
+
     public function openRejectPublishModal(int $storyId)
     {
         $this->rejectingStoryId = $storyId;
@@ -291,10 +333,10 @@ class StoryManager extends Component
     public function rejectPublishStory()
     {
         $this->validate([
-            'publishRejectionReason' => 'required|string|min:10',
+            'publishRejectionReason' => 'required|string|min:5',
         ], [
-            'publishRejectionReason.required' => 'Alasan penolakan wajib diisi agar penulis tahu bagian mana yang harus diperbaiki.',
-            'publishRejectionReason.min' => 'Alasan penolakan minimal 10 karakter.',
+            'publishRejectionReason.required' => 'Alasan penolakan wajib diisi.',
+            'publishRejectionReason.min' => 'Alasan penolakan minimal 5 karakter.',
         ]);
 
         $story = Story::findOrFail($this->rejectingStoryId);
@@ -307,7 +349,7 @@ class StoryManager extends Component
             $story->author->notify(new PublishStatusUpdatedNotification('rejected', $this->publishRejectionReason));
         }
 
-        session()->flash('message', "Pengajuan publish cerita '{$story->title}' telah ditolak beserta alasannya.");
+        session()->flash('message', "Pengajuan publish cerita '{$story->title}' telah ditolak permanen.");
         $this->closeRejectPublishModal();
     }
 

@@ -17,8 +17,10 @@ class ManagePremiumRequests extends Component
 
     public $selectedRequest = null;
     public $rejectionReason = '';
+    public $revisiReason = '';
     public $isDetailModalOpen = false;
     public $isRejectModalOpen = false;
+    public $isRevisiModalOpen = false;
 
     protected $paginationTheme = 'tailwind';
 
@@ -50,8 +52,10 @@ class ManagePremiumRequests extends Component
     {
         $this->isDetailModalOpen = false;
         $this->isRejectModalOpen = false;
+        $this->isRevisiModalOpen = false;
         $this->selectedRequest = null;
         $this->rejectionReason = '';
+        $this->revisiReason = '';
         $this->resetErrorBag();
     }
 
@@ -98,9 +102,53 @@ class ManagePremiumRequests extends Component
         $this->closeModals();
     }
 
+    public function openRevisiModal($id)
+    {
+        $this->selectedRequest = PremiumStoryRequest::findOrFail($id);
+        $this->revisiReason = '';
+        $this->resetErrorBag();
+        $this->isRevisiModalOpen = true;
+    }
+
+    public function revisi()
+    {
+        $this->validate(
+            [
+                'revisiReason' => 'required|min:5|max:500',
+            ],
+            [
+                'revisiReason.required' => 'Catatan revisi wajib diisi!',
+                'revisiReason.min' => 'Catatan revisi minimal 5 karakter!'
+            ]
+        );
+
+        if ($this->selectedRequest) {
+            $this->selectedRequest->update([
+                'status' => 'revisi',
+                'rejection_reason' => $this->revisiReason,
+                'processed_by' => Auth::id()
+            ]);
+
+            $user = $this->selectedRequest->user;
+
+            if ($user) {
+                $user->notify(new MonetizeStatusUpdatedNotification(
+                    'revisi',
+                    $this->revisiReason
+                ));
+            }
+
+            session()->flash('message', 'Pengajuan berhasil dikembalikan untuk revisi ke penulis!');
+        }
+
+        $this->closeModals();
+    }
+
     public function openRejectModal($id)
     {
         $this->selectedRequest = PremiumStoryRequest::findOrFail($id);
+        $this->rejectionReason = '';
+        $this->resetErrorBag();
         $this->isRejectModalOpen = true;
     }
 
@@ -108,7 +156,7 @@ class ManagePremiumRequests extends Component
     {
         $this->validate(
             [
-                'rejectionReason' => 'required|min:5|max:255',
+                'rejectionReason' => 'required|min:5|max:500',
             ],
             [
                 'rejectionReason.required' => 'Alasan penolakan wajib diisi!',
@@ -133,7 +181,7 @@ class ManagePremiumRequests extends Component
                 ));
             }
 
-            session()->flash('message', 'Pengajuan berhasil ditolak!');
+            session()->flash('message', 'Pengajuan berhasil ditolak permanen!');
         }
 
         $this->closeModals();

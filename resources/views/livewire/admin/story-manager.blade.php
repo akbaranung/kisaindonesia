@@ -166,11 +166,26 @@
                             <div class="flex flex-col items-start gap-1.5">
                                 <select wire:change="updateStoryStatus({{ $story->id }}, $event.target.value)"
                                     class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold focus:outline-none focus:border-brand-400">
-                                    <option value="draft" {{ $story->status === 'draft' ? 'selected' : '' }}>Draft
-                                    </option>
-                                    <option value="published" {{ $story->status === 'published' ? 'selected' : '' }}>
-                                        Published</option>
+                                    <option value="draft" {{ $story->status === 'draft' ? 'selected' : '' }}>Draft</option>
+                                    <option value="pending_review" {{ $story->status === 'pending_review' ? 'selected' : '' }}>Review Publish</option>
+                                    <option value="published" {{ $story->status === 'published' ? 'selected' : '' }}>Published</option>
+                                    <option value="revisi" {{ $story->status === 'revisi' ? 'selected' : '' }}>Revisi</option>
+                                    <option value="rejected" {{ $story->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
                                 </select>
+
+                                @if ($story->status === 'revisi')
+                                    <span
+                                        class="px-2 py-0.5 rounded-md bg-amber-950 border border-amber-800 text-amber-400 text-[9px] font-bold"
+                                        title="{{ $story->rejection_reason ? 'Catatan revisi: ' . $story->rejection_reason : '' }}">
+                                        📝 Perlu Revisi
+                                    </span>
+                                @elseif ($story->status === 'rejected')
+                                    <span
+                                        class="px-2 py-0.5 rounded-md bg-rose-950 border border-rose-800 text-rose-400 text-[9px] font-bold"
+                                        title="{{ $story->rejection_reason ? 'Alasan ditolak: ' . $story->rejection_reason : '' }}">
+                                        ✕ Ditolak
+                                    </span>
+                                @endif
 
                                 @if ($story->is_blocked)
                                     <span
@@ -223,7 +238,7 @@
                         </td>
                         <td class="p-3 text-center">
                             <div class="flex flex-wrap items-center justify-center gap-1.5">
-                                <!-- Tombol Approval & Reject Pengajuan Publish -->
+                                <!-- Tombol Approval, Revisi & Reject Pengajuan Publish -->
                                 @if ($story->status === 'pending_review')
                                     <button type="button" wire:click="approvePublishStory({{ $story->id }})"
                                         wire:confirm="Setujui dan publikasikan cerita '{{ $story->title }}' sekarang?"
@@ -233,9 +248,16 @@
                                         <span>Approve</span>
                                     </button>
 
+                                    <button type="button" wire:click="openRevisiPublishModal({{ $story->id }})"
+                                        class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
+                                        title="Minta Revisi Sebelum Publish">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        <span>Revisi</span>
+                                    </button>
+
                                     <button type="button" wire:click="openRejectPublishModal({{ $story->id }})"
                                         class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
-                                        title="Tolak Publikasi">
+                                        title="Tolak Publikasi Permanen">
                                         <i class="fa-solid fa-xmark"></i>
                                         <span>Reject</span>
                                     </button>
@@ -285,7 +307,53 @@
         {{ $stories->links('vendor.livewire.custom-pagination') }}
     </div>
 
-    <!-- MODAL PENOLAKAN PUBLIKASI CERITA -->
+    <!-- MODAL REVISI PUBLIKASI CERITA -->
+    @if ($showRevisiPublishModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-4 flex items-center justify-center"
+            x-data @keydown.window.escape="$wire.closeRevisiPublishModal()">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in"
+                @click.away="$wire.closeRevisiPublishModal()">
+
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                    <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Minta Revisi Sebelum Publikasi</span>
+                    </h3>
+                    <button type="button" wire:click="closeRevisiPublishModal"
+                        class="text-slate-400 hover:text-slate-200 text-sm">✕</button>
+                </div>
+
+                <form wire:submit.prevent="revisiPublishStory" class="space-y-4">
+                    <div>
+                        <p class="text-[11px] text-slate-400 mb-2">Penulis dapat melihat catatan revisi ini dan <strong>dapat mengajukan publish ulang</strong> setelah memperbaiki ceritanya.</p>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+                            Catatan Revisi untuk Penulis <span class="text-amber-400">*</span>
+                        </label>
+                        <textarea wire:model="publishRevisiReason" rows="4"
+                            placeholder="Jelaskan poin-poin yang harus diperbaiki oleh penulis (misal: perbaiki typo pada bab 1-3, lengkapi sinopsis cerita)..."
+                            class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500 placeholder:text-slate-600 leading-relaxed"></textarea>
+                        @error('publishRevisiReason')
+                            <span class="text-[11px] text-rose-400 font-semibold block mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                        <button type="button" wire:click="closeRevisiPublishModal"
+                            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition">
+                            Batal
+                        </button>
+                        <button type="submit" wire:loading.attr="disabled"
+                            class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50">
+                            <span wire:loading.remove wire:target="revisiPublishStory">Kirim Catatan Revisi</span>
+                            <span wire:loading wire:target="revisiPublishStory">Menyimpan...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    <!-- MODAL PENOLAKAN PUBLIKASI CERITA (PERMANEN) -->
     @if ($showRejectPublishModal)
         <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-4 flex items-center justify-center"
             x-data @keydown.window.escape="$wire.closeRejectPublishModal()">
@@ -295,7 +363,7 @@
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
                     <h3 class="text-sm font-bold text-rose-400 flex items-center gap-2">
                         <i class="fa-solid fa-triangle-exclamation"></i>
-                        <span>Tolak Pengajuan Publikasi</span>
+                        <span>Tolak Pengajuan Publikasi (Permanen)</span>
                     </h3>
                     <button type="button" wire:click="closeRejectPublishModal"
                         class="text-slate-400 hover:text-slate-200 text-sm">✕</button>
@@ -303,11 +371,12 @@
 
                 <form wire:submit.prevent="rejectPublishStory" class="space-y-4">
                     <div>
+                        <p class="text-[11px] text-rose-400/90 mb-2">Perhatian: Penolakan ini bersifat permanen. Penulis <strong>tidak dapat mengajukan ulang</strong> cerita ini untuk dipublikasikan.</p>
                         <label class="block text-xs font-semibold text-slate-300 mb-1.5">
                             Alasan Penolakan <span class="text-rose-400">*</span>
                         </label>
                         <textarea wire:model="publishRejectionReason" rows="4"
-                            placeholder="Jelaskan bagian yang perlu diperbaiki penulis (misal: EYD/typo terlalu banyak, sinopsis kurang jelas, atau melanggar pedoman konten)..."
+                            placeholder="Jelaskan alasan penolakan cerita (misal: melanggar pedoman komunitas/SARA/pornografi)..."
                             class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-rose-500 placeholder:text-slate-600 leading-relaxed"></textarea>
                         @error('publishRejectionReason')
                             <span class="text-[11px] text-rose-400 font-semibold block mt-1">{{ $message }}</span>

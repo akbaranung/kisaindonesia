@@ -100,6 +100,15 @@ class ApplyPremium extends Component
             ->latest()
             ->first();
 
+        if ($this->existingRequest && $this->existingRequest->status === 'revisi') {
+            if (empty($this->bankName)) {
+                $this->bankName = $this->existingRequest->bank_name ?? '';
+                $this->accountNumber = $this->existingRequest->account_number ?? '';
+                $this->accountHolderName = $this->existingRequest->account_holder_name ?? '';
+                $this->authorNotes = $this->existingRequest->author_notes ?? '';
+            }
+        }
+
         $this->totalChapters = $this->selectedStory->chapters->count();
         $this->totalWords = 0;
         $this->estimatedBeans = 0;
@@ -152,10 +161,17 @@ class ApplyPremium extends Component
             return;
         }
 
+        if ($this->existingRequest && $this->existingRequest->status === 'rejected') {
+            session()->flash('error', 'Pengajuan untuk cerita ini telah ditolak oleh Admin secara permanen dan tidak dapat diajukan kembali.');
+            return;
+        }
+
         if ($this->existingRequest && $this->existingRequest->status === 'pending') {
             session()->flash('error', 'Pengajuan untuk cerita ini sedang dalam proses peninjauan.');
             return;
         }
+
+        $isRevising = ($this->existingRequest && $this->existingRequest->status === 'revisi');
 
         PremiumStoryRequest::create([
             'user_id'                 => Auth::id(),
@@ -174,7 +190,11 @@ class ApplyPremium extends Component
         $user->address = $this->address;
         $user->save();
 
-        session()->flash('success', 'Pengajuan cerita premium berhasil dikirim! Tim kami akan meninjau pengajuan Anda.');
+        $successMsg = $isRevising
+            ? 'Pengajuan revisi cerita premium berhasil dikirim ulang! Tim kami akan meninjau kembali.'
+            : 'Pengajuan cerita premium berhasil dikirim! Tim kami akan meninjau pengajuan Anda.';
+
+        session()->flash('success', $successMsg);
         $this->loadStoryDetails();
     }
 
