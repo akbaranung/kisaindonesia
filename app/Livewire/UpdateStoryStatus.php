@@ -24,8 +24,8 @@ class UpdateStoryStatus extends Component
         }
 
         $chapterCount = $this->story->chapters()->where('status', 'published')->count();
-        if ($chapterCount < 5) {
-            session()->flash('error', 'Cerita minimal harus memiliki 5 bab yang diterbitkan sebelum diajukan untuk publish!');
+        if ($chapterCount < 3) {
+            session()->flash('error', 'Cerita minimal harus memiliki 3 bab yang diterbitkan sebelum diajukan untuk publish!');
             return;
         }
 
@@ -92,7 +92,7 @@ class UpdateStoryStatus extends Component
         $chapterCount = $this->story->chapters_count ?? $this->story->chapters()->where('status', 'published')->count();
         return view('livewire.stories.update-story-status', [
             'chapterCount' => $chapterCount,
-            'canSubmit' => $chapterCount >= 5 && in_array($this->story->status, ['draft', 'revisi']),
+            'canSubmit' => $chapterCount >= 3 && in_array($this->story->status, ['draft', 'revisi']),
         ]);
     }
 }
