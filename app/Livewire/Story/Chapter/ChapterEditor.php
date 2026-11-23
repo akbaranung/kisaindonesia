@@ -111,7 +111,7 @@ class ChapterEditor extends Component
         if ($this->message_type === 'text' || $this->message_type === 'center_text') {
             $rules['message'] = 'required|string|max:1000';
         } elseif ($this->message_type === 'image') {
-            if ($this->editingIndex === null && !$this->image_upload && empty($this->exisiting_image_url)) {
+            if ($this->editingIndex === null && !$this->image_upload && empty($this->existing_image_url)) {
                 $rules['image_upload'] = 'required|image|max:500';
             } else {
                 $rules['image_upload'] = 'nullable|image|max:500';
@@ -263,7 +263,7 @@ class ChapterEditor extends Component
             $avatarPath = $this->char_existing_avatar;
 
             if ($this->char_avatar_upload) {
-                if ($this->char_existing_avatar && Storage::disk('public')->exists($this->char_avatar_upload)) {
+                if ($this->char_existing_avatar && Storage::disk('public')->exists($this->char_existing_avatar)) {
                     Storage::disk('public')->delete($this->char_existing_avatar);
                 }
 
@@ -314,6 +314,11 @@ class ChapterEditor extends Component
         if ($this->chapter->exists && $this->chapter->status === 'published' && $this->status === 'draft') {
             $this->status = 'published';
             $this->dispatch('show-toast', type: 'error', message: 'Bab yang sudah dipublikasikan tidak dapat dikembalikan ke status Draft!');
+            return;
+        }
+
+        if ($this->story->fresh()->isChapterLocked()) {
+            $this->dispatch('show-toast', type: 'error', message: 'Bab tidak bisa diubah: cerita sedang direview tamat atau sudah tamat.');
             return;
         }
 
@@ -438,6 +443,8 @@ class ChapterEditor extends Component
                 }
             }
 
+            $wasPublished = $this->chapter->status === 'published';
+
             // Update Judul Bab di Database
             $this->chapter->update([
                 'title'      => trim($this->title),
@@ -452,7 +459,7 @@ class ChapterEditor extends Component
             // Simpan Ke File JSON
             $this->saveChapterFile();
 
-            if ($this->status === 'published') {
+            if ($this->status === 'published' && ! $wasPublished) {
 
                 $penName = $this->story->penName ?? null;
 
@@ -532,6 +539,11 @@ class ChapterEditor extends Component
 
     public function removeChapterCover()
     {
+        if ($this->story->fresh()->isChapterLocked()) {
+            $this->dispatch('show-toast', type: 'error', message: 'Bab dikunci, cover tidak bisa diubah.');
+            return;
+        }
+
         if ($this->chapter_existing_cover && Storage::disk('public')->exists($this->chapter_existing_cover)) {
             Storage::disk('public')->delete($this->chapter_existing_cover);
         }

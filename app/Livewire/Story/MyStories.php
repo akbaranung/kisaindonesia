@@ -358,4 +358,22 @@ class MyStories extends Component
             'latestContractVersion' => $latestContractVersion,
         ]);
     }
+
+    public function requestCompletion(int $storyId)
+    {
+        $story = Story::where('user_id', Auth::id())->findOrFail($storyId);
+
+        if ($reason = $story->completionBlockReason()) {
+            session()->flash('error', $reason);
+            return;
+        }
+
+        $story->update([
+            'completion_status' => 'pending',
+            'completion_requested_at' => now(),
+            'completion_note' => null,
+        ]);
+
+        session()->flash('success', 'Pengajuan tamat untuk "' . $story->title . '" dikirim. Menunggu pengecekan editor.');
+    }
 }

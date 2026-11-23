@@ -274,6 +274,30 @@
                                     </button>
                                 @endif
 
+                                @if ($story->completion_status === 'tamat')
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                        <i class="fa-solid fa-flag-checkered"></i> Tamat
+                                    </span>
+                                @elseif ($story->completion_status === 'pending')
+                                    <span
+                                        class="text-[9px] px-2 py-0.5 rounded-lg font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse">
+                                        Tamat: Menunggu Editor
+                                    </span>
+                                @elseif (in_array($story->completion_status, ['ongoing', 'rejected']) && $story->status === 'published')
+                                    @if ($reason = $story->completionBlockReason())
+                                        <span
+                                            class="text-[9px] px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold rounded-xl cursor-not-allowed"
+                                            title="{{ $reason }}">Ajukan Tamat</span>
+                                    @else
+                                        <button wire:click="requestCompletion({{ $story->id }})"
+                                            wire:confirm="Ajukan cerita ini tamat? Admin akan mengecek dulu sebelum statusnya berubah. Setelah tamat, bab tidak bisa diedit atau dihapus lagi."
+                                            class="text-[9px] px-2.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl transition shadow-sm">
+                                            Ajukan Tamat
+                                        </button>
+                                    @endif
+                                @endif
+
                                 <button wire:click="editStory({{ $story->id }})"
                                     class="text-[9px] p-1.5 bg-brand-600 hover:bg-brand-500 rounded-xl text-white transition flex items-center justify-center">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
@@ -298,6 +322,13 @@
                                 <span class="font-black block mb-0.5"><i class="fa-solid fa-triangle-exclamation"></i>
                                     Revisi Publish:</span>
                                 <p class="leading-relaxed">{{ $story->rejection_reason }}</p>
+                            </div>
+                        @endif
+                        @if ($story->completion_status === 'rejected' && $story->completion_note)
+                            <div
+                                class="mt-3 p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-600 dark:text-rose-300">
+                                <span class="font-black block mb-0.5">Pengajuan Tamat Ditolak:</span>
+                                <p class="leading-relaxed">{{ $story->completion_note }}</p>
                             </div>
                         @endif
                     </div>

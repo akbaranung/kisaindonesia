@@ -111,7 +111,7 @@
             </select>
 
             <div x-data="{ showConfirmModal: false }">
-                <button type="button"
+                <button type="button" @disabled($story->isChapterLocked())
                     @click="
             if ($wire.status === 'published' && '{{ $chapter->status }}' !== 'published') {
                 showConfirmModal = true;
@@ -211,6 +211,16 @@
                     </div>
                 @endif
             </div>
+
+            @if ($story->isChapterLocked())
+                <div
+                    class="px-4 py-2 text-xs bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900 text-amber-700 dark:text-amber-300">
+                    <i class="fa-solid fa-lock"></i>
+                    {{ $story->completion_status === 'tamat'
+                        ? 'Cerita sudah tamat. Bab ini tidak bisa diedit atau dihapus lagi.'
+                        : 'Pengajuan tamat sedang direview admin. Bab dikunci sementara.' }}
+                </div>
+            @endif
 
             <!-- Input Judul & Cover Bab -->
             <div class="max-w-xl mx-auto space-y-3">

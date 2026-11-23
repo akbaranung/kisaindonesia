@@ -90,6 +90,9 @@
                 <option value="draft">Draft</option>
                 <option value="active">Aktif (Tidak Diblokir)</option>
                 <option value="blocked">Diblokir Admin</option>
+                <option value="tamat_pending">Pengajuan Tamat</option>
+                <option value="tamat_done">Sudah Tamat</option>
+                <option value="tamat_rejected">Tamat Ditolak</option>
             </select>
         </div>
 
@@ -137,7 +140,7 @@
             </thead>
             <tbody class="divide-y divide-slate-800/60">
                 @forelse($stories as $index => $story)
-                    <tr class="hover:bg-slate-800/30 transition {{ $story->status === 'pending_review' ? 'bg-amber-500/5' : '' }}"
+                    <tr class="hover:bg-slate-800/30 transition {{ $story->status === 'pending_review' ? 'bg-amber-500/5' : '' }} {{ $story->completion_status === 'pending' ? 'bg-emerald-500/5' : '' }}"
                         wire:key="story-row-{{ $story->id }}">
                         <td class="p-3 font-semibold text-slate-200">
                             {{ $stories->firstItem() + $index }}
@@ -149,6 +152,7 @@
                                         class="text-left font-semibold text-slate-100 hover:text-brand-400 transition"
                                         title="Lihat Detail Bab">
                                         {{ $story->title }}
+
                                     </button>
                                     @if ($story->monetization_type === 'premium')
                                         <span
@@ -160,37 +164,70 @@
                                 <span class="text-[10px] text-slate-400 font-normal">
                                     {{ $story->chapters_count ?? $story->chapters()->count() }} Bab
                                 </span>
+                                @if ($story->completion_status === 'pending')
+                                    @php $avgWords = $story->published_chapters_count > 0 ? round(($story->published_words ?? 0) / $story->published_chapters_count) : 0; @endphp
+                                    <span class="text-[10px] text-emerald-400 font-normal">
+                                        {{ $story->published_chapters_count }} bab terbit ·
+                                        rata-rata {{ number_format($avgWords) }} kata/bab ·
+                                        bab terakhir
+                                        {{ $story->last_chapter_at ? \Carbon\Carbon::parse($story->last_chapter_at)->diffForHumans() : '-' }}
+                                    </span>
+                                @endif
                             </div>
                         </td>
                         <td class="p-3 font-semibold text-slate-200">
                             <div class="flex flex-col items-start gap-1.5">
                                 <select wire:change="updateStoryStatus({{ $story->id }}, $event.target.value)"
                                     class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold focus:outline-none focus:border-brand-400">
-                                    <option value="draft" {{ $story->status === 'draft' ? 'selected' : '' }}>Draft</option>
-                                    <option value="pending_review" {{ $story->status === 'pending_review' ? 'selected' : '' }}>Review Publish</option>
-                                    <option value="published" {{ $story->status === 'published' ? 'selected' : '' }}>Published</option>
-                                    <option value="revisi" {{ $story->status === 'revisi' ? 'selected' : '' }}>Revisi</option>
-                                    <option value="rejected" {{ $story->status === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                    <option value="draft" {{ $story->status === 'draft' ? 'selected' : '' }}>Draft
+                                    </option>
+                                    <option value="pending_review"
+                                        {{ $story->status === 'pending_review' ? 'selected' : '' }}>Review Publish
+                                    </option>
+                                    <option value="published" {{ $story->status === 'published' ? 'selected' : '' }}>
+                                        Published</option>
+                                    <option value="revisi" {{ $story->status === 'revisi' ? 'selected' : '' }}>Revisi
+                                    </option>
+                                    <option value="rejected" {{ $story->status === 'rejected' ? 'selected' : '' }}>
+                                        Rejected</option>
                                 </select>
 
                                 @if ($story->status === 'revisi')
                                     <span
                                         class="px-2 py-0.5 rounded-md bg-amber-950 border border-amber-800 text-amber-400 text-[9px] font-bold"
                                         title="{{ $story->rejection_reason ? 'Catatan revisi: ' . $story->rejection_reason : '' }}">
-                                        📝 Perlu Revisi
+                                        <i class="fa-solid fa-file-pen"></i> Perlu Revisi
                                     </span>
                                 @elseif ($story->status === 'rejected')
                                     <span
                                         class="px-2 py-0.5 rounded-md bg-rose-950 border border-rose-800 text-rose-400 text-[9px] font-bold"
                                         title="{{ $story->rejection_reason ? 'Alasan ditolak: ' . $story->rejection_reason : '' }}">
-                                        ✕ Ditolak
+                                        <i class="fa-regular fa-circle-xmark"></i> Ditolak
                                     </span>
                                 @endif
 
                                 @if ($story->is_blocked)
                                     <span
                                         class="px-2 py-0.5 rounded-md bg-rose-950 border border-rose-800 text-rose-400 text-[9px] font-bold">
-                                        🚫 Diblokir
+                                        <i class="fa-solid fa-ban"></i> Diblokir
+                                    </span>
+                                @endif
+
+                                @if ($story->completion_status === 'pending')
+                                    <span
+                                        class="px-2 py-0.5 rounded-md bg-emerald-950 border border-emerald-800 text-emerald-400 text-[9px] font-bold animate-pulse">
+                                        <i class="fa-solid fa-flag-checkered"></i> Pengajuan Tamat
+                                    </span>
+                                @elseif ($story->completion_status === 'tamat')
+                                    <span
+                                        class="px-2 py-0.5 rounded-md bg-emerald-950 border border-emerald-800 text-emerald-400 text-[9px] font-bold">
+                                        <i class="fa-solid fa-circle-check"></i> Tamat
+                                    </span>
+                                @elseif ($story->completion_status === 'rejected')
+                                    <span
+                                        class="px-2 py-0.5 rounded-md bg-rose-950 border border-rose-800 text-rose-400 text-[9px] font-bold"
+                                        title="{{ $story->completion_note ? 'Alasan tamat ditolak: ' . $story->completion_note : '' }}">
+                                        <i class="fa-regular fa-circle-xmark"></i> Tamat Ditolak
                                     </span>
                                 @endif
                             </div>
@@ -263,6 +300,25 @@
                                     </button>
                                 @endif
 
+                                @if ($story->completion_status === 'pending')
+                                    <!-- Tombol Approval & Reject Pengajuan Tamat -->
+                                    <button type="button" wire:click="approveCompletionStory({{ $story->id }})"
+                                        wire:confirm="Nyatakan cerita '{{ $story->title }}' resmi tamat? Setelah itu penulis tidak bisa menambah, mengedit, atau menghapus bab."
+                                        class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
+                                        title="Setujui Tamat">
+                                        <i class="fa-solid fa-flag-checkered"></i>
+                                        <span>Setujui Tamat</span>
+                                    </button>
+
+                                    <button type="button"
+                                        wire:click="openRejectCompletionModal({{ $story->id }})"
+                                        class="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 shadow-sm"
+                                        title="Tolak Pengajuan Tamat">
+                                        <i class="fa-solid fa-xmark"></i>
+                                        <span>Tolak Tamat</span>
+                                    </button>
+                                @endif
+
                                 <!-- Tombol Detail Bab & Koin -->
                                 <button type="button" wire:click="openDetailModal({{ $story->id }})"
                                     class="px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
@@ -325,7 +381,9 @@
 
                 <form wire:submit.prevent="revisiPublishStory" class="space-y-4">
                     <div>
-                        <p class="text-[11px] text-slate-400 mb-2">Penulis dapat melihat catatan revisi ini dan <strong>dapat mengajukan publish ulang</strong> setelah memperbaiki ceritanya.</p>
+                        <p class="text-[11px] text-slate-400 mb-2">Penulis dapat melihat catatan revisi ini dan
+                            <strong>dapat mengajukan publish ulang</strong> setelah memperbaiki ceritanya.
+                        </p>
                         <label class="block text-xs font-semibold text-slate-300 mb-1.5">
                             Catatan Revisi untuk Penulis <span class="text-amber-400">*</span>
                         </label>
@@ -371,7 +429,8 @@
 
                 <form wire:submit.prevent="rejectPublishStory" class="space-y-4">
                     <div>
-                        <p class="text-[11px] text-rose-400/90 mb-2">Perhatian: Penolakan ini bersifat permanen. Penulis <strong>tidak dapat mengajukan ulang</strong> cerita ini untuk dipublikasikan.</p>
+                        <p class="text-[11px] text-rose-400/90 mb-2">Perhatian: Penolakan ini bersifat permanen.
+                            Penulis <strong>tidak dapat mengajukan ulang</strong> cerita ini untuk dipublikasikan.</p>
                         <label class="block text-xs font-semibold text-slate-300 mb-1.5">
                             Alasan Penolakan <span class="text-rose-400">*</span>
                         </label>
@@ -392,6 +451,50 @@
                             class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50">
                             <span wire:loading.remove wire:target="rejectPublishStory">Kirim Penolakan</span>
                             <span wire:loading wire:target="rejectPublishStory">Menyimpan...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    @if ($showRejectCompletionModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-4 flex items-center justify-center"
+            x-data @keydown.window.escape="$wire.closeRejectCompletionModal()">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in"
+                @click.away="$wire.closeRejectCompletionModal()">
+
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                    <h3 class="text-sm font-bold text-rose-400 flex items-center gap-2">
+                        <i class="fa-solid fa-flag-checkered"></i>
+                        <span>Tolak Pengajuan Tamat</span>
+                    </h3>
+                    <button type="button" wire:click="closeRejectCompletionModal"
+                        class="text-slate-400 hover:text-slate-200 text-sm">✕</button>
+                </div>
+
+                <form wire:submit.prevent="rejectCompletionStory" class="space-y-4">
+                    <div>
+                        <p class="text-[11px] text-slate-400 mb-2">Penulis bisa memperbaiki ceritanya lalu
+                            <strong>mengajukan tamat lagi</strong>. Bab akan terbuka kembali setelah ditolak.</p>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+                            Alasan Penolakan <span class="text-rose-400">*</span>
+                        </label>
+                        <textarea wire:model="completionRejectReason" rows="4"
+                            placeholder="Jelaskan apa yang harus diperbaiki (misal: ending belum tuntas, konflik utama belum selesai)..."
+                            class="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-rose-500 placeholder:text-slate-600 leading-relaxed"></textarea>
+                        @error('completionRejectReason')
+                            <span class="text-[11px] text-rose-400 font-semibold block mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                        <button type="button" wire:click="closeRejectCompletionModal"
+                            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition">Batal</button>
+                        <button type="submit" wire:loading.attr="disabled"
+                            class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 disabled:opacity-50">
+                            <span wire:loading.remove wire:target="rejectCompletionStory">Kirim Penolakan</span>
+                            <span wire:loading wire:target="rejectCompletionStory">Menyimpan...</span>
                         </button>
                     </div>
                 </form>

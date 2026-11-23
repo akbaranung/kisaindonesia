@@ -26,6 +26,12 @@ class Story extends Model
         'vies_ranking',
         'is_blocked',
         'rejection_reason',
+        'completion_status',
+        'completion_requested_at',
+        'completion_reviewed_at',
+        'completion_reviewed_by',
+        'completion_note',
+        'completion_chapters_count',
     ];
 
     protected $casts = [
@@ -34,6 +40,9 @@ class Story extends Model
     ];
 
     use HasFactory;
+
+    public const MIN_CHAPTERS_FOR_TAMAT = 30;
+    public const MAX_CHAPTERS_FOR_TAMAT = 60;
 
     public function chapters()
     {
@@ -121,5 +130,56 @@ class Story extends Model
     public function badges()
     {
         return $this->belongsToMany(Badge::class, 'story_badge')->withPivot('order')->withTimestamps();
+    }
+
+    public function publishedChaptersCount(): int
+    {
+        return $this->chapters()->where('status', 'published')->count();
+    }
+
+    public function completionBlockReason(): ?string
+    {
+        if ($this->status !== 'published') {
+            return 'Cerita harus sudah dipublikasikan.';
+        }
+
+        if ($this->is_blocked) {
+            return 'Cerita sedah diblokir';
+        }
+
+        if ($this->monetization_type !== 'premium') {
+            return 'Cerita harus sudah bestatus monetisasi (premium) untuk mengajukan tamat.';
+        }
+
+        if (!in_array($this->completion_status, ['ongoing', 'rejected'], true)) {
+            return 'Cerita sudah diajukan tamat atau sudah tamat.';
+        }
+
+        $count = $this->publishedChaptersCount();
+
+        if ($count < self::MIN_CHAPTERS_FOR_TAMAT) {
+            return "Minimal " . self::MIN_CHAPTERS_FOR_TAMAT . " bab terbit (saat ini {$count}.";
+        }
+
+        if ($count > self::MAX_CHAPTERS_FOR_TAMAT) {
+            return "Maksimal " . self::MAX_CHAPTERS_FOR_TAMAT . " bab terbit (saat ini {$count}).";
+        }
+
+        return null;
+    }
+
+    public function canRequestCompletion(): bool
+    {
+        return $this->completionBlockReason() === null;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->completion_status === 'tamat';
+    }
+
+    public function isChapterLocked(): bool
+    {
+        return in_array($this->completion_status, ['pending', 'tamat'], true);
     }
 }

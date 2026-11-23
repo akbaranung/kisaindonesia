@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Badge;
 use App\Models\Genre;
 use App\Models\Story;
+use App\Notifications\CompletionStatusUpdatedNotification;
 use App\Notifications\PublishStatusUpdatedNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,11 @@ class StoryManager extends Component
     public bool $showRevisiPublishModal = false;
     public ?int $revisiStoryId = null;
     public string $publishRevisiReason = '';
+
+    // Properti manage pengajuan tamat
+    public bool $showRejectCompletionModal = false;
+    public ?int $rejectingCompletionStoryId = null;
+    public string $completionRejectReason = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -173,6 +179,11 @@ class StoryManager extends Component
         }
 
         $story = Story::findOrFail($storyId);
+        if ($story->isChapterLocked() && $status !== 'published') {
+            session()->flash('error', 'Status cerita tidak bisa diubah selama pengajuan tamat diproses atau setelah tamat.');
+            return;
+        }
+
         $story->update(['status' => $status]);
 
         session()->flash('message', "Status cerita '{$story->title}' berhasil diubah ke " . ucfirst($status) . ".");
@@ -353,6 +364,100 @@ class StoryManager extends Component
         $this->closeRejectPublishModal();
     }
 
+    public function approveCompletionStory(int $storyId)
+    {
+        $result = DB::transaction(function () use ($storyId) {
+            $story = Story::lockForUpdate()->findOrFail($storyId);
+
+            if ($story->completion_status !== 'pending') {
+                return ['error', 'Pengajuan ini sudah diproses atau statusnya berubah.'];
+            }
+
+            if ($story->status !== 'published' || $story->is_blocked) {
+                return ['error', 'Cerita harus berstatus published dan tidak diblokir.'];
+            }
+
+            if ($story->monetization_type !== 'premium') {
+                return ['error', 'Cerita ini sudah tidak berstatus premium. Tolak pengajuan atau pulihkan status monetisasinya dulu.'];
+            }
+
+            $count = $story->publishedChaptersCount();
+            if ($count < Story::MIN_CHAPTERS_FOR_TAMAT || $count > Story::MAX_CHAPTERS_FOR_TAMAT) {
+                return ['error', "Jumlah bab terbit {$count}, di luar batas " . Story::MIN_CHAPTERS_FOR_TAMAT . '-' . Story::MAX_CHAPTERS_FOR_TAMAT . '.'];
+            }
+
+            $story->update([
+                'completion_status'         => 'tamat',
+                'completion_reviewed_at'    => now(),
+                'completion_reviewed_by'    => auth()->id(),
+                'completion_note'           => null,
+                'completion_chapters_count' => $count,
+            ]);
+
+            return ['ok', $story];
+        });
+
+        if ($result[0] === 'error') {
+            session()->flash('error', $result[1]);
+            return;
+        }
+
+        $story = $result[1];
+
+        if ($story->author) {
+            $story->author->notify(new CompletionStatusUpdatedNotification('approved'));
+        }
+
+        session()->flash('message', "Cerita '{$story->title}' resmi dinyatakan tamat.");
+    }
+
+    public function openRejectCompletionModal(int $storyId)
+    {
+        $this->rejectingCompletionStoryId = $storyId;
+        $this->completionRejectReason = '';
+        $this->resetErrorBag();
+        $this->showRejectCompletionModal = true;
+    }
+
+    public function closeRejectCompletionModal()
+    {
+        $this->showRejectCompletionModal = false;
+        $this->rejectingCompletionStoryId = null;
+        $this->completionRejectReason = '';
+    }
+
+    public function rejectCompletionStory()
+    {
+        $this->validate([
+            'completionRejectReason' => 'required|string|min:5',
+        ], [
+            'completionRejectReason.required' => 'Alasan penolakan wajib diisi agar penulis tahu apa yang harus diperbaiki.',
+            'completionRejectReason.min'      => 'Alasan penolakan minimal 5 karakter.',
+        ]);
+
+        $story = Story::findOrFail($this->rejectingCompletionStoryId);
+
+        if ($story->completion_status !== 'pending') {
+            session()->flash('error', 'Pengajuan ini sudah diproses atau statusnya berubah.');
+            $this->closeRejectCompletionModal();
+            return;
+        }
+
+        $story->update([
+            'completion_status'      => 'rejected',
+            'completion_reviewed_at' => now(),
+            'completion_reviewed_by' => auth()->id(),
+            'completion_note'        => $this->completionRejectReason,
+        ]);
+
+        if ($story->author) {
+            $story->author->notify(new CompletionStatusUpdatedNotification('rejected', $this->completionRejectReason));
+        }
+
+        session()->flash('message', "Pengajuan tamat '{$story->title}' dikembalikan ke penulis.");
+        $this->closeRejectCompletionModal();
+    }
+
     public function render()
     {
         $categories = Genre::orderBy('name')->get();
@@ -372,7 +477,13 @@ class StoryManager extends Component
             });
         }
 
+        $published = fn($q) => $q->where('status', 'published');
+
         $stories = Story::with(['author', 'genre', 'badges'])
+            ->withCount(['chapters', 'chapters as published_chapters_count' => $published])
+            ->withSum(['chapters as published_words' => $published], 'word_count')
+            ->withMax(['chapters as last_chapter_at' => $published], 'created_at')
+
             // Search Judul atau Penulis
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
@@ -387,22 +498,21 @@ class StoryManager extends Component
                 $query->where('category', $this->category);
             })
             // Filter Gratis / Premium
-            ->when($this->type, function ($query) {
-                $query->where('monetization_type', $this->type === 'premium');
-            })
+            ->when($this->type, fn($q) => $q->where('monetization_type', $this->type))
             ->when($this->selectedBadge, function ($query) {
                 $query->whereHas('badges', function ($bQuery) {
                     $bQuery->where('badges.id', $this->selectedBadge);
                 });
             })
             ->when($this->statusFilter !== '', function ($query) {
-                if ($this->statusFilter === 'blocked') {
-                    $query->where('is_blocked', true);
-                } elseif ($this->statusFilter === 'active') {
-                    $query->where('is_blocked', false);
-                } else {
-                    $query->where('status', $this->statusFilter);
-                }
+                match ($this->statusFilter) {
+                    'blocked'         => $query->where('is_blocked', true),
+                    'active'          => $query->where('is_blocked', false),
+                    'tamat_pending'   => $query->where('completion_status', 'pending'),
+                    'tamat_done'      => $query->where('completion_status', 'tamat'),
+                    'tamat_rejected'  => $query->where('completion_status', 'rejected'),
+                    default           => $query->where('status', $this->statusFilter),
+                };
             })
             ->latest()
             ->paginate(10);

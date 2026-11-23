@@ -5,6 +5,7 @@ namespace App\Livewire\Story\Chapter;
 use App\Models\Chapter;
 use App\Models\Story;
 use App\Models\StoryCharacter;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -32,6 +33,11 @@ class ManageStoryChapters extends Component
 
     public function openCreateModal()
     {
+        if ($this->story->fresh()->isChapterLocked()) {
+            session()->flash('message', 'Bab baru tidak bisa ditambahkan: cerita sedang direview tamat atau sudah tamat.');
+            return;
+        }
+
         $this->resetErrorBag();
         $this->title = '';
         $this->status = 'draft';
@@ -48,6 +54,13 @@ class ManageStoryChapters extends Component
 
     public function createAndRedirect()
     {
+        abort_if($this->story->fresh()->isChapterLocked(), 403);
+
+        if ($this->story->isChapterLocked()) {
+            $this->dispatch('show-toast', type: 'error', message: 'Cerita sudah tamat atau sedang menunggu review tamat. Bab baru tidak bisa ditambahkan.');
+            return;
+        }
+
         $this->validate(
             [
                 'title' => 'required|string|max:255',
@@ -149,6 +162,13 @@ class ManageStoryChapters extends Component
     {
         $chapter = $this->story->chapters()->find($chapterId);
 
+        abort_unless($chapter->story->user_id === Auth::id(), 403);
+
+        if ($this->story->fresh()->isChapterLocked()) {
+            $this->dispatch('show-toast', type: 'error', message: 'Cerita ini sudah tamat, tidak bisa hapus bab.');
+            return;
+        }
+
         if (!$chapter) {
             $this->dispatch('show-toast', type: 'error', message: 'Bab tidak ditemukan.');
             return;
@@ -159,6 +179,12 @@ class ManageStoryChapters extends Component
             $this->dispatch('show-toast', type: 'error', message: 'Gagal! Bab yang sudah dipublikasikan tidak dapat dihapus.');
             return;
         }
+
+        if ($chapter->story->isChapterLocked()) {
+            $this->dispatch('show-toast', type: 'error', message: 'Bab tidak bisa dihapus karena cerita sudah tamat atau sedang direview.');
+            return;
+        }
+
 
         // 2. Validasi: Cek apakah sudah ada transaksi pembelian
         $hasPurchases = DB::table('user_purchased_chapters')

@@ -15,17 +15,23 @@
             </div>
         </div>
 
-        <button wire:click="openCreateModal"
-            class="px-3 py-1.5 bg-brand-500 text-white font-bold rounded-lg text-xs flex items-center gap-2 shadow-md shadow-brand-500/10 hover:bg-brand-600 transition">
-            <span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-4">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-            </span>
-            <span>Bab Baru</span>
-        </button>
+        @if ($story->isChapterLocked())
+            <span
+                class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold rounded-lg text-xs cursor-not-allowed"
+                title="Bab dikunci selama review tamat / setelah tamat">Bab Baru Terkunci</span>
+        @else
+            <button wire:click="openCreateModal"
+                class="px-3 py-1.5 bg-brand-500 text-white font-bold rounded-lg text-xs flex items-center gap-2 shadow-md shadow-brand-500/10 hover:bg-brand-600 transition">
+                <span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-4">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </span>
+                <span>Bab Baru</span>
+            </button>
+        @endif
     </div>
 
     <div class="p-4 space-y-3">
@@ -33,6 +39,18 @@
             <div
                 class="p-3 bg-brand-50 dark:bg-brand-950/80 border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 text-xs rounded-xl">
                 ✓ {{ session('message') }}
+            </div>
+        @endif
+
+        @if ($story->completion_status === 'pending')
+            <div
+                class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-700 dark:text-amber-300 text-xs rounded-xl">
+                Pengajuan tamat sedang dicek editor. Penambahan dan penghapusan bab dikunci sementara.
+            </div>
+        @elseif ($story->completion_status === 'tamat')
+            <div
+                class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300 text-xs rounded-xl">
+                <i class="fa-solid fa-flag-checkered"></i> Cerita ini sudah tamat. Bab baru tidak bisa ditambahkan.
             </div>
         @endif
 
