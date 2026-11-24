@@ -63,12 +63,31 @@
                 ->toArray();
         @endphp
 
+        @php
+            // Bab tidak bisa dihapus jika cerita premium atau ada pengajuan monetisasi pending/approved
+            $storyDeleteLocked =
+                $story->monetization_type === 'premium' ||
+                $story
+                    ->premiumRequests()
+                    ->whereIn('status', ['pending', 'approved'])
+                    ->exists();
+            $storyChapterLocked = $story->isChapterLocked();
+        @endphp
+
         <div class="space-y-2.5">
             @forelse($chapters as $chap)
                 @php
                     $isDraft = $chap->status === 'draft';
                     $hasPurchases = in_array($chap->id, $purchasedChapterIds);
-                    $canDelete = $isDraft && !$hasPurchases;
+                    // Draft selalu boleh dihapus; bab terbit terkunci jika cerita premium / ada pengajuan pending/approved
+                    $canDelete = !$storyChapterLocked && !$hasPurchases && ($isDraft || !$storyDeleteLocked);
+
+                    $lockReason = match (true) {
+                        $storyChapterLocked => 'Cerita sedang direview tamat atau sudah tamat',
+                        $storyDeleteLocked
+                            => 'Bab sudah dipublikasikan dan cerita premium atau sedang/sudah diajukan monetisasi',
+                        default => 'Bab sudah dibeli oleh pembaca',
+                    };
                 @endphp
                 <div wire:key="chap-{{ $chap->id }}"
                     class="p-3.5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl flex items-center justify-between gap-3 hover:border-brand-500 dark:hover:border-brand-500 shadow-2xs transition">
@@ -107,7 +126,11 @@
                     <div class="flex items-center gap-2">
                         @if ($canDelete)
                             <button type="button" wire:click="deleteChapter({{ $chap->id }})"
-                                wire:confirm="Hapus Bab {{ $chap->order_number }}? Urutan bab setelahnya akan disesuaikan."
+                                wire:confirm="{{ $isDraft
+                                    ? 'Hapus Bab ' . $chap->order_number . '? Urutan bab setelahnya akan disesuaikan.'
+                                    : 'Bab ' .
+                                        $chap->order_number .
+                                        ' sudah DIPUBLIKASIKAN. Menghapusnya akan menghilangkannya dari pembaca secara permanen dan tidak bisa dikembalikan. Lanjutkan?' }}"
                                 wire:loading.attr="disabled" wire:target="deleteChapter({{ $chap->id }})"
                                 class="px-3 py-1.5 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 rounded-lg text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/60 transition flex items-center gap-1">
                                 <span wire:loading.remove wire:target="deleteChapter({{ $chap->id }})">Hapus</span>
@@ -116,7 +139,7 @@
                         @else
                             <button type="button" disabled
                                 class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-lg text-xs font-medium cursor-not-allowed border border-slate-200 dark:border-slate-700"
-                                title="{{ !$isDraft ? 'Bab sudah dipublikasikan' : 'Bab sudah dibeli oleh pembaca' }}">
+                                title="{{ $lockReason }}">
                                 Terkunci
                             </button>
                         @endif

@@ -160,33 +160,37 @@ class ManageStoryChapters extends Component
 
     public function deleteChapter($chapterId)
     {
+        // 1. Kepemilikan & keberadaan bab (cek sebelum mengakses relasi apa pun)
+        abort_unless($this->story->user_id === Auth::id(), 403);
+
         $chapter = $this->story->chapters()->find($chapterId);
-
-        abort_unless($chapter->story->user_id === Auth::id(), 403);
-
-        if ($this->story->fresh()->isChapterLocked()) {
-            $this->dispatch('show-toast', type: 'error', message: 'Cerita ini sudah tamat, tidak bisa hapus bab.');
-            return;
-        }
 
         if (!$chapter) {
             $this->dispatch('show-toast', type: 'error', message: 'Bab tidak ditemukan.');
             return;
         }
 
-        // 1. Validasi: Wajib berstatus draft
+        $story = $this->story->fresh();
+
+        // 2. Cerita tamat / sedang direview tamat
+        if ($story->isChapterLocked()) {
+            $this->dispatch('show-toast', type: 'error', message: 'Cerita ini sudah tamat atau sedang direview, tidak bisa hapus bab.');
+            return;
+        }
+
+        // 3. Bab draft selalu boleh dihapus. Bab yang sudah terbit tidak boleh dihapus
+        //    jika cerita premium atau ada pengajuan monetisasi pending/approved.
         if ($chapter->status !== 'draft') {
-            $this->dispatch('show-toast', type: 'error', message: 'Gagal! Bab yang sudah dipublikasikan tidak dapat dihapus.');
-            return;
+            $storyLocked = $story->monetization_type === 'premium'
+                || $story->premiumRequests()->whereIn('status', ['pending', 'approved'])->exists();
+
+            if ($storyLocked) {
+                $this->dispatch('show-toast', type: 'error', message: 'Gagal! Bab yang sudah dipublikasikan tidak dapat dihapus karena cerita premium atau sedang/sudah diajukan monetisasi.');
+                return;
+            }
         }
 
-        if ($chapter->story->isChapterLocked()) {
-            $this->dispatch('show-toast', type: 'error', message: 'Bab tidak bisa dihapus karena cerita sudah tamat atau sedang direview.');
-            return;
-        }
-
-
-        // 2. Validasi: Cek apakah sudah ada transaksi pembelian
+        // 4. Bab yang sudah dibeli pembaca tidak boleh dihapus
         $hasPurchases = DB::table('user_purchased_chapters')
             ->where('chapter_id', $chapter->id)
             ->exists();
@@ -196,18 +200,19 @@ class ManageStoryChapters extends Component
             return;
         }
 
+        $wasPublished = $chapter->status === 'published';
+
+        // Kumpulkan semua file terkait SEBELUM record dihapus
+        $publicFiles = $this->collectChapterPublicFiles($chapter);
+        $contentFile = (is_string($chapter->file_path)
+            && $chapter->file_path !== ''
+            && !str_starts_with(ltrim($chapter->file_path), '{')
+            && !str_contains($chapter->file_path, '..'))
+            ? $chapter->file_path
+            : null;
+
         try {
-            DB::transaction(function () use ($chapter) {
-                // Hapus file JSON fisik dari storage local
-                if ($chapter->file_path && Storage::disk('local')->exists($chapter->file_path)) {
-                    Storage::disk('local')->delete($chapter->file_path);
-                }
-
-                // Hapus file cover fisik dari storage public jika ada
-                if ($chapter->cover_path && Storage::disk('public')->exists($chapter->cover_path)) {
-                    Storage::disk('public')->delete($chapter->cover_path);
-                }
-
+            DB::transaction(function () use ($chapter, $story) {
                 // Hapus record bab
                 $chapter->delete();
 
@@ -222,15 +227,26 @@ class ManageStoryChapters extends Component
                     // Update order_number & penyesuaian otomatis is_premium jika melewati bab 5
                     $item->update([
                         'order_number' => $newOrder,
-                        'is_premium' => ($this->story->monetization_type === 'premium' && $newOrder > 5),
+                        'is_premium' => ($story->monetization_type === 'premium' && $newOrder > 5),
                     ]);
                 }
             });
 
+            // File fisik dihapus hanya setelah database berhasil diperbarui
+            foreach ($publicFiles as $path) {
+                Storage::disk('public')->delete($path);
+            }
+
+            if ($contentFile) {
+                Storage::disk('local')->delete($contentFile);
+            }
+
             // Reload relasi chapters di instance story agar view ter-render ulang dengan data presisi
             $this->story->load('chapters');
 
-            $this->dispatch('show-toast', type: 'success', message: 'Bab draft berhasil dihapus dan nomor urut disesuaikan!');
+            $this->dispatch('show-toast', type: 'success', message: $wasPublished
+                ? 'Bab berhasil dihapus permanen dan nomor urut disesuaikan!'
+                : 'Bab draft berhasil dihapus dan nomor urut disesuaikan!');
         } catch (\Throwable $th) {
             Log::error(
                 'Gagal menghapus bab: ' . $th->getMessage(),
@@ -239,6 +255,61 @@ class ManageStoryChapters extends Component
 
             $this->dispatch('show-toast', type: 'error', message: 'Terjadi kesalahan saat menghapus bab.');
         }
+    }
+
+    /**
+     * Semua file di disk "public" milik satu bab: cover bab, gambar bubble chat,
+     * dan gambar yang disisipkan di isi bab (URL /storage/...).
+     */
+    private function collectChapterPublicFiles(Chapter $chapter): array
+    {
+        $paths = [];
+
+        if ($chapter->cover_path) {
+            $paths[] = $this->normalizeStoragePath($chapter->cover_path);
+        }
+
+        try {
+            $data = $chapter->parseJsonData();
+        } catch (\Throwable $e) {
+            $data = [];
+        }
+
+        foreach (($data['bubbles'] ?? []) as $bubble) {
+            foreach (['image_url', 'existing_image_url'] as $key) {
+                if (!empty($bubble[$key]) && is_string($bubble[$key])) {
+                    $paths[] = $this->normalizeStoragePath($bubble[$key]);
+                }
+            }
+        }
+
+        $ext = 'jpe?g|png|gif|webp|svg|bmp|avif';
+        if (
+            !empty($data['content']) && is_string($data['content'])
+            && preg_match_all('~/storage/([^\s"\'<>()?\\\\]+\.(?:' . $ext . '))~i', $data['content'], $m)
+        ) {
+            foreach ($m[1] as $path) {
+                $paths[] = urldecode($path);
+            }
+        }
+
+        $disk = Storage::disk('public');
+
+        return collect($paths)
+            ->unique()
+            ->reject(fn($p) => $p === '' || str_contains($p, '..'))
+            ->filter(fn($p) => $disk->exists($p))
+            ->values()
+            ->all();
+    }
+
+    private function normalizeStoragePath(string $value): string
+    {
+        if (($pos = strpos($value, '/storage/')) !== false) {
+            $value = substr($value, $pos + strlen('/storage/'));
+        }
+
+        return urldecode(ltrim($value, '/'));
     }
 
     public function render()

@@ -71,6 +71,9 @@
                     $isRevisi = $latestRequest && $latestRequest->status === 'revisi';
                     $isRejected = $latestRequest && $latestRequest->status === 'rejected';
 
+                    // Cerita bisa dihapus hanya jika belum premium & tidak sedang/sudah diajukan monetisasi
+                    $canDelete = $story->monetization_type !== 'premium' && !$isPending && !$isApproved;
+
                     // Pengecekan status kontrak per cerita berdasarkan versi terbaru di settings dan masa berlaku 5 tahun
                     $latestContractVersion = (int) \App\Models\Setting::get('current_contract_version', 1);
                     $contract = $story->contract; // Relasi hasOne ke story_contracts
@@ -298,6 +301,18 @@
                                     @endif
                                 @endif
 
+                                @if ($canDelete)
+                                    <button type="button" wire:click="confirmDelete({{ $story->id }})"
+                                        title="Hapus cerita"
+                                        class="text-[9px] p-1.5 bg-rose-600 hover:bg-rose-500 rounded-xl text-white transition flex items-center justify-center disabled:opacity-50">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                        </svg>
+                                    </button>
+                                @endif
+
                                 <button wire:click="editStory({{ $story->id }})"
                                     class="text-[9px] p-1.5 bg-brand-600 hover:bg-brand-500 rounded-xl text-white transition flex items-center justify-center">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
@@ -345,6 +360,78 @@
         </div>
     @else
         @include('stories.create-stories')
+    @endif
+
+    {{-- Modal konfirmasi hapus cerita --}}
+    @if ($showDeleteModal)
+        <div class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4" role="dialog"
+            aria-modal="true" aria-labelledby="delete-story-title" wire:keydown.escape.window="cancelDelete">
+            <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" wire:click="cancelDelete"></div>
+
+            <div
+                class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden">
+                <div class="p-6 pb-4">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="shrink-0 w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 id="delete-story-title"
+                                class="text-base font-black text-slate-900 dark:text-white leading-tight">
+                                Hapus cerita ini secara permanen?
+                            </h3>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400 break-words">
+                                &ldquo;{{ $deleteStoryTitle }}&rdquo;
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="mt-5 p-3.5 rounded-2xl bg-rose-500/5 border border-rose-500/20 text-[12px] leading-relaxed text-rose-700 dark:text-rose-300">
+                        <p class="font-bold mb-2">Tindakan ini tidak dapat dibatalkan. Yang akan dihapus:</p>
+                        <ul class="space-y-1.5 list-disc pl-4">
+                            <li>Cerita beserta cover dan sinopsisnya</li>
+                            <li><strong>{{ $deleteChaptersCount }}</strong> bab beserta isi, cover bab, dan semua
+                                gambar di dalamnya</li>
+                            <li><strong>{{ $deleteCharactersCount }}</strong> karakter beserta avatarnya</li>
+                            <li>Seluruh file terkait di server</li>
+                        </ul>
+                    </div>
+
+                    <p class="mt-4 text-[11px] text-slate-500 dark:text-slate-400">
+                        Data yang sudah dihapus <span class="font-bold">tidak bisa dikembalikan</span>. Pastikan Anda
+                        sudah menyimpan salinan tulisan Anda jika masih diperlukan.
+                    </p>
+                </div>
+
+                <div
+                    class="px-6 py-4 bg-slate-50 dark:bg-slate-950/40 border-t border-slate-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                    <button type="button" wire:click="cancelDelete" wire:loading.attr="disabled"
+                        wire:target="deleteStory"
+                        class="px-4 py-2.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition disabled:opacity-50">
+                        Batal
+                    </button>
+                    <button type="button" wire:click="deleteStory" wire:loading.attr="disabled"
+                        wire:target="deleteStory"
+                        class="px-4 py-2.5 text-xs font-bold rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-sm transition disabled:opacity-60 flex items-center justify-center gap-2">
+                        <svg wire:loading wire:target="deleteStory" class="w-4 h-4 animate-spin" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                            </path>
+                        </svg>
+                        <span wire:loading.remove wire:target="deleteStory">Ya, Hapus Permanen</span>
+                        <span wire:loading wire:target="deleteStory">Menghapus...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
 
 </div>

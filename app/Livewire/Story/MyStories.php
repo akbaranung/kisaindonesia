@@ -2,12 +2,15 @@
 
 namespace App\Livewire\Story;
 
+use App\Models\Character;
 use App\Models\Genre;
+use App\Models\StoryCharacter;
 use App\Models\Setting;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Story;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -44,6 +47,13 @@ class MyStories extends Component
     public string $new_pen_bio = '';
     public bool $isEditingPenName = false;
     public ?int $editingPenNameId = null;
+
+    // State modal konfirmasi hapus cerita
+    public bool $showDeleteModal = false;
+    public ?int $deleteStoryId = null;
+    public string $deleteStoryTitle = '';
+    public int $deleteChaptersCount = 0;
+    public int $deleteCharactersCount = 0;
 
     public $parentGenres = [];
     public $subGenres = [];
@@ -357,6 +367,200 @@ class MyStories extends Component
             'penNames' => $penNames,
             'latestContractVersion' => $latestContractVersion,
         ]);
+    }
+
+    /**
+     * Cerita hanya boleh dihapus jika belum premium dan tidak sedang
+     * (atau sudah) diproses untuk monetisasi.
+     */
+    private function deleteBlockReason(Story $story): ?string
+    {
+        if ($story->monetization_type === 'premium') {
+            return 'Cerita premium tidak bisa dihapus.';
+        }
+
+        $hasActiveRequest = $story->premiumRequests()
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        if ($hasActiveRequest) {
+            return 'Cerita yang sedang/sudah diajukan monetisasi tidak bisa dihapus.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Mengumpulkan semua path gambar (disk "public") yang terkait dengan cerita:
+     * cover, gambar di dalam isi bab/sinopsis (URL /storage/...), serta kolom
+     * path gambar pada bab dan pengajuan monetisasi.
+     */
+    private function collectStoryImagePaths(Story $story): array
+    {
+        $story->loadMissing(['chapters', 'premiumRequests']);
+
+        $models = collect([$story])
+            ->merge($story->chapters)
+            ->merge($story->premiumRequests);
+
+        $ext = 'jpe?g|png|gif|webp|svg|bmp|avif';
+        $disk = Storage::disk('public');
+        $paths = [];
+
+        foreach ($models as $model) {
+            foreach ($model->getAttributes() as $value) {
+                if (! is_string($value) || $value === '') {
+                    continue;
+                }
+
+                // 1) Gambar yang disisipkan sebagai URL, mis. <img src="/storage/chapter-images/a.jpg">
+                if (preg_match_all('~/storage/([^\s"\'<>()?\\\\]+\.(?:' . $ext . '))~i', $value, $m)) {
+                    foreach ($m[1] as $path) {
+                        $paths[] = urldecode($path);
+                    }
+                }
+
+                // 2) Kolom yang langsung berisi path, mis. covers/abc.jpg
+                if (preg_match('~^[\w\-./]+\.(?:' . $ext . ')$~i', $value)) {
+                    $paths[] = ltrim($value, '/');
+                }
+            }
+        }
+
+        // Gambar bubble chat di dalam bab (disimpan di file JSON bab, bukan kolom DB)
+        foreach ($story->chapters as $chapter) {
+            try {
+                $data = $chapter->parseJsonData();
+            } catch (\Throwable $e) {
+                $data = [];
+            }
+
+            foreach (($data['bubbles'] ?? []) as $bubble) {
+                foreach (['image_url', 'existing_image_url'] as $key) {
+                    if (! empty($bubble[$key]) && is_string($bubble[$key])) {
+                        $paths[] = $this->normalizeStoragePath($bubble[$key]);
+                    }
+                }
+            }
+
+            if (
+                ! empty($data['content']) && is_string($data['content'])
+                && preg_match_all('~/storage/([^\s"\'<>()?\\\\]+\.(?:' . $ext . '))~i', $data['content'], $m)
+            ) {
+                foreach ($m[1] as $path) {
+                    $paths[] = urldecode($path);
+                }
+            }
+        }
+
+        // Avatar karakter (dua model: StoryCharacter di editor bab, Character di halaman kelola karakter)
+        foreach (StoryCharacter::where('story_id', $story->id)->pluck('avatar_path') as $avatar) {
+            if ($avatar) {
+                $paths[] = $this->normalizeStoragePath($avatar);
+            }
+        }
+
+        return collect($paths)
+            ->unique()
+            ->reject(fn($p) => str_contains($p, '..'))   // cegah path traversal
+            ->filter(fn($p) => $disk->exists($p))
+            ->values()
+            ->all();
+    }
+
+    private function normalizeStoragePath(string $value): string
+    {
+        // Terima path relatif ("chat-fic/story_1/a.jpg") maupun URL ("/storage/chat-fic/...")
+        if (($pos = strpos($value, '/storage/')) !== false) {
+            $value = substr($value, $pos + strlen('/storage/'));
+        }
+
+        return urldecode(ltrim($value, '/'));
+    }
+
+    public function confirmDelete(int $storyId): void
+    {
+        $story = Story::where('user_id', Auth::id())->findOrFail($storyId);
+
+        if ($reason = $this->deleteBlockReason($story)) {
+            session()->flash('error', $reason);
+            return;
+        }
+
+        $this->deleteStoryId = $story->id;
+        $this->deleteStoryTitle = $story->title;
+        $this->deleteChaptersCount = $story->chapters()->count();
+        $this->deleteCharactersCount = StoryCharacter::where('story_id', $story->id)->count();
+        $this->showDeleteModal = true;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->reset(['showDeleteModal', 'deleteStoryId', 'deleteStoryTitle', 'deleteChaptersCount', 'deleteCharactersCount']);
+    }
+
+    public function deleteStory()
+    {
+        if (! $this->deleteStoryId) {
+            return;
+        }
+
+        // Pastikan hanya pemilik cerita yang bisa menghapus
+        $story = Story::where('user_id', Auth::id())->findOrFail($this->deleteStoryId);
+
+        if ($reason = $this->deleteBlockReason($story)) {
+            $this->cancelDelete();
+            session()->flash('error', $reason);
+            return;
+        }
+
+        $title = $story->title;
+
+        // Kumpulkan semua gambar terkait SEBELUM data dihapus dari database
+        $imagePaths = $this->collectStoryImagePaths($story);
+
+        // File JSON isi bab (disimpan di disk "local" lewat Chapter::saveContent)
+        $contentFiles = $story->chapters
+            ->pluck('file_path')
+            ->filter(fn($f) => is_string($f)
+                && $f !== ''
+                && ! str_starts_with(ltrim($f), '{')   // bukan JSON inline
+                && ! str_contains($f, '..'))
+            ->unique()
+            ->values()
+            ->all();
+
+        $id = $story->id;
+
+        DB::transaction(function () use ($story, $id) {
+            StoryCharacter::where('story_id', $id)->delete();
+            $story->chapters()->delete();
+            $story->delete();
+        });
+
+        // Hapus file dari server hanya jika data DB berhasil dihapus
+        foreach ($imagePaths as $path) {
+            Storage::disk('public')->delete($path);
+        }
+
+        foreach ($contentFiles as $file) {
+            Storage::disk('local')->delete($file);
+            Storage::delete($file); // disk default, jika berbeda dari "local" (sesuai parseJsonData)
+        }
+
+        // Sapu folder khusus cerita ini (sisa file yang tidak tercatat di database)
+        foreach (["chat-fic/story_{$id}", "characters/story_{$id}", "chapters/covers/story_{$id}"] as $dir) {
+            Storage::disk('public')->deleteDirectory($dir);
+        }
+
+        // Jika halaman terakhir jadi kosong, kembali ke halaman sebelumnya
+        if ($this->getPage() > 1 && Story::where('user_id', Auth::id())->count() <= ($this->getPage() - 1) * 10) {
+            $this->previousPage();
+        }
+
+        $this->cancelDelete();
+
+        session()->flash('success', 'Cerita "' . $title . '" berhasil dihapus.');
     }
 
     public function requestCompletion(int $storyId)
