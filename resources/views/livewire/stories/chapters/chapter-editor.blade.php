@@ -18,42 +18,37 @@
         }, { passive: true });
 
         root.addEventListener('touchmove', (e) => {
-            if (!e.touches || e.touches.length === 0) return;
+            if (!e.touches || e.touches.length !== 1) return;
 
+            // Hitung pergeseran sejak event terakhir (bukan sejak touchstart),
+            // supaya arah gestur akurat walau jari berbalik arah di tengah jalan
             const dx = e.touches[0].clientX - this.startX;
             const dy = e.touches[0].clientY - this.startY;
+            this.startX = e.touches[0].clientX;
+            this.startY = e.touches[0].clientY;
 
-            if (Math.abs(dx) > Math.abs(dy)) return;
+            if (dy === 0 || Math.abs(dx) > Math.abs(dy)) return;
 
+            // Cari apakah ada elemen scrollable (dari target naik ke atas)
+            // yang MASIH bisa menyerap gestur ini. Jika ada, biarkan scroll normal.
             let el = e.target;
-            let scrollableParent = null;
+            let canScroll = false;
 
-            while (el && el !== root) {
+            while (el && el.nodeType === 1 && el !== document.body) {
                 const oy = window.getComputedStyle(el).overflowY;
-                if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight) {
-                    scrollableParent = el;
-                    break;
+
+                if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 1) {
+                    // Jari turun (dy > 0) = konten bergerak ke atas, butuh ruang scroll di atas
+                    if (dy > 0 && el.scrollTop > 0) { canScroll = true; break; }
+                    // Jari naik (dy < 0) = butuh ruang scroll di bawah
+                    if (dy < 0 && el.scrollTop + el.clientHeight < el.scrollHeight - 1) { canScroll = true; break; }
                 }
                 el = el.parentElement;
             }
 
-            if (scrollableParent) {
-                const scrollTop = scrollableParent.scrollTop;
-                const scrollHeight = scrollableParent.scrollHeight;
-                const clientHeight = scrollableParent.clientHeight;
-
-                // Hanya cegah jika benar-benar di ujung atas dan mencoba menarik ke bawah (pull-to-refresh)
-                if (scrollTop <= 0 && dy > 0) {
-                    if (e.cancelable) e.preventDefault();
-                    return;
-                }
-
-                // Hanya cegah jika benar-benar di ujung bawah dan mencoba mendorong ke atas
-                if (scrollTop + clientHeight >= scrollHeight && dy < 0) {
-                    if (e.cancelable) e.preventDefault();
-                    return;
-                }
-            }
+            // Tidak ada yang bisa scroll lagi (mentok, atau sentuhan di header/input bar/modal)
+            // -> blokir supaya WebView tidak menganggapnya pull-to-refresh
+            if (!canScroll && e.cancelable) e.preventDefault();
         }, { passive: false });
 
         ['touchend', 'touchcancel'].forEach(t =>

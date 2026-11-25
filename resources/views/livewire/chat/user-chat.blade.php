@@ -8,8 +8,13 @@
                 }
             });
         }
-    }" x-init="scrollToBottom()" @message-sent.window="scrollToBottom()"
-    @message-received.window="scrollToBottom()">
+    }" x-init="scrollToBottom();
+    document.documentElement.classList.add('overscroll-y-none');
+    document.body.classList.add('overscroll-y-none');"
+    x-on:livewire:navigating.window="
+        document.documentElement.classList.remove('overscroll-y-none');
+        document.body.classList.remove('overscroll-y-none');"
+    @message-sent.window="scrollToBottom()" @message-received.window="scrollToBottom()">
 
     <!-- Header Obrolan -->
     <header
@@ -52,7 +57,8 @@
     </header>
 
     <!-- Area Pesan (Chat Stream) -->
-    <main x-ref="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-3.5 max-h-[calc(100vh-140px)]">
+    <main x-ref="chatContainer"
+        class="flex-1 overflow-y-auto overscroll-y-contain p-4 space-y-3.5 max-h-[calc(100vh-140px)]">
         <!-- Banner Sambutan -->
         <div
             class="p-3.5 bg-brand-50/70 dark:bg-brand-950/30 border border-brand-200/70 dark:border-brand-900/40 rounded-2xl text-center space-y-1 my-2">
@@ -223,7 +229,7 @@
                     @keydown.enter="if (!$event.shiftKey && window.innerWidth > 640) { $event.preventDefault(); $wire.sendMessage(); }"
                     rows="1" placeholder="Tulis pesan..." maxlength="3000"
                     class="w-full resize-none overflow-y-auto px-3.5 py-2 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-brand-500 dark:focus:border-brand-500 leading-relaxed block"
-                    style="height: 38px; min-height: 38px; max-height: 120px;"></textarea>
+                    style="height: 38px; min-height: 38px; max-height: 120px; overscroll-behavior: contain;"></textarea>
             </div>
 
             <!-- Tombol Kirim -->
