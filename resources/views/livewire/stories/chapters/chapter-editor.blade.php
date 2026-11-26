@@ -392,6 +392,8 @@
             @else
                 <div class="relative max-w-xl mx-auto pt-2">
                     <div x-data="{
+                        vvHandler: null,
+                        vvTimer: null,
                         initQuill() {
                             this.$nextTick(() => {
                                 if (!$refs.editor) return;
@@ -445,36 +447,81 @@
                                     $wire.set('regularContent', html, false);
                                 });
                     
-                                // Otomatis scroll halaman agar editor berada di atas keyboard saat fokus
-                                window.quillEditor.root.addEventListener('focus', () => {
-                                    setTimeout(() => {
-                                        const editorContainer = document.querySelector('#chapter-editor-root .ql-container');
-                                        if (editorContainer) {
-                                            editorContainer.scrollIntoView({
-                                                behavior: 'smooth',
-                                                block: 'nearest'
-                                            });
-                                        }
-                                    }, 300);
+                                const q = window.quillEditor;
+                    
+                                // Sesuaikan tinggi editor dengan ruang yang terlihat (di atas keyboard)
+                                this.fit(false);
+                    
+                                // Kursor selalu dijaga terlihat: saat mengetik, pindah kursor, atau fokus
+                                q.on('text-change', () => setTimeout(() => this.caretIntoView(), 0));
+                                q.on('selection-change', (range) => {
+                                    if (range) setTimeout(() => this.caretIntoView(), 0);
+                                });
+                                q.root.addEventListener('focus', () => {
+                                    setTimeout(() => { this.fit(true);
+                                        this.caretIntoView(); }, 350);
                                 });
                     
+                                // Keyboard muncul/hilang -> ukur ulang, lalu turunkan kursor ke area terlihat
+                                this.vvHandler = () => {
+                                    clearTimeout(this.vvTimer);
+                                    this.fit(true);
+                                    this.vvTimer = setTimeout(() => { this.fit(true);
+                                        this.caretIntoView(); }, 250);
+                                };
                                 if (window.visualViewport) {
-                                    let lastHeight = window.visualViewport.height;
-                                    window.visualViewport.addEventListener('resize', () => {
-                                        // Jika tinggi viewport mengecil (artinya keyboard muncul)
-                                        if (window.visualViewport.height < lastHeight) {
-                                            setTimeout(() => {
-                                                const quillRoot = window.quillEditor.root;
-                                                if (quillRoot) {
-                                                    // Hanya scroll bagian dalam Quill ke teks paling bawah agar pas di atas keyboard
-                                                    quillRoot.scrollTop = quillRoot.scrollHeight;
-                                                }
-                                            }, 100);
-                                        }
-                                        lastHeight = window.visualViewport.height;
-                                    });
+                                    window.visualViewport.addEventListener('resize', this.vvHandler);
+                                    window.visualViewport.addEventListener('scroll', this.vvHandler);
                                 }
+                                window.addEventListener('resize', this.vvHandler);
                             });
+                        },
+                        fit(align) {
+                            const root = document.getElementById('chapter-editor-root');
+                            const canvas = document.getElementById('editor-canvas');
+                            if (!root || !canvas) return;
+                            const toolbar = root.querySelector('.ql-toolbar');
+                            const vv = window.visualViewport;
+                    
+                            // Tinggi root mengikuti area yang benar-benar terlihat (di atas keyboard)
+                            root.style.height = Math.round(vv ? vv.height : window.innerHeight) + 'px';
+                            root.style.top = (vv ? Math.round(vv.offsetTop) : 0) + 'px';
+                            root.style.bottom = 'auto';
+                    
+                            // Tinggi area tulis = sisa ruang canvas - toolbar - padding
+                            const toolbarH = toolbar ? toolbar.offsetHeight : 42;
+                            const avail = canvas.clientHeight - toolbarH - 48;
+                            root.style.setProperty('--ql-h', Math.max(avail, 160) + 'px');
+                    
+                            // Saat mengetik, rapatkan editor ke atas canvas agar muat di atas keyboard
+                            if (align && window.quillEditor && window.quillEditor.hasFocus() && toolbar) {
+                                const wrap = toolbar.parentElement;
+                                canvas.scrollTop += wrap.getBoundingClientRect().top - canvas.getBoundingClientRect().top - 8;
+                            }
+                        },
+                        caretIntoView() {
+                            const q = window.quillEditor;
+                            if (!q || !q.hasFocus()) return;
+                            const range = q.getSelection();
+                            if (!range) return;
+                            const root = q.root;
+                            const b = q.getBounds(range.index, range.length || 0);
+                            const pad = 28;
+                            if (b.bottom > root.clientHeight - pad) {
+                                root.scrollTop += b.bottom - root.clientHeight + pad;
+                            } else if (b.top < pad) {
+                                root.scrollTop -= pad - b.top;
+                            }
+                        },
+                        destroy() {
+                            clearTimeout(this.vvTimer);
+                            if (this.vvHandler) {
+                                if (window.visualViewport) {
+                                    window.visualViewport.removeEventListener('resize', this.vvHandler);
+                                    window.visualViewport.removeEventListener('scroll', this.vvHandler);
+                                }
+                                window.removeEventListener('resize', this.vvHandler);
+                            }
                         }
                     }" x-init="initQuill()" wire:ignore
                         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -905,8 +952,8 @@
 
     /* FIX QUILL: Kunci tinggi Quill Editor agar TIDAK DINAMIS, berikan scrollbar internal */
     #chapter-editor-root .ql-container.ql-snow {
-        height: 80vh !important;
-        max-height: 80vh !important;
+        height: var(--ql-h, 60vh) !important;
+        max-height: var(--ql-h, 60vh) !important;
         overflow: hidden;
     }
 
