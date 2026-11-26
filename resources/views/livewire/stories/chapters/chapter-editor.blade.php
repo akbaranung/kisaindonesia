@@ -55,16 +55,7 @@
             root.addEventListener(t, (e) => e.stopPropagation(), { passive: true })
         );
     },
-    scrollStep(direction) {
-        const quillEditor = document.querySelector('#chapter-editor-root .ql-editor');
-        const canvas = document.getElementById('editor-canvas');
-        const targetEl = quillEditor || canvas;
 
-        if (targetEl) {
-            const amount = direction === 'up' ? -300 : 300;
-            targetEl.scrollBy({ top: amount, behavior: 'smooth' });
-        }
-    },
     scrollToTop() {
         const canvas = document.getElementById('editor-canvas');
         if (canvas) {
@@ -371,16 +362,6 @@
                     <!-- Tombol Navigasi Naik/Turun & Ke Paling Atas (Chat Mode) -->
                     <div
                         class="absolute right-3 bottom-20 z-30 flex flex-col gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
-                        <button type="button" @click="scrollStep('up')"
-                            class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
-                            title="Naik 300px">
-                            <i class="fa-solid fa-chevron-up"></i>
-                        </button>
-                        <button type="button" @click="scrollStep('down')"
-                            class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
-                            title="Turun 300px">
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </button>
                         <button type="button" @click="scrollToTop()"
                             class="w-9 h-9 bg-brand-600 hover:bg-brand-700 text-white rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-brand-500"
                             title="Ke Paling Atas">
@@ -458,16 +439,20 @@
                                     if (range) setTimeout(() => this.caretIntoView(), 0);
                                 });
                                 q.root.addEventListener('focus', () => {
-                                    setTimeout(() => { this.fit(true);
-                                        this.caretIntoView(); }, 350);
+                                    setTimeout(() => {
+                                        this.fit(true);
+                                        this.caretIntoView();
+                                    }, 350);
                                 });
                     
                                 // Keyboard muncul/hilang -> ukur ulang, lalu turunkan kursor ke area terlihat
                                 this.vvHandler = () => {
                                     clearTimeout(this.vvTimer);
                                     this.fit(true);
-                                    this.vvTimer = setTimeout(() => { this.fit(true);
-                                        this.caretIntoView(); }, 250);
+                                    this.vvTimer = setTimeout(() => {
+                                        this.fit(true);
+                                        this.caretIntoView();
+                                    }, 250);
                                 };
                                 if (window.visualViewport) {
                                     window.visualViewport.addEventListener('resize', this.vvHandler);
@@ -527,21 +512,6 @@
                         class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
                         <div x-ref="editor" id="editor" class="text-slate-800 dark:text-slate-200">
                         </div>
-                    </div>
-
-                    <!-- Tombol Navigasi Naik/Turun (Quill Mode) -->
-                    <div
-                        class="absolute right-3 top-28 z-30 flex flex-col gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
-                        <button type="button" @click="scrollStep('up')"
-                            class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
-                            title="Naik 300px">
-                            <i class="fa-solid fa-chevron-up"></i>
-                        </button>
-                        <button type="button" @click="scrollStep('down')"
-                            class="w-9 h-9 bg-slate-800/80 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full shadow-lg flex items-center justify-center text-xs transition active:scale-95 border border-slate-700"
-                            title="Turun 300px">
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </button>
                     </div>
 
                     <div
