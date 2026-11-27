@@ -47,7 +47,7 @@ class WithdrawalIndex extends Component
         if ($premiumRequest) {
             $this->bank_name = $premiumRequest->bank_name;
             $this->account_number = $premiumRequest->account_number;
-            $this->account_name = $premiumRequest->account_name;
+            $this->account_name = $premiumRequest->account_holder_name;
             $this->has_saved_bank = true;
         } else {
             // Jika tidak ada data tersimpan, otomatis masuk mode manual input
